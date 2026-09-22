@@ -1,0 +1,57 @@
+* TODO Investigation
+  :LOGBOOK:
+  CLOCK: [2026-09-16 Wed 11:42]--[2026-09-18 Fri 12:14] => 48:32
+  CLOCK: [2026-09-16 Wed 09:52]--[2026-09-16 Wed 10:34] =>  0:42
+  CLOCK: [2026-09-15 Tue 14:44]--[2026-09-16 Wed 09:04] => 18:20
+  :END:
+- [2026-09-16 Wed 09:53] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/TODO.org::*Investigation][Investigation]]
+   Meet the people in person that attend the regular catch up
+  - [ ] Sachin Khandekar
+  - [ ] Yiru Cang
+  - [ ] Minghan Liang
+  - [ ] Zack Rosenthal
+  - [ ] Courtney Gleede
+  - [ ] Joan Tucker
+  - [ ] Bence Magyar
+  - [ ] Sherry Pallath
+  - [ ] JD Wright
+- [2026-09-16 Wed 09:56] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/src/sql/original_queries.sql::SELECT DISTINCT LOWER(EMPLOYEE_USER_NAME) AS UN]]
+  - Read the updated charter again
+- [2026-09-16 Wed 09:57] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/src/sql/original_queries.sql::SELECT DISTINCT LOWER(EMPLOYEE_USER_NAME) AS UN]]
+   Not so guangho about validating other people's analysis especially if it is not clear what they are doing.
+- Comments on the Pharmacist Grouping Analysis
+  - The Delta:
+    - Involve DS from the get go/brain storm together
+      - We can help design the analysis and carry it out as well.
+    - Divide up the analysis to smaller junks
+      - Grouping
+      - Call Assigment
+  - The good
+    - Clear ask from DS
+- [2026-09-16 Wed 10:02] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/src/sql/original_queries.sql::WITH t AS (]]
+  - Data cleanliness
+- [2026-09-16 Wed 10:03] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/src/sql/original_queries.sql::)]]
+  - How to keep track of the pipeline of ideas to investigate
+    - Stages
+      - Idea
+      - Initial Feasibility Discussion/Vetting (Pass/Fail)
+        - Is the relevant data there?
+        - Is the result actionable?
+          - Even if there is an effect, can we take action? Can we take reasonable action? Intial monetary estimate? Back of the envelope calculation
+        - Does this make sense from first principles stand point? (What does this mean)
+      - Refine the Question
+      - Develop and analysis Plan
+        - How can we validate?
+          - A/B Experimentation or similar --> Setup with DS
+          - Observational Study --> Setup with DS
+        - What is the output
+      - Execution
+- [2026-09-16 Wed 10:29] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/TODO.org::*Investigation][Investigation]]
+   We also need an alignment on calculating durations
+- [2026-09-16 Wed 10:22] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/src/sql/original_queries.sql::CONVERT_TIMEZONE('UTC', STARTED_AT)::DATE AS D]]
+   We need a clarification on RACI
+- [2026-09-16 Wed 11:42] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/TODO.org::*Investigation][Investigation]]
+   Does the task grouping analysis change if you use only happy path ? Suggest that to Sachin.
+- [2026-09-16 Wed 14:17] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/TODO.org::*Investigation][Investigation]] Does the methodology work for
+  synthetic data? It would be good to test this on synthetic data
+  really.
