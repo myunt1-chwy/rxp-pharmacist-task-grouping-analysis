@@ -1,0 +1,128 @@
+%%{init: { "layout": "elk","themeVariables": { "fontSize": "24px", "subgraphFontSize": "28px", "fontWeight": "bold" }, "themeCSS": ".nodeLabel { font-weight: bold; }" } }%%
+
+flowchart TB
+    %% Master container that acts as the top-centered title
+    subgraph Main ["<span style='font-size:32px; font-weight:bold; display:block; padding:10px 0;'>Approved DUR Time</span>"]
+        direction LR
+        subgraph Env[Time]
+            Seasonality(Seasonality)
+            Events(Calendar/Marketing Events)
+            TimeOfDay(Time of day)
+            DayOfWeek(Day of the week)
+        end
+        subgraph Treatments[Current Task]
+            T(Task is chosen similar to previous task)
+            TreatmentNote["Similarity: could be same cohort or same product"]
+        end
+        subgraph SW[Software Platform]
+            Responsiveness(Latency)
+            Features(Features)
+            Usability(Usability)
+        end
+        subgraph  Task[Task]
+            subgraph PetProfile[Pet Profile]
+                direction LR
+                PHH(Health History)
+                PCM(Current Medications)
+                PA(Age)
+                PB(Breed)
+                PG(Gender)
+            end
+            subgraph Rx[Prescription]
+                direction TB
+                Typos(Typos)
+                MissingData(Missing Data)
+                Medication(Product)
+                Cohort(Cohort)
+                Directions(Directions)
+                Pet(Pet)
+            end
+        end
+        subgraph PastPharmacist[Pharmacist Past]
+                PriorTask(Prior Task)
+                PastTasks(Past Tasks)
+        end
+        subgraph Pharmacist[Pharmacist Current]
+            subgraph Health
+                PhPM("Memory")
+                PhPC("Concentration")
+                PhPL("Energy Level")
+            end
+            subgraph Skills
+                PhPS(Spell Checking Skill)
+                PhPI(Imputation Skill)
+                PhPA(Drug Interaction Checking Skill)
+                PhPD(Dosage Determination Skill)
+            end
+            subgraph Performance
+                PhPSP(Spell Checking Performance)
+                PhPIP(Imputation Performance)
+                PhPAP(Drug Interaction Performance)
+                PhPDP(Dosage Determination Performance)
+            end
+            PhPS --> PhPSP
+            PhPI --> PhPIP
+            PhPA --> PhPAP
+            PhPD --> PhPDP
+            PhPM --> Performance
+            PhPL --> Performance
+            PhPC --> Performance
+        end
+        subgraph Dist[Disturbances]
+            Inbound(Inbound Calls)
+        end
+        PastPharmacist --> Skills
+        PriorTask --> T
+        T --> Rx
+        PastTasks --> PhPL
+        PastTasks --> PhPM
+        PastTasks --> PhPC
+        Env --> Health
+        Env --> SW
+        subgraph WBR[Work Breakdown]
+            direction LR
+            SpellCheckTask(Spelling Check/Correction)
+            ImputeTask(Missing Data Imputation)
+            DetermineDosageTask(Determine Dosage)
+            DrugInteractionTask(Check Drug Interactions)
+            SpellCheckTask --> ImputeTask
+            ImputeTask --> DrugInteractionTask
+            DrugInteractionTask --> DetermineDosageTask
+        end
+        Pet --> PetProfile
+        Typos --> SpellCheckTask
+        PhPSP --> SpellCheckTask
+        MissingData --> ImputeTask
+        Directions --> ImputeTask
+        PhPIP -->ImputeTask
+        Medication --> DrugInteractionTask
+        PhPAP -->DrugInteractionTask
+        PHH --> DrugInteractionTask
+        PCM --> DrugInteractionTask
+        PhPDP --> DetermineDosageTask
+        PA --> DetermineDosageTask
+        PB --> DetermineDosageTask
+        PG --> DetermineDosageTask
+        SW --> WBR
+        DetermineDosageTask --> DUR(Approved DUR Time)
+        DrugInteractionTask --> DUR(Approved DUR Time)
+        ImputeTask --> DUR(Approved DUR Time)
+        SpellCheckTask --> DUR(Approved DUR Time)
+        Inbound --> DUR(Approved DUR Time)
+        Inbound --> PhPC
+    end
+
+    %% Hide the outer master box lines so only the text title shows on top
+    style Main fill:none,stroke:none;
+    %% Styling the PetProfile subgraph light blue
+    style PetProfile fill:#e6f2ff,stroke:#b3d7ff,stroke-width:2px;
+    %% Styling the Treatments subgraph light red
+    style Treatments fill:#ffebee,stroke:#ffcdd2,stroke-width:2px;
+    %% Display treatment similarity as a text-only annotation
+    style TreatmentNote fill:none,stroke:none,color:#666,font-style:italic;
+    %% Make connector lines more visible
+    linkStyle default stroke-width:4px;
+    %% Styling the Disturbances subgraph light brown
+    style Dist fill:#f5e6d3,stroke:#d7b899,stroke-width:2px;
+    %% Styling the Environment subgraph light orange
+    style Env fill:#fff2cc,stroke:#f4b183,stroke-width:2px;
