@@ -1,0 +1,61 @@
+#+TITLE: Pharmacist Task Grouping Analysis Log
+
+* 2026-09-24 Build the pharmacist task table workflow
+
+** Summary
+
+Implemented and validated a parameterized workflow that creates or replaces
+=EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS= as a transient Snowflake
+table.
+
+** Changes
+
+- Added =src/sql/create_task_table.sql.j2=.
+  - Uses a half-open =TASK_CREATED_AT= date window.
+  - Selects the requested lifecycle and employee fields.
+  - Aliases =ITEM_COHORT= as =COH= and casts =STARTED_AT= to =STARTED_DATE=.
+  - Deduplicates employee snapshots to the latest row per
+    =EMPLOYEE_KYRIOS_ID=.
+  - Filters to the approved pharmacist and pharmacy-operations job titles.
+- Added =src/python/generate_task_table.py=.
+  - Uses Click for command-line parsing and ISO-date validation.
+  - Uses strict Jinja rendering.
+  - Supports =--env-file= and =--dry-run=.
+  - Writes the rendered statement to =generated/generate_task_table.sql= on
+    every run.
+  - Authenticates to Snowflake through the external browser flow.
+  - Executes one CTAS statement and reports the resulting table row count.
+- Migrated =skills/rxp-sql/scripts/run_snowflake_query.py= from =argparse= to
+  Click while preserving its query-file, =--query=, =--env-file=,
+  =--output-parquet=, and =--sql-log-dir= interface.
+- Added the required Click, Jinja, Snowflake connector, and SQL parser
+  dependencies, plus pytest for the test suite. Updated =uv.lock=.
+- Added =setup=, =generate-task-table=, and =test= targets to the root
+  =Makefile=.
+- Added the Dockerized =create-causal-diagram= Make target. It renders
+  =src/mermaid/DUR.mmd= at 2400 by 1600 pixels and writes
+  =outputs/charts/DUR_detailed.png=.
+- Added =HOWTO.md= with setup, Snowflake configuration, Make target, date
+  override, and test instructions.
+- Updated the =rxp-sql= skill with live task-lifecycle and employee schemas and
+  the approved =USER_ID= to =EMPLOYEE_KYRIOS_ID= relationship.
+- Added Click CLI and SQL-rendering regression tests.
+
+** Validation
+
+- Ran the repository test suite: 12 tests passed.
+- Ran =git diff --check=: passed.
+- Ran the skill validator: =Skill is valid!=
+- Captured both source schemas with live, read-only =DESCRIBE TABLE= queries.
+- Ran =make generate-task-table= for =2026-02-01= through =2026-08-01=
+  (exclusive).
+- Created =MY_RXP_TASKS= with 4,128,503 rows.
+- Confirmed the target contains all 18 requested columns.
+- Confirmed every populated =JOB_TITLE= belongs to the approved filter list.
+
+** Notes
+
+- Snowflake credentials remain in the local =.env= file and are not written to
+  generated SQL or other repository files.
+- The reproducible =generated/= directory is excluded from Git.
+- Existing unrelated working-tree changes were preserved.
