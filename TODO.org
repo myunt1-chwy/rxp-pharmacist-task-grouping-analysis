@@ -1,9 +1,14 @@
-* TODO Investigation
-  :LOGBOOK:
-  CLOCK: [2026-09-16 Wed 11:42]--[2026-09-18 Fri 12:14] => 48:32
-  CLOCK: [2026-09-16 Wed 09:52]--[2026-09-16 Wed 10:34] =>  0:42
-  CLOCK: [2026-09-15 Tue 14:44]--[2026-09-16 Wed 09:04] => 18:20
-  :END:
+* PROJECT:TODO [#B] Similar Task Sequencing Analysis:
+:PROPERTIES:
+:CATEGORY: chewy
+:PROJECT: RxP Similar Task Sequencing Analysis
+:END:
+** DONE [#B] Investigation
+   :LOGBOOK:
+   CLOCK: [2026-09-16 Wed 11:42]--[2026-09-18 Fri 12:14] => 48:32
+   CLOCK: [2026-09-16 Wed 09:52]--[2026-09-16 Wed 10:34] =>  0:42
+   CLOCK: [2026-09-15 Tue 14:44]--[2026-09-16 Wed 09:04] => 18:20
+   :END:
 - [2026-09-16 Wed 09:53] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/TODO.org::*Investigation][Investigation]]
    Meet the people in person that attend the regular catch up
   - [ ] Sachin Khandekar
@@ -55,3 +60,14 @@
 - [2026-09-16 Wed 14:17] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/TODO.org::*Investigation][Investigation]] Does the methodology work for
   synthetic data? It would be good to test this on synthetic data
   really.
+** TODO [#A] Data Analysis
+   * TODO Task 1: Create a ta
+
+
+** TODO [#B] Create Final Report
+*** TODO [#B] Write Abstract
+*** TODO [#B] Write Summary
+*** TODO [#B] Write Method Summary
+*** TODO [#B] Write Appendix
+**** TODO [#B] Detailed Description of Method
+**** TODO [#B] DUR Model Description

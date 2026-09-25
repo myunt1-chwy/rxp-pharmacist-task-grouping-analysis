@@ -32,3 +32,22 @@
 | LAST_UPDATE_TIME               | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       |                                                                         | NULL        | NULL           | NULL          |
 | IS_DELETED                     | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       |                                                                         | NULL        | NULL           | NULL          |
 | LEAD                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       |                                                                         | NULL        | NULL           | NULL          |
+
+
+
+describe table  edldb.rxp_drug_rx.action
+
+| name                     | type              | kind   | null? | default | primary key | unique key | check | expression | comment | policy name | privacy domain | write default |
+|--------------------------+-------------------+--------+-------+---------+-------------+------------+-------+------------+---------+-------------+----------------+---------------|
+| ID                       | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| RESOURCE_ID              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ACTION_SPEC_ID           | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| USER_ID                  | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLIENT_ID                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ACTION_RESULT            | VARIANT           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ACTION_REQUEST           | VARIANT           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CREATION_DATETIME        | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| IS_DELETED               | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DW_SITE_ID               | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| REPLICATION_SYNCED       | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| REPLICATION_DELETED_FLAG | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |

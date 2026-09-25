@@ -1,0 +1,74 @@
+CREATE OR REPLACE TRANSIENT TABLE EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS AS
+WITH latest_employees AS (
+    SELECT
+        EMPLOYEE_KYRIOS_ID,
+        JOB_TITLE,
+        WH_ID,
+        SHIFT
+    FROM EDLDB.BT_PET_HEALTH_RX_OPERATIONS.RX_DIM_EMPLOYEES
+    WHERE EMPLOYEE_KYRIOS_ID IS NOT NULL
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY EMPLOYEE_KYRIOS_ID
+        ORDER BY REPORT_DATE DESC NULLS LAST,
+                 LAST_UPDATE_TIME DESC NULLS LAST,
+                 EMPLOYEE_KEY DESC NULLS LAST
+    ) = 1
+),
+task_lifecycle AS (
+    SELECT
+        lifecycle.*,
+        COALESCE(
+            lifecycle.DWELL_IN_PROGRESS_TO_CLOSED_SECONDS,
+            1
+        ) AS IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS
+    FROM EDLDB.PET_HEALTH_ANALYTICS_SANDBOX.FCT__TASKS_LIFECYCLE AS lifecycle
+)
+SELECT
+    l.USER_ID,
+    l.STARTED_AT,
+    l.CLOSED_AT,
+    l.PRESCRIPTION_ID,
+    l.RX_USAGE_ID,
+    l.ITEM_COHORT AS COH,
+    l.PART_NUMBER,
+    l.TASK_ID,
+    l.TASK_TYPE,
+    l.ORDER_ID,
+    l.IS_REFILL,
+    l.HANDOFF_TYPE,
+    l.HANDOFF_REASON,
+    l.DWELL_IN_PROGRESS_TO_CLOSED_SECONDS,
+    l.IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS,
+    DATEADD(
+        'second',
+        -l.IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS,
+        CONVERT_TIMEZONE('UTC', l.CLOSED_AT)
+    ) AS PROCESS_START_TIME,
+    CAST(
+        DATEADD(
+            'second',
+            -l.IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS,
+            CONVERT_TIMEZONE('UTC', l.CLOSED_AT)
+        ) AS DATE
+    ) AS PROCESS_START_DATE,
+    e.JOB_TITLE,
+    e.WH_ID,
+    e.SHIFT
+FROM task_lifecycle AS l
+JOIN latest_employees AS e
+    ON l.USER_ID = CAST(e.EMPLOYEE_KYRIOS_ID AS VARCHAR)
+WHERE e.JOB_TITLE IN (
+    'Pharmacist',
+    'Area Manager, Pharmacist II',
+    'Technical Services Pharmacist',
+    'Compounding Pharmacist',
+    'Pharmacist Lead',
+    'Regional Operations Excellence Rx',
+    'Sr Product Manager',
+    'Manager, Pharmacy Operations',
+    'Director Pharmacy Operations',
+    'Chief of Staff Rx Operations',
+    'Pharmacist in Charge'
+)
+  AND l.TASK_CREATED_AT >= '{{ start_date }}'
+  AND l.TASK_CREATED_AT < '{{ end_date }}';

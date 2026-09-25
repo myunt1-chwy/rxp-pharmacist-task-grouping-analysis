@@ -1,5 +1,101 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-09-25 Add task-duration cohort boxplots
+
+** Summary
+
+- Extended =create_task_based_distributions.py= with a task-level duration
+  cache and one PNG containing four cohort boxplots.
+- Each boxplot uses individual filtered DUR task durations from
+  =IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS=, with the same filters and
+  approximate 95th-percentile cutoff as the existing distributions.
+
+** Validation
+
+- Refreshed the Snowflake-backed task-duration cache and generated
+  =outputs/charts/tasks-based-distributions/task-duration-by-cohort-boxplots.png=.
+- Visually inspected the four-cohort single-axis boxplot.
+
+* 2026-09-25 Add task-duration cohort violin plots
+
+** Summary
+
+- Added a shared-y-axis four-cohort violin plot PNG using the same individual
+  filtered DUR task-duration cache as the boxplot.
+
+** Validation
+
+- Regenerated and visually inspected
+  =outputs/charts/tasks-based-distributions/task-duration-by-cohort-violin-plots.png=.
+
+* 2026-09-25 Analyze cohort composition by part number
+
+** Summary
+
+- Added =src/python/create_part_number_analysis.py= and the
+  =create-part-number-analysis= Make target.
+- Filtered known Cohort 1–4 DUR tasks to non-refills, no handoff, and non-null,
+  non-blank part numbers.
+- Excluded durations at or above the filtered population's approximate 95th
+  percentile and aggregated mean, median, sample standard deviation, distinct
+  task count, and distinct user count by cohort and part number.
+- Added four Altair PNGs with ordered part numbers, mean points, standard
+  deviation error bars, and statistic tooltips.
+- Added =part-number-analysis-cohort-violin-plots.png=, with one violin per
+  cohort using the product-level mean durations.
+- Marked and labeled the 10 part numbers with the longest average duration in
+  each cohort as red dots.
+- Cached aggregate data at =outputs/data/part-number-analysis.parquet= and
+  added =REDRAW=1= support.
+- Updated =HOWTO.md= and marked REFNUM 1.11 done in =TODO2.org=.
+
+** Validation
+
+- Compiled the new module and verified the generated SQL filters and aggregate
+  fields.
+- Verified the four-chart renderer with synthetic cached aggregate data and
+  visually inspected a cohort chart for ordering, mean points, and error bars.
+
+* 2026-09-25 Generate DUR duration distributions by task intersection
+
+** Summary
+
+- Added =src/python/create_task_intersection_duration_distributions.py= and
+  the =create-task-intersection-duration-distributions= Make target.
+- Joined =MY_RXP_TASKS_WITH_SEQUENCE= to =MY_RXP_TASKS= and filtered to DUR
+  tasks with a known cohort, non-refill status, and no handoff.
+- Used =IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS= and classified tasks by
+  whether =N_INTERSECTING_TASKS= was positive.
+- Corrected the mapping so =N_INTERSECTING_TASKS > 0= is =multitasking= and
+  zero is =singletasking=.
+- Excluded durations at or above the filtered population's approximate 95th
+  percentile before calculating the shared histogram bins, as requested.
+- Added a combined chart with =singletasking= and =multitasking= shaded
+  density distributions in each cohort panel.
+- Added mean and median duration annotations for all eight cohort/classification
+  groups.
+- Included the total task count in each of those annotations.
+- Reduced the histogram from 200 to 100 bins and retained only the combined
+  output at
+  =outputs/charts/task-intersection-duration-distributions/intersecting-and-non-intersecting.png=.
+- Recorded the read-only aggregate query at
+  =generated/create_task_intersection_duration_distributions.sql=.
+- Cached the aggregate chart data at
+  =outputs/data/task-intersection-duration-distributions.parquet= so aesthetic
+  redraws do not require another Snowflake query.
+
+** Validation
+
+- Ran =make create-task-intersection-duration-distributions= successfully
+  through external-browser Snowflake authentication.
+- Verified =make create-task-intersection-duration-distributions REDRAW_ONLY=1=
+  regenerated both PNGs from the Parquet cache without Snowflake access.
+- Created both PNGs and the embedding README under
+  =outputs/charts/task-intersection-duration-distributions/=.
+- Visually inspected the combined chart and confirmed four cohort panels with
+  shaded densities, the =singletask= and =probable_multitasking= labels,
+  independent zero-based y-axes, and the shared 100-bin axis.
+
 * 2026-09-24 Build the pharmacist task table workflow
 
 ** Summary
@@ -35,6 +131,29 @@ table.
 - Added the Dockerized =create-causal-diagram= Make target. It renders
   =src/mermaid/DUR.mmd= at 2400 by 1600 pixels and writes
   =outputs/charts/DUR_detailed.png=.
+- Added =src/python/drop_task_table.py= and the destructive
+  =drop-task-table= Make target. The command uses external-browser Snowflake
+  authentication and executes =DROP TABLE IF EXISTS= for =MY_RXP_TASKS=.
+- Added =src/python/create_task_based_distributions.py= and the
+  =create-task-based-distributions= Make target. One read-only aggregate query
+  produces three Altair PNG heatmap tables by cohort crossed with shift, job
+  title, and warehouse. Each cell contains unique task count and duration mean,
+  median, and standard deviation, with cell color representing task count. The
+  final layout consolidates the original six count/statistics charts into three
+  combined charts and removes the obsolete PNGs during each refresh. Every run
+  records its aggregate query in =generated/create_task_based_distributions.sql=
+  before connecting to Snowflake.
+- Added Altair and =vl-convert-python= for reproducible PNG rendering.
+- Added =src/python/create_task_time_bucket_distribution.py= and the
+  =create-task-time-bucket-distribution= Make target. It builds one overall and
+  one per-warehouse Altair heatmap, each with six four-hour UTC columns and four
+  cohort rows. Each cell shows unique tasks, unique users, duration mean,
+  median, and standard deviation. Day/Night counts were removed from the final
+  charts because they were not useful. A complete grid preserves zero-count
+  cohort/bucket combinations.
+- The time-bucket target records its read-only aggregate query at
+  =generated/create_task_time_bucket_distribution.sql= and writes the PNGs and
+  embedding =README.md= to =outputs/charts/task-time-bucket-distribution/=.
 - Added =HOWTO.md= with setup, Snowflake configuration, Make target, date
   override, and test instructions.
 - Updated the =rxp-sql= skill with live task-lifecycle and employee schemas and
@@ -43,7 +162,279 @@ table.
 
 ** Validation
 
-- Ran the repository test suite: 12 tests passed.
+- Ran the repository test suite: 21 tests passed.
+- Ran =git diff --check=: passed.
+
+* 2026-09-25 Add task-based 95th-percentile filtering and redraw-only rendering
+
+** Summary
+
+- Updated =create-task-based-distributions= to exclude durations at or above the
+  filtered population's approximate 95th percentile before aggregation.
+- Added a Parquet cache at
+  =outputs/data/task-based-distributions.parquet= for chart redraws without a
+  Snowflake connection.
+- Added =REDRAW_ONLY=1= support to the Make target, matching the intersection
+  duration chart workflow.
+
+** Validation
+
+- Refreshed the cache and regenerated all four task-based PNG charts from
+  Snowflake.
+- Regenerated all four charts with
+  =make create-task-based-distributions REDRAW_ONLY=1= without querying
+  Snowflake.
+- Ran =git diff --check= and Python byte-compilation successfully.
+
+* 2026-09-25 Analyze user performance by cohort
+
+** Summary
+
+- Added =src/python/create_user_performance_analysis.py= and the
+  =user-performance-analysis= Make target.
+- Filtered DUR tasks to known cohorts, non-refills, no handoffs, and durations
+  below the filtered population's approximate 95th percentile.
+- Computed per-user/per-cohort task counts, means, medians, and standard
+  deviations in SQL while preserving missing cohort values as NULL.
+- Generated separate upper-triangle scatter matrices for mean and median
+  duration. Each pairwise panel includes only users with at least 10 tasks in
+  both compared cohorts.
+- Cached the aggregate data at
+  =outputs/data/user-performance-analysis.parquet= and wrote the query to
+  =generated/create_user_performance_analysis.sql=.
+
+** Validation
+
+- Ran =make user-performance-analysis= through external-browser Snowflake
+  authentication and generated both PNGs.
+- Ran =make user-performance-analysis REDRAW=1= successfully from the Parquet
+  cache without querying Snowflake.
+- Ran a synthetic chart smoke test, Python byte-compilation, and
+  =git diff --check= successfully.
+
+* 2026-09-25 Raise user-performance pair threshold to 30 tasks
+
+** Summary
+
+- Changed each scatter-matrix pair to include only users with at least 30
+  tasks in both compared cohorts.
+
+** Validation
+
+- Redrew both mean and median PNGs from the existing Parquet cache without
+  querying Snowflake.
+- Ran Python byte-compilation and =git diff --check=.
+
+* 2026-09-25 Add per-user DUR-count distributions
+
+** Summary
+
+- Added =user-dur-count-distributions.png= with one histogram panel per cohort.
+- Binned the number of DUR tasks per user on the x-axis and counted users on
+  the y-axis.
+- Doubled the histogram bin count from 25 to 50 to halve the bucket width.
+
+* 2026-09-25 Add per-user median-duration distributions
+
+** Summary
+
+- Added =user-median-dur-duration-distributions.png= with one 50-bin
+  histogram panel per cohort for users' median DUR duration.
+
+** Validation
+
+- Redrew all eight PNGs from the cached user-performance data.
+- Ran Python byte-compilation and =git diff --check=.
+
+** Validation
+
+- Redrew all seven PNGs from the cached user-performance data.
+- Ran Python byte-compilation and =git diff --check=.
+
+* 2026-09-25 Add cohort warehouse/job-title performance heatmaps
+
+** Summary
+
+- Added one PNG containing four cohort heatmaps crossed by warehouse and job
+  title.
+- Each cell reports the average of the per-user mean DUR durations and retains
+  the contributing user count in the tooltip.
+
+** Validation
+
+- Refreshed and redrew the heatmap from the user-performance cache.
+- Ran Python byte-compilation and =git diff --check=.
+
+* 2026-09-25 Add user counts and diverging heatmap colors
+
+** Summary
+
+- Added the contributing user count directly to every heatmap cell.
+- Changed the shared heatmap scale to a blue-white-red gradient.
+- Updated the midpoint to gray, producing a blue-gray-red gradient.
+- Enlarged the heatmap cells and added a footer to each cohort panel with the
+  distinct pharmacist/user count.
+- Applied the 30-task minimum before calculating heatmap cell averages and
+  cohort footer counts.
+
+** Validation
+
+- Redrew and visually inspected the 2x2 heatmap PNG.
+- Ran Python byte-compilation and =git diff --check=.
+
+* 2026-09-25 Add median-of-medians cohort heatmap
+
+** Summary
+
+- Added a second 2x2 heatmap containing the median of per-user median DUR
+  durations by cohort, warehouse, and job title.
+- Retained the 30-task minimum, cell user counts, cohort footers, and shared
+  blue-gray-red scale.
+
+** Validation
+
+- Redrew all six PNGs from the cached user-performance data.
+- Ran Python byte-compilation and =git diff --check=.
+
+* 2026-09-25 Add eligible-user counts to user-performance plots
+
+** Summary
+
+- Added the number of eligible users to every populated scatter panel alongside
+  Pearson's correlation coefficient.
+- Counts use the same pair-specific 30-task eligibility rule.
+- Added the eligible-user count to both cohort axis titles in each panel.
+
+* 2026-09-25 Color user-performance points by job title
+
+** Summary
+
+- Added a deterministic per-user job title to the SQL result using the mode
+  job title across the filtered tasks.
+- Colored points by job title and added job title to the scatter tooltips.
+
+* 2026-09-25 Shape user-performance points by warehouse
+
+** Summary
+
+- Added a deterministic per-user warehouse using the modal =WH_ID= across the
+  filtered tasks.
+- Mapped warehouse IDs to point shapes and added warehouse to the tooltips,
+  while retaining job-title colors.
+
+** Validation
+
+- Refreshed the cache and redrew all four PNGs.
+- Ran Python byte-compilation and =git diff --check=.
+
+** Validation
+
+- Refreshed the cache and redrew all four PNGs.
+- Ran Python byte-compilation and =git diff --check=.
+
+** Validation
+
+- Redrew and visually inspected all four PNGs.
+- Ran Python byte-compilation and =git diff --check=.
+
+* 2026-09-25 Add all-four-cohort user-performance plots
+
+** Summary
+
+- Added separate mean and median scatter matrices restricted to users with
+  data and at least 30 tasks in every cohort.
+- Retained the existing pairwise-eligibility mean and median matrices.
+
+** Validation
+
+- Redrew all four PNGs from the existing Parquet cache.
+- Ran Python byte-compilation and =git diff --check=.
+
+* 2026-09-25 Add correlation coefficients to user-performance plots
+
+** Summary
+
+- Added Pearson correlation annotations to every populated mean and median
+  cohort-comparison panel.
+- Correlations use the same pair-specific users meeting the 30-task threshold.
+
+** Validation
+
+- Redrew and visually inspected both PNGs.
+- Ran Python byte-compilation and =git diff --check=.
+
+* 2026-09-25 Remove empty user-performance scatter panels
+
+** Summary
+
+- Removed all lower-triangle and diagonal placeholder panels.
+- Retained only the six populated upper-triangle cohort comparisons, grouped
+  by row.
+- Kept only the upper-triangle comparisons populated and retained the
+  pairwise 30-task eligibility rule.
+
+** Validation
+
+- Redrew and visually inspected the mean matrix.
+- Ran Python byte-compilation and =git diff --check=.
+
+* 2026-09-25 Change time-bucket charts to two-hour intervals
+
+** Summary
+
+- Changed the process-start bucket width from four hours to two hours.
+- Updated the Snowflake bucket grid, chart ordering, titles, README, and HOWTO
+  text to show twelve UTC buckets from 00:00 through 23:59.
+
+** Validation
+
+- Refreshed the cached data and regenerated the overall and per-warehouse PNGs.
+- Verified the redraw-only target and ran =git diff --check=.
+
+* 2026-09-25 Add time-bucket 95th-percentile filtering and redraw-only rendering
+
+** Summary
+
+- Updated =create-task-time-bucket-distribution= to exclude durations at or
+  above the filtered population's approximate 95th percentile.
+- Added a Parquet cache at
+  =outputs/data/task-time-bucket-distribution.parquet= for redraws without a
+  Snowflake connection.
+- Added =REDRAW_ONLY=1= support to the Make target.
+
+** Validation
+
+- Refreshed the cache and regenerated the overall and per-warehouse PNG charts
+  from Snowflake.
+- Regenerated the charts with
+  =make create-task-time-bucket-distribution REDRAW_ONLY=1= without querying
+  Snowflake.
+- Ran =git diff --check= and Python byte-compilation successfully.
+
+* 2026-09-25 Build task sequence table
+
+** Summary
+
+- Added =generate-task-sequence-table= and the transient
+  =MY_RXP_TASKS_WITH_SEQUENCE= table.
+- The table has one row per usable =USER_ID= and =TASK_ID= and exposes
+  =TASK_ID_PRECEDING=, =DELTA_T_WITH_PRECEDING=, =TASK_ID_FOLLOWING=,
+  =DELTA_T_WITH_FOLLOWING=, and =N_INTERSECTING_TASKS=.
+- Sequencing uses strict process-start/close inequalities across all task
+  types. Intersections use closed =PROCESS_START_TIME= through =CLOSED_AT=
+  intervals and deterministic timestamp tie handling.
+- The rendered CTAS is recorded at
+  =generated/generate_task_sequence_table.sql=.
+
+** Validation
+
+- Ran the repository test suite: 32 tests passed.
+- Created =MY_RXP_TASKS_WITH_SEQUENCE= with 4,128,503 rows and seven columns.
+- Confirmed zero duplicate task keys, neighbor user mismatches, temporal-order
+  violations, delta mismatches, and negative intersection counts.
+- Direct closed-interval self-join validation for =USER_ID= =319402689= found
+  zero intersection-count mismatches across 94,054 tasks; both methods counted
+  8,624 directed intersections.
 - Ran =git diff --check=: passed.
 - Ran the skill validator: =Skill is valid!=
 - Captured both source schemas with live, read-only =DESCRIBE TABLE= queries.
@@ -52,6 +443,10 @@ table.
 - Created =MY_RXP_TASKS= with 4,128,503 rows.
 - Confirmed the target contains all 18 requested columns.
 - Confirmed every populated =JOB_TITLE= belongs to the approved filter list.
+- Generated and visually inspected all three task-summary PNGs and their
+  embedding Markdown file under =outputs/charts/tasks-based-distributions/=.
+- Generated and visually inspected the overall and per-warehouse four-hour UTC
+  task-distribution charts, each containing all four cohort strips.
 
 ** Notes
 
@@ -59,3 +454,78 @@ table.
   generated SQL or other repository files.
 - The reproducible =generated/= directory is excluded from Git.
 - Existing unrelated working-tree changes were preserved.
+
+* 2026-09-24 Generate task-intersection inspection table
+
+** Summary
+
+- Added the =generate-task-intersection-table= Make target, defaulting to
+  =USER_ID= =319402689= and supporting a =USER_ID= override.
+- Added a Click generator and strict Jinja CTAS template under =src/=.
+- The transient =MY_RXP_TASK_INTERSECTIONS= table stores both directed forms of
+  each intersecting task pair, along with both source intervals and their
+  intersection bounds.
+- Each run writes =generated/generate_task_intersection_table.sql= before
+  external-browser Snowflake authentication.
+
+** Validation
+
+- Ran the repository test suite: 26 tests passed.
+- Ran =make generate-task-intersection-table= for =USER_ID= =319402689=.
+- Created =MY_RXP_TASK_INTERSECTIONS= with 166,870 directed rows covering
+  51,388 tasks with intersections.
+- Confirmed the table contains no other users, self-pairs, or rows that fail
+  the closed-interval intersection predicate.
+
+* 2026-09-25 Add process-start fields and rebucket DUR charts
+
+** Summary
+
+- Added =IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS= as
+  =COALESCE(DWELL_IN_PROGRESS_TO_CLOSED_SECONDS, 1)= while preserving the
+  original dwell field.
+- Added UTC =PROCESS_START_TIME= by subtracting the imputed dwell seconds from
+  =CLOSED_AT= and added =PROCESS_START_DATE= from that timestamp.
+- Removed =STARTED_DATE= while retaining =STARTED_AT=.
+- Changed the four-hour DUR charts and their labels to bucket on
+  =PROCESS_START_TIME= instead of =STARTED_AT=.
+- Changed both task-based and four-hour chart statistics to use
+  =IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS= instead of the source dwell
+  field.
+
+** Validation
+
+- Ran the repository test suite: 27 tests passed.
+- Rebuilt =MY_RXP_TASKS= with 4,128,503 rows for the existing 2026-02-01
+  through 2026-08-01 exclusive window.
+- Confirmed 19,550 null source dwell values were imputed, with no null imputed
+  values and no process-time or process-date calculation mismatches.
+- Confirmed =PROCESS_START_TIME= is populated for every table row.
+- Regenerated and visually inspected the overall and eight per-warehouse PNGs.
+  All 3,925,727 chart-eligible DUR tasks have a process-start timestamp.
+- Regenerated the three task-based and nine four-hour charts using imputed
+  dwell values for all duration statistics.
+- Ran =git diff --check=: passed.
+
+* 2026-09-25 Add weekday task distribution and user counts
+
+** Summary
+
+- Extended =create-task-based-distributions= with a fourth heatmap whose rows
+  are UTC =PROCESS_START_TIME= weekdays and whose columns are cohorts.
+- Fixed weekday presentation to ISO Monday-through-Sunday order.
+- Added distinct =USER_ID= counts to every shift, job-title, warehouse, and
+  weekday chart cell.
+- Retained unique task counts and imputed-dwell mean, median, and standard
+  deviation in every cell.
+
+** Validation
+
+- Ran the repository test suite: 28 tests passed.
+- Ran =make create-task-based-distributions= and produced four PNGs plus four
+  embeds in the generated README.
+- Confirmed the generated query uses =DAYOFWEEKISO(PROCESS_START_TIME)=,
+  =COUNT(DISTINCT USER_ID)=, and the imputed dwell field.
+- Visually inspected the weekday and shift charts; weekday order and all five
+  cell metrics render clearly.
+- Ran =git diff --check=: passed.
