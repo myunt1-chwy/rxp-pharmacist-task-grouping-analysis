@@ -2,13 +2,21 @@
 
 ## 2026-10-01
 
-## Appendix
+### Modeling DUR Durations
 
-### Model Details
+See [Model Details](#model-details) in the Appendix.
 
-#### Final MC3/COH/PETTYPE mixed-effects model
+### EDA on Factors Affecting DUR
 
-##### Purpose and analysis sample
+See [Factors Affecting DUR](#factors-affecting-successful-durs) in the Appendix.
+
+### Appendix
+
+#### Model Details
+
+##### Final MC3/COH/PETTYPE mixed-effects model
+
+###### Purpose and analysis sample
 
 This is the final model. It estimates how same-cell sequence position relates
 to DUR duration while controlling for correction status, weekday, approval
@@ -33,7 +41,7 @@ The fitted sample keeps tasks satisfying $0<Y_i<q_{0.95}$; the upper
 bound is strict. MC3, COH, PETTYPE, parent part number, approval channel, and
 prescription source blanks are represented by `<Missing>`.
 
-##### Derived indicators
+###### Derived indicators
 
 For sequence number $S_i$, batch length $L_i$, and correction count
 $N_i$, the three binary fixed effects are
@@ -49,7 +57,7 @@ $$
 Thus $P_i$ is `SAME_PRECEDING`, $F_i$ is `SAME_FOLLOWING`, and $C_i$
 is `HAS_CORRECTION`.
 
-##### Outcome transformation
+###### Outcome transformation
 
 The retained durations receive one global Box-Cox transformation:
 
@@ -66,7 +74,7 @@ $\widehat{\lambda}=-0.08159843$. All coefficients, random
 effects, standard deviations, residuals, RMSE, and diagnostics are therefore
 on the Box-Cox scale.
 
-##### Complete model formula
+###### Complete model formula
 
 Index task, fixed-effect cell, user, date, and parent part by $i,c,u,d,p$.
 The model is
@@ -109,7 +117,7 @@ $$
 \qquad e_i=Z_i-\widehat{Z}_i.
 $$
 
-##### Inference and fit statistics
+###### Inference and fit statistics
 
 For fixed effect $k$, the report uses
 
@@ -132,7 +140,7 @@ R_c^2=1-\frac{\sum_i e_i^2}{\sum_i(Z_i-\bar Z)^2},\qquad
 RMSE_c=\sqrt{\frac1n\sum_i e_i^2}.
 $$
 
-##### Sample and fit
+###### Sample and fit
 
 | Quantity | Value |
 |---|---:|
@@ -150,7 +158,7 @@ $$
 | REML negative log-likelihood | 3142827.127402 |
 | Converged | True |
 
-##### Fixed effects
+###### Fixed effects
 
 | Term | Estimate | SE | z | p-value | 95% CI | Significant |
 |---|---:|---:|---:|---:|---:|:---:|
@@ -182,7 +190,7 @@ $$
 | PRESCRIPTION_SOURCE[TELEMEDICINE vs PRACTICE_HUB] | 0.185396 | 0.052942 | 3.5018 | 0.000462051 | [0.081631, 0.289161] | Yes |
 | PRESCRIPTION_SOURCE[VERBAL vs PRACTICE_HUB] | -0.002803 | 0.011736 | -0.2388 | 0.81126 | [-0.025805, 0.020200] | No |
 
-##### Variance components
+###### Variance components
 
 | Component | SD | Approximate 95% CI |
 |---|---:|---:|
@@ -191,7 +199,7 @@ $$
 | Parent-part random intercept | 0.114187 | [0.107719, 0.121045] |
 | Residual | 0.603803 | [0.603351, 0.604255] |
 
-##### Diagnostics
+###### Diagnostics
 
 ![User Q–Q plot](../outputs/charts/mc3-coh-pettype-final-model/user_random_intercepts_qq.png)
 
@@ -203,7 +211,7 @@ $$
 
 ![Predicted versus outcome](../outputs/charts/mc3-coh-pettype-final-model/predicted_vs_boxcox_actual.png)
 
-##### Artifacts
+###### Artifacts
 
 - [Generated SQL](../generated/mc3_coh_pettype_final_model.sql)
 - [Raw Snowflake data](../outputs/data/mc3_coh_pettype_final_model_task_data.parquet)
@@ -213,4 +221,6 @@ $$
 - [Date random effects](../outputs/tables/mc3_coh_pettype_final_model_date_effects.md)
 - [Parent-part random effects](../outputs/tables/mc3_coh_pettype_final_model_parent_part_effects.md)
 
-### Factors Affecting Successful DURs
+#### Factors Affecting Successful DURs
+
+[DUR detailed diagram](../outputs/charts/DUR_detailed.png)
