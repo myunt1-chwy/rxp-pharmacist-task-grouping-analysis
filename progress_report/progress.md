@@ -23,10 +23,10 @@ sequence does not exceed batch length. Duration is
 
 Let $Y_i$ be the positive imputed duration in seconds for task $i$. One
 global cutoff is calculated over all otherwise eligible tasks with Snowflake's
-`APPROX_PERCENTILE` function:
+`APPROX_PERCENTILE(Y, 0.95)` function call:
 
 $$
-q_{0.95}=\mathrm{APPROX\;PERCENTILE}(Y,0.95).
+q_{0.95}=Q_{0.95}(Y).
 $$
 
 The fitted sample keeps tasks satisfying $0<Y_i<q_{0.95}$; the upper
@@ -56,7 +56,7 @@ The retained durations receive one global Box-Cox transformation:
 $$
 Z_i=g_\lambda(Y_i)=
 \begin{cases}
-\dfrac{Y_i^\lambda-1}{\lambda}, & \lambda\ne0,\\[4pt]
+\dfrac{Y_i^\lambda-1}{\lambda}, & \lambda\ne0,\\
 \log(Y_i), & \lambda=0.
 \end{cases}
 $$

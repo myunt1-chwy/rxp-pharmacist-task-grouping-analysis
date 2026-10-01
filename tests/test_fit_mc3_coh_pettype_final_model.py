@@ -173,10 +173,12 @@ def test_report_documents_complete_model_formula(tmp_path, monkeypatch) -> None:
     assert not {"\\[", "\\]"}.intersection(report.splitlines())
     assert "\\(" not in report
     assert "\\operatorname" not in report
-    assert "`APPROX_PERCENTILE`" in report
-    assert "\\mathrm{APPROX\\;PERCENTILE}" in report
+    assert "`APPROX_PERCENTILE(Y, 0.95)`" in report
+    assert "q_{0.95}=Q_{0.95}(Y)." in report
+    assert "\\mathrm{APPROX\\;PERCENTILE}" not in report
     assert "\\mathrm{APPROX\\_PERCENTILE}" not in report
     assert "CI_{95\\%}" not in report
     assert "\\mathrm{CI}_{95}" in report
     assert "\\lvert z_k\\rvert" in report
+    assert "[4pt]" not in report
     assert "$$" in report
