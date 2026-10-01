@@ -1,5 +1,217 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-01 Consolidate the final mixed-effects model
+
+** Summary
+
+- Promoted the parent-part-number model to the sole final model and renamed its
+  Python, SQL, test, Make target, caches, tables, report, and chart paths.
+- Removed the superseded user-only, crossed user/date, earlier final-model, and
+  experimental model implementations and targets.
+- Made the final Python module independent of the removed model modules by
+  including validation, Box-Cox transformation, fixed-effect construction,
+  Snowflake download, REML fitting, and reporting in one implementation.
+- Expanded the generated report with the sample restriction, indicator,
+  Box-Cox, complete mixed-model, random-distribution, prediction, residual,
+  inference, conditional R-squared, and RMSE formulas.
+
+* 2026-09-30 Add cohort-by-pet sequence fields to valid DUR tasks
+
+** Summary
+
+- Added `COHORT_PET_SEQN` and `COHORT_PET_BATCH_ID` to the valid-DUR CTAS.
+- The sequence uses the existing cohort sequence adjacency and time-gap rules,
+  and additionally requires the same `PET_ID` for the same `USER_ID` and
+  cohort.
+- Missing pet IDs start a new cohort-pet sequence.
+- Recreated `MY_RXP_VALID_DUR_TASKS` and verified the new fields.
+
+* 2026-09-30 Add MC3-by-pet sequence fields to valid DUR tasks
+
+** Summary
+
+- Added `MC3_PET_SEQN` and `MC3_PET_BATCH_ID` to the valid-DUR CTAS.
+- The sequence uses the existing MC3 sequence adjacency and time-gap rules,
+  and additionally requires the same `PETTYPE` for the same `USER_ID`.
+- Missing or blank pet types are normalized to `<Missing>` for sequence
+  comparison.
+- Recreated `MY_RXP_VALID_DUR_TASKS` and verified the new fields.
+
+* 2026-09-29 Analyze DUR duration by prior approved non-vet-diet prescription count
+
+** Summary
+
+- Added `src/python/create_prior_approved_non_vet_diet_rx_analysis.py` and the
+  `create-prior-approved-non-vet-diet-rx-analysis` Make target.
+- Queried `N_PRIOR_APPROVED_NON_VET_DIET_RX_IDS` from `MY_RXP_VALID_DUR_TASKS`
+  for Cohorts 1–4 using imputed DUR duration and one global approximate
+  95th-percentile cutoff.
+- Bucketed the grouping values as `0` through `9` and `10+` and added four
+  horizontal cohort boxplots with `Whole cohort` reference boxes, cached data,
+  generated SQL, README, focused tests, and `REDRAW=1` support.
+
+* 2026-09-29 Analyze DUR duration by prior approved prescription count
+
+** Summary
+
+- Added `src/python/create_prior_approved_rx_analysis.py` and the
+  `create-prior-approved-rx-analysis` Make target.
+- Queried `N_PRIOR_APPROVED_RX_IDS` from `MY_RXP_VALID_DUR_TASKS` for Cohorts
+  1–4 using imputed DUR duration and one global approximate 95th-percentile
+  cutoff.
+- Added four horizontal cohort boxplots with a `Whole cohort` reference box,
+  task-count labels, cached task-level Parquet data, generated SQL, README,
+  focused tests, and `REDRAW=1` support.
+
+* 2026-09-29 Populate task prescription IDs from RX usage actions
+
+** Summary
+
+- Added a transient `MY_RXP_RX_USAGE_TO_RX` mapping CTAS from
+  `EDLDB.BT_HCA_HCDM.RXP_RX_USAGE_ACTIONS`, grouped to one deterministic
+  `RX_ID` per `RX_USAGE_ID`.
+- Updated the task-table generator to execute the mapping CTAS before the
+  `MY_RXP_TASKS` CTAS and to write both generated SQL statements.
+- Updated `MY_RXP_TASKS.PRESCRIPTION_ID` to prefer the mapped `RX_ID` and
+  retain the lifecycle value as a fallback.
+- Rebuilt `MY_RXP_VALID_DUR_TASKS` so valid DUR rows inherit the corrected
+  prescription IDs.
+
+* 2026-09-29 Add prior approved-prescription counts to valid DUR tasks
+
+** Summary
+
+- Implemented REFNUM 1.30 in the valid-DUR CTAS generator.
+- Added total, vet-diet, and non-vet-diet distinct prior approved prescription
+  counts per task, using approvals strictly before =PROCESS_START_TIME=.
+- Excluded the current task's =RX_ID= from those prior-prescription counts.
+- Used =TO_STATE = 'APPROVED'= with =STATE_CHANGED_DATETIME= and an
+  =ACTION_CREATION_DATETIME= fallback; marked a prescription as vet diet when
+  any approved action row has =IS_VET_DIET_FLAG= true.
+- Rebuilt =MY_RXP_VALID_DUR_TASKS= and added focused SQL coverage and
+  documentation.
+
+* 2026-09-28 Analyze DUR duration by initiation channel and reason
+
+** Summary
+
+- Added =src/python/create_initiation_channel_analysis.py= and the
+  =create-initiation-channel-analysis= Make target.
+- Queried the read-only =MY_RXP_VALID_DUR_TASKS= table for Cohorts 1–4 using
+  =IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS= as the duration.
+- Applied one global approximate 95th-percentile cutoff across the four cohorts
+  and normalized null or blank =INITIATION_CHANNEL= and =INITIATION_REASON=
+  values to =<Missing>=.
+- Added four horizontal initiation-channel boxplot PNGs with task-count labels,
+  white medians, and a final =Whole cohort= reference boxplot in every chart.
+- Appended four matching initiation-reason boxplot PNGs to the same output
+  directory and README.
+- Added the task-level Parquet cache, generated SQL, README embeds, focused
+  tests, and =REDRAW=1= support.
+
+* 2026-09-27 Create valid DUR task sequence table
+
+** Summary
+
+- Added =src/python/generate_valid_dur_task_table.py= and the
+  =generate-valid-dur-task-table= and =drop-valid-dur-task-table= Make targets.
+- Added the transient =MY_RXP_VALID_DUR_TASKS= CTAS with valid non-intersecting
+  DUR tasks, product enrichment, global/valid task ordering, prior-task status,
+  and independent cohort, MC3, purchase-brand, and parent-part sequences.
+- Defined =COHORT_SEQN= as the one-based task position within each contiguous
+  cohort batch, with =COHORT_BATCH_ID= retaining the batch identity.
+- Corrected batch boundaries to compare each valid task with the previous valid
+  task, so invalid tasks cannot hide a cohort transition.
+
+* 2026-09-28 Add RXP prescriptions schema to rxp-sql skill
+
+** Summary
+
+- Added the complete `EDLDB.BT_HCA_HCDM.RXP_PRESCRIPTIONS` column/type catalog
+  to =skills/rxp-sql/references/rxp-prescriptions-schema.md=.
+- Linked the schema from the RxP SQL skill and prescription data-model guide,
+  and marked REFNUM 1.15 done in =TODO2.org=.
+- Added generated SQL, mocked generator/drop tests, and documentation.
+
+* 2026-09-28 Add RXP usage-actions schema to rxp-sql skill
+
+** Summary
+
+- Added the complete `EDLDB.BT_HCA_HCDM.RXP_RX_USAGE_ACTIONS` column/type
+  catalog to =skills/rxp-sql/references/rxp-rx-usage-actions-schema.md=.
+- Documented its action-level grain, `ACTION_ID` identity, `RX_USAGE_ID` usage
+  join, and `RX_ID` prescription join in the skill references and HOWTO.
+- Marked REFNUM 1.16 done in =TODO2.org=.
+
+* 2026-09-28 Enrich valid DUR tasks with prescription attributes
+
+** Summary
+
+- Added =ORIGINATION=, =INITIATION_CHANNEL=, =INITIATION_REASON=, and =PET_ID=
+  to =MY_RXP_VALID_DUR_TASKS=.
+- Restricted the action lookup to valid task =RX_USAGE_ID= values and grouped
+  by usage ID, using deterministic =MIN(RX_ID)= selection before joining to
+  =RXP_PRESCRIPTIONS=.
+- Used left joins to retain valid tasks with missing usage or prescription
+  mappings, and added focused SQL-rendering tests for the join path and row
+  preservation.
+- Marked REFNUM 1.17 done in =TODO2.org=.
+
+* 2026-09-27 Analyze Purchase Brand duration distributions
+
+** Summary
+
+- Added =src/python/create_purchase_brand_analysis.py= and the
+  =create-purchase-brand-analysis= Make target.
+- Reused the MC3 task filters and approximate 95th-percentile cutoff, joined
+  =EDLDB.PDM.PRODUCT= on =PART_NUMBER=, and used =PURCHASE_BRAND= as the
+  categorical field.
+- Added four cohort boxplot PNGs with a whole-cohort boxplot, task/PN labels,
+  visible median lines, generated SQL, cache, README embeds, and =REDRAW=1=
+  support.
+- Added =outputs/tables/purchase-brand-analysis-top-10-by-median.md= with the
+  top 10 brands per cohort by median duration, task counts, PN counts, and
+  average durations.
+- Added =purchase-brand-analysis-top-10-table.png= as an Altair 2x2 table
+  graphic, with one cohort panel per cell and a highlighted whole-cohort row.
+- Added =purchase-brand-analysis-brand-median-histogram.png=, a four-panel
+  Altair histogram of brand median DUR durations using two-second bins.
+
+* 2026-09-27 Analyze MC3 duration distributions
+
+** Summary
+
+- Added =src/python/create_mc3_analysis.py= and the =create-mc3-analysis=
+  Make target.
+- Filtered known Cohort 1–4 DUR tasks to non-refills, no handoff, and durations
+  below the filtered population's approximate 95th percentile.
+- Joined =EDLDB.PDM.PRODUCT= on =PART_NUMBER= and plotted categorical
+  =MERCH_CLASSIFICATION3= boxplots by cohort, including a final whole-cohort
+  boxplot. Missing MC3 values are labeled =<Missing>=.
+- Added a task-level Parquet cache, generated SQL, four cohort PNGs, README
+  embeds, and =REDRAW=1= support.
+- Added =mc3-analysis-category-median-histogram.png=, a four-panel Altair
+  histogram of MC3 median DUR durations using two-second bins.
+
+* 2026-09-27 Replace MC3 violins with boxplots
+
+** Summary
+
+- Replaced the MC3 violin plots with categorical boxplots.
+- Added a =Whole cohort= boxplot to each cohort PNG alongside the MC3 boxes.
+
+* 2026-09-27 Improve MC3 boxplot annotations
+
+** Summary
+
+- Moved task and distinct part-number counts into a second x-axis-label line,
+  using the shorter =PN= label.
+- Made median markers thicker horizontal white lines for readability.
+
+** Validation
+
+- Added focused SQL, chart, output, and generated-SQL tests.
+
 * 2026-09-25 Add task-duration cohort boxplots
 
 ** Summary
@@ -48,6 +260,22 @@
 - Cached aggregate data at =outputs/data/part-number-analysis.parquet= and
   added =REDRAW=1= support.
 - Updated =HOWTO.md= and marked REFNUM 1.11 done in =TODO2.org=.
+
+* 2026-09-30 Replace part-number violins with one labeled boxplot figure
+
+** Summary
+
+- Removed the four separate cohort PNGs from the part-number analysis output.
+- Replaced the combined four-panel violin figure with
+  =part-number-analysis-cohort-boxplots.png=.
+- Kept product-level mean durations, with boxes showing the IQR and whiskers
+  showing the 5th–95th percentiles.
+- Marked and labeled up to five high-duration part numbers whose product-level
+  means fall outside their cohort's whiskers.
+
+** Validation
+
+- Added focused renderer tests for the combined boxplot and stale-output cleanup.
 
 ** Validation
 

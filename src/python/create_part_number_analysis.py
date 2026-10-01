@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Analyze imputed DUR duration by part number and cohort."""
+"""Analyze DUR duration by part number and cohort."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ import click
 import pandas as pd
 
 from .generate_task_table import REQUIRED_SETTINGS, connect_to_snowflake, parse_dotenv
+from .plot_style import FIGURE_BACKGROUND, MEDIAN_COLOR
 
 SOURCE_TABLE = "EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS"
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -104,63 +105,14 @@ def read_data() -> pd.DataFrame:
     return pd.read_parquet(DATA_PATH)
 
 
-def create_chart(frame: pd.DataFrame, cohort: str) -> alt.Chart:
-    chart_frame = frame.copy()
-    chart_frame["part_number"] = chart_frame["part_number"].astype(str)
-    chart_frame["part_number_sort"] = chart_frame["part_number"]
-    chart_frame["lower_duration_seconds"] = (
-        chart_frame["average_duration_seconds"] - chart_frame["stddev_duration_seconds"].fillna(0)
-    )
-    chart_frame["upper_duration_seconds"] = (
-        chart_frame["average_duration_seconds"] + chart_frame["stddev_duration_seconds"].fillna(0)
-    )
-
-    base = alt.Chart(chart_frame).encode(
-        x=alt.X(
-            "part_number:N",
-            title="Part number",
-            sort=alt.SortField(field="part_number_sort", order="ascending"),
-            axis=alt.Axis(labelAngle=-45, labelOverlap="greedy", labelLimit=90),
-        ),
-        tooltip=[
-            alt.Tooltip("coh:N", title="Cohort"),
-            alt.Tooltip("part_number:N", title="Part number"),
-            alt.Tooltip("average_duration_seconds:Q", title="Average seconds", format=",.2f"),
-            alt.Tooltip("median_duration_seconds:Q", title="Median seconds", format=",.2f"),
-            alt.Tooltip("stddev_duration_seconds:Q", title="SD seconds", format=",.2f"),
-            alt.Tooltip("unique_task_count:Q", title="DUR tasks", format=",.0f"),
-            alt.Tooltip("unique_user_count:Q", title="Distinct users", format=",.0f"),
-        ],
-    )
-    error_bars = base.mark_rule(color="#4c78a8", size=3).encode(
-        y=alt.Y("lower_duration_seconds:Q", title="Average imputed DUR duration (seconds)"),
-        y2="upper_duration_seconds:Q",
-    )
-    points = base.mark_point(color="#f58518", filled=True, size=70).encode(
-        y=alt.Y("average_duration_seconds:Q", title="Average imputed DUR duration (seconds)")
-    )
-    median_points = base.mark_point(color="#d62728", filled=True, size=38).encode(
-        y=alt.Y("median_duration_seconds:Q", title="Average imputed DUR duration (seconds)")
-    )
-    return (error_bars + points + median_points).properties(
-        title=alt.TitleParams(
-            f"Average imputed DUR duration by part number — {cohort}",
-            subtitle="Orange dots show the mean; red dots show the median; error bars show ± one sample standard deviation",
-            anchor="start",
-        ),
-        width=min(2400, max(900, len(chart_frame) * 3)),
-        height=430,
-    ).configure_view(stroke=None)
-
-
 def write_markdown(chart_files: list[tuple[str, str]]) -> Path:
     lines = [
         "# Part-number analysis",
         "",
         "DUR tasks are filtered to known cohorts, non-refill tasks, no handoff, and part numbers that are not null or blank.",
         "Durations at or above the filtered population's approximate 95th percentile are excluded.",
-        "Orange points show average and red points show median `IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS`; error bars show one sample standard deviation.",
-        "The combined violin plot uses product-level mean durations; labeled red dots identify the 5 part numbers with the longest mean in each cohort, and labeled dashed red lines show the quartiles.",
+        "The combined boxplot uses product-level mean durations; boxes show the interquartile range and whiskers show the 5th–95th percentiles.",
+        "Red points outside the whiskers are labeled with their part numbers.",
         "Tooltips include median duration, distinct task count, and distinct user count.",
         "Cached aggregate data is stored at `outputs/data/part-number-analysis.parquet` for redraw-only runs.",
         "",
@@ -172,50 +124,64 @@ def write_markdown(chart_files: list[tuple[str, str]]) -> Path:
     return path
 
 
-def create_violin_plot(frame: pd.DataFrame) -> alt.Chart:
+def create_boxplot(frame: pd.DataFrame) -> alt.Chart:
     chart_frame = frame.copy()
+    chart_frame["part_number"] = chart_frame["part_number"].astype(str)
     duration_max = float(chart_frame["average_duration_seconds"].max())
+    duration_min = float(chart_frame["average_duration_seconds"].min())
+    y_domain = [min(0.0, duration_min), duration_max * 1.1]
     panels: list[alt.Chart] = []
-    x_domain = [-0.15, 0.15]
+    x_domain = [-0.5, 0.5]
     for cohort in COHORTS:
         cohort_frame = chart_frame.loc[chart_frame["coh"] == cohort].copy()
         if cohort_frame.empty:
             raise ValueError(f"the query returned no rows for {cohort}")
 
-        density = (
-            alt.Chart(cohort_frame)
-            .transform_density(
-                "average_duration_seconds",
-                as_=["average_duration_seconds", "density"],
-                extent=[0, duration_max],
-                steps=200,
-            )
-            .transform_calculate(density_negative="-datum.density")
-            .mark_area(orient="horizontal", interpolate="monotone", opacity=0.8)
-            .encode(
-                y=alt.Y(
-                    "average_duration_seconds:Q",
-                    title="Product mean imputed DUR duration (seconds)",
-                ),
-                x=alt.X(
-                    "density_negative:Q",
-                    title=None,
-                    axis=None,
-                    scale=alt.Scale(domain=x_domain),
-                ),
-                x2="density:Q",
-                color=alt.value("#4c78a8"),
-            )
+        quantiles = cohort_frame["average_duration_seconds"].quantile([0.05, 0.25, 0.50, 0.75, 0.95])
+        summary = pd.DataFrame(
+            {
+                "x": [0.0],
+                "median_lower": [-0.28],
+                "median_upper": [0.28],
+                "p05": [quantiles.loc[0.05]],
+                "q1": [quantiles.loc[0.25]],
+                "median": [quantiles.loc[0.50]],
+                "q3": [quantiles.loc[0.75]],
+                "p95": [quantiles.loc[0.95]],
+            }
+        )
+        whiskers = alt.Chart(summary).mark_rule(size=2, color="#4c78a8").encode(
+            x=alt.X("x:Q", axis=None, scale=alt.Scale(domain=x_domain)),
+            y=alt.Y(
+                "p05:Q",
+                title="Product mean DUR duration (seconds)",
+                scale=alt.Scale(domain=y_domain),
+            ),
+            y2="p95:Q",
+        )
+        boxes = alt.Chart(summary).mark_bar(size=90, color="#4c78a8").encode(
+            x=alt.X("x:Q", axis=None, scale=alt.Scale(domain=x_domain)),
+            y=alt.Y("q1:Q", scale=alt.Scale(domain=y_domain)),
+            y2="q3:Q",
+        )
+        medians = alt.Chart(summary).mark_rule(size=4, color=MEDIAN_COLOR).encode(
+            x=alt.X("median_lower:Q", axis=None, scale=alt.Scale(domain=x_domain)),
+            x2="median_upper:Q",
+            y=alt.Y("median:Q", scale=alt.Scale(domain=y_domain)),
         )
 
-        top_frame = (
-            cohort_frame.nlargest(5, "average_duration_seconds")
-            .sort_values("average_duration_seconds", ascending=False)
-            .copy()
+        outlier_candidates = cohort_frame.loc[
+            (cohort_frame["average_duration_seconds"] < quantiles.loc[0.05])
+            | (cohort_frame["average_duration_seconds"] > quantiles.loc[0.95])
+        ].copy()
+        outlier_frame = outlier_candidates.nlargest(5, "average_duration_seconds").copy()
+        outlier_frame["point_x"] = 0.0
+        outlier_frame["label_x"] = 0.08
+        outlier_frame["part_label"] = outlier_frame.apply(
+            lambda row: f"{row['part_number']} ({row['average_duration_seconds']:,.1f}s)",
+            axis=1,
         )
-        top_frame["dot_x"] = 0.0
-        top_frame["label_x"] = 0.012
-        label_frame = top_frame.sort_values("average_duration_seconds").copy()
+        label_frame = outlier_frame.sort_values("average_duration_seconds").copy()
         if len(label_frame) > 1:
             label_spacing = max(
                 (float(label_frame["average_duration_seconds"].max())
@@ -229,74 +195,29 @@ def create_violin_plot(frame: pd.DataFrame) -> alt.Chart:
             ]
         else:
             label_frame["label_y"] = label_frame["average_duration_seconds"]
-        label_frame["label_x"] = 0.012
-        label_frame["part_label"] = label_frame.apply(
-            lambda row: f"{row['part_number']} ({row['average_duration_seconds']:,.1f}s)",
-            axis=1,
+        outlier_points = alt.Chart(outlier_frame).mark_point(
+            color="#d62728", filled=True, size=65, stroke="white", strokeWidth=1
+        ).encode(
+            x=alt.X("point_x:Q", axis=None, scale=alt.Scale(domain=x_domain)),
+            y=alt.Y("average_duration_seconds:Q", scale=alt.Scale(domain=y_domain)),
+            tooltip=[
+                alt.Tooltip("part_number:N", title="Part number"),
+                alt.Tooltip(
+                    "average_duration_seconds:Q",
+                    title="Product mean seconds",
+                    format=",.2f",
+                ),
+            ],
         )
-        top_dots = (
-            alt.Chart(top_frame)
-            .mark_point(color="#d62728", filled=True, size=65, stroke="white", strokeWidth=1)
-            .encode(
-                x=alt.X("dot_x:Q", axis=None, scale=alt.Scale(domain=x_domain)),
-                y=alt.Y("average_duration_seconds:Q"),
-                tooltip=[
-                    alt.Tooltip("part_number:N", title="Top part number"),
-                    alt.Tooltip(
-                        "average_duration_seconds:Q",
-                        title="Product mean seconds",
-                        format=",.2f",
-                    ),
-                ],
-            )
-        )
-        top_labels = (
-            alt.Chart(label_frame)
-            .mark_text(align="left", dx=5, dy=-5, color="#d62728", fontSize=10)
-            .encode(
-                x=alt.X("label_x:Q", axis=None, scale=alt.Scale(domain=x_domain)),
-                y=alt.Y("label_y:Q"),
-                text=alt.Text("part_label:N"),
-            )
-        )
-        quartile_values = cohort_frame["average_duration_seconds"].quantile([0.25, 0.50, 0.75])
-        quartile_frame = pd.DataFrame(
-            {
-                "quartile": ["25th percentile", "50th percentile (median)", "75th percentile"],
-                "quartile_seconds": [
-                    quartile_values.loc[0.25],
-                    quartile_values.loc[0.50],
-                    quartile_values.loc[0.75],
-                ],
-            }
-        )
-        quartile_frame["label_x"] = -0.145
-        quartile_frame["quartile_label"] = quartile_frame.apply(
-            lambda row: f"{row['quartile']}: {row['quartile_seconds']:,.1f}s",
-            axis=1,
-        )
-        quartile_rules = (
-            alt.Chart(quartile_frame)
-            .mark_rule(color="#d62728", strokeDash=[6, 4], size=2)
-            .encode(
-                y=alt.Y("quartile_seconds:Q"),
-                tooltip=[
-                    alt.Tooltip("quartile:N", title="Statistic"),
-                    alt.Tooltip("quartile_seconds:Q", title="Seconds", format=",.2f"),
-                ],
-            )
-        )
-        quartile_labels = (
-            alt.Chart(quartile_frame)
-            .mark_text(align="left", dx=3, dy=-5, color="#d62728", fontSize=9)
-            .encode(
-                x=alt.X("label_x:Q", axis=None, scale=alt.Scale(domain=x_domain)),
-                y=alt.Y("quartile_seconds:Q"),
-                text=alt.Text("quartile_label:N"),
-            )
+        outlier_labels = alt.Chart(label_frame).mark_text(
+            align="left", dx=5, dy=-5, color="#d62728", fontSize=10
+        ).encode(
+            x=alt.X("label_x:Q", axis=None, scale=alt.Scale(domain=x_domain)),
+            y=alt.Y("label_y:Q", scale=alt.Scale(domain=y_domain)),
+            text=alt.Text("part_label:N"),
         )
         panels.append(
-            (density + quartile_rules + quartile_labels + top_dots + top_labels).properties(
+            (whiskers + boxes + medians + outlier_points + outlier_labels).properties(
                 title=cohort,
                 width=300,
                 height=520,
@@ -305,11 +226,13 @@ def create_violin_plot(frame: pd.DataFrame) -> alt.Chart:
 
     return alt.hconcat(*panels).properties(
         title=alt.TitleParams(
-            "Product mean DUR duration violin plots by cohort",
-            subtitle="Dashed red lines are labeled with quartiles; red dots and labels identify the 5 longest product means",
+            "Product mean DUR duration boxplots by cohort",
+            subtitle="Boxes show the IQR; whiskers show the 5th–95th percentiles; up to five high-duration outliers are labeled by part number",
             anchor="start",
         )
-    ).resolve_scale(y="shared").configure_view(stroke=None)
+    ).resolve_scale(y="shared").configure(background=FIGURE_BACKGROUND).configure_view(
+        stroke=None, fill=FIGURE_BACKGROUND
+    )
 
 
 def create_outputs(frame: pd.DataFrame) -> list[Path]:
@@ -320,21 +243,18 @@ def create_outputs(frame: pd.DataFrame) -> list[Path]:
     outputs: list[Path] = []
     chart_files: list[tuple[str, str]] = []
     for cohort in COHORTS:
-        cohort_frame = frame.loc[frame["coh"] == cohort].copy()
-        if cohort_frame.empty:
+        if frame.loc[frame["coh"] == cohort].empty:
             raise ValueError(f"the query returned no rows for {cohort}")
-        filename = f"part-number-analysis-{cohort.lower().replace(' ', '-')}.png"
-        path = OUTPUT_DIRECTORY / filename
-        create_chart(cohort_frame, cohort).save(path, scale_factor=2)
-        outputs.append(path)
-        chart_files.append((cohort, filename))
-    old_boxplot_path = OUTPUT_DIRECTORY / "part-number-analysis-cohort-boxplots.png"
-    old_boxplot_path.unlink(missing_ok=True)
-    violin_filename = "part-number-analysis-cohort-violin-plots.png"
-    violin_path = OUTPUT_DIRECTORY / violin_filename
-    create_violin_plot(frame).save(violin_path, scale_factor=2)
-    outputs.append(violin_path)
-    chart_files.append(("Product mean duration violin plots", violin_filename))
+    for stale_filename in [
+        *(f"part-number-analysis-{cohort.lower().replace(' ', '-')}.png" for cohort in COHORTS),
+        "part-number-analysis-cohort-violin-plots.png",
+    ]:
+        (OUTPUT_DIRECTORY / stale_filename).unlink(missing_ok=True)
+    boxplot_filename = "part-number-analysis-cohort-boxplots.png"
+    boxplot_path = OUTPUT_DIRECTORY / boxplot_filename
+    create_boxplot(frame).save(boxplot_path, scale_factor=2)
+    outputs.append(boxplot_path)
+    chart_files.append(("Product mean duration boxplots", boxplot_filename))
     outputs.append(write_markdown(chart_files))
     return outputs
 
@@ -353,7 +273,7 @@ def create_outputs(frame: pd.DataFrame) -> list[Path]:
     help="Redraw from cached Parquet data without connecting to Snowflake.",
 )
 def main(env_file: Path, redraw_only: bool) -> None:
-    """Query MY_RXP_TASKS and render one part-number chart per cohort."""
+    """Query MY_RXP_TASKS and render one combined part-number chart."""
     try:
         if redraw_only:
             if not DATA_PATH.is_file():

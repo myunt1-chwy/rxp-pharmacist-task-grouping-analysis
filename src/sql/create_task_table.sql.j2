@@ -27,7 +27,7 @@ SELECT
     l.USER_ID,
     l.STARTED_AT,
     l.CLOSED_AT,
-    l.PRESCRIPTION_ID,
+    COALESCE(rx_mapping.RX_ID, l.PRESCRIPTION_ID) AS PRESCRIPTION_ID,
     l.RX_USAGE_ID,
     l.ITEM_COHORT AS COH,
     l.PART_NUMBER,
@@ -57,6 +57,8 @@ SELECT
 FROM task_lifecycle AS l
 JOIN latest_employees AS e
     ON l.USER_ID = CAST(e.EMPLOYEE_KYRIOS_ID AS VARCHAR)
+LEFT JOIN EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_RX_USAGE_TO_RX AS rx_mapping
+    ON rx_mapping.RX_USAGE_ID = l.RX_USAGE_ID
 WHERE e.JOB_TITLE IN (
     'Pharmacist',
     'Area Manager, Pharmacist II',

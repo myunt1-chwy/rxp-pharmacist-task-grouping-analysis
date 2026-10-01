@@ -16,6 +16,19 @@ For diagrammed RxP relationships, read [the core join map](rxp-join-map.md) and 
 | `BT_HCA_HCDM.ORDER_LINE_PET_VET_CLINIC_XREF` | `order_line_id × pet_id × vet_id × clinic_id` | Link order lines to pets, vets, and clinics. |
 | `BT_HCA_HCDM.CLINIC_DATAMART_V2` | `activity_date × clinic_id × rx_origination_type × merch_class2 × compound_flag × is_swap × b2b_flag × approval_channel` | Daily clinic performance reporting. |
 
+The complete `RXP_PRESCRIPTIONS` column catalog is in the [prescription schema reference](rxp-prescriptions-schema.md).
+The complete `RXP_RX_USAGE_ACTIONS` column catalog is in the
+[usage-actions schema reference](rxp-rx-usage-actions-schema.md).
+
+## Pet-profile source
+
+`CHEWYBI.CUSTOMER_PETPROFILES` is a legacy pet-profile source documented in
+the [pet-profile schema reference](customer-petprofiles-schema.md). Use
+`PETPROFILE_ID = RXP_PRESCRIPTIONS.PET_ID` to connect a pet profile to
+prescriptions, or `PETPROFILE_CUSTOMER_ID = RXP_PRESCRIPTIONS.CUSTOMER_ID` for
+customer-level context. Neither profile key is declared unique in the supplied
+metadata, so validate the requested grain before joining or aggregating.
+
 ## Join and grain rules
 
 - Use `clinic_id` for operational joins such as prescriptions to clinics; use `clinic_key` only for dimensional/star-schema joins.

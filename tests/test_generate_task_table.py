@@ -12,7 +12,9 @@ from src.python import generate_task_table
 @pytest.fixture(autouse=True)
 def generated_sql_path(monkeypatch, tmp_path: Path) -> Path:
     path = tmp_path / "generated" / "generate_task_table.sql"
+    mapping_path = tmp_path / "generated" / "create_rx_usage_to_rx_mapping.sql"
     monkeypatch.setattr(generate_task_table, "GENERATED_SQL_PATH", path)
+    monkeypatch.setattr(generate_task_table, "MAPPING_GENERATED_SQL_PATH", mapping_path)
     return path
 
 
@@ -50,6 +52,20 @@ def test_rendered_sql_contains_required_shape() -> None:
     assert "'Area Manager, Pharmacist II'" in sql
     assert "l.TASK_CREATED_AT >= '2026-02-01'" in sql
     assert "l.TASK_CREATED_AT < '2026-08-01'" in sql
+    assert "COALESCE(rx_mapping.RX_ID, l.PRESCRIPTION_ID) AS PRESCRIPTION_ID" in sql
+    assert "MY_RXP_RX_USAGE_TO_RX AS rx_mapping" in sql
+
+
+def test_mapping_sql_uses_rxp_rx_usage_actions() -> None:
+    sql = generate_task_table.render_mapping_sql()
+
+    assert sql.startswith(
+        "CREATE OR REPLACE TRANSIENT TABLE "
+        "EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_RX_USAGE_TO_RX AS"
+    )
+    assert "FROM EDLDB.BT_HCA_HCDM.RXP_RX_USAGE_ACTIONS AS actions" in sql
+    assert "MIN(actions.RX_ID) AS RX_ID" in sql
+    assert "GROUP BY actions.RX_USAGE_ID" in sql
 
 
 def test_dry_run_prints_and_writes_sql_without_env_or_connection(monkeypatch, generated_sql_path: Path) -> None:
@@ -99,7 +115,7 @@ def test_missing_connection_setting_is_cli_error(tmp_path: Path) -> None:
     assert "RXP_SNOWFLAKE_WAREHOUSE" in result.output
 
 
-def test_executes_exactly_one_ctas(monkeypatch, tmp_path: Path, generated_sql_path: Path) -> None:
+def test_executes_mapping_then_task_ctas(monkeypatch, tmp_path: Path, generated_sql_path: Path) -> None:
     env_file = tmp_path / ".env"
     write_env(env_file)
     executed: list[str] = []
@@ -128,9 +144,12 @@ def test_executes_exactly_one_ctas(monkeypatch, tmp_path: Path, generated_sql_pa
     )
 
     assert result.exit_code == 0
-    assert len(executed) == 2
+    assert len(executed) == 3
     assert executed[0].startswith("CREATE OR REPLACE TRANSIENT TABLE")
-    assert executed[1] == f"SELECT COUNT(*) FROM {generate_task_table.TARGET_TABLE}"
-    assert sum(statement.startswith("CREATE OR REPLACE TRANSIENT TABLE") for statement in executed) == 1
-    assert generated_sql_path.read_text(encoding="utf-8") == executed[0]
+    assert generate_task_table.MAPPING_TARGET_TABLE in executed[0]
+    assert executed[1].startswith("CREATE OR REPLACE TRANSIENT TABLE")
+    assert generate_task_table.TARGET_TABLE in executed[1]
+    assert executed[2] == f"SELECT COUNT(*) FROM {generate_task_table.TARGET_TABLE}"
+    assert sum(statement.startswith("CREATE OR REPLACE TRANSIENT TABLE") for statement in executed) == 2
+    assert generated_sql_path.read_text(encoding="utf-8") == executed[1]
     assert "with 42 rows" in result.output

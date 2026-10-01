@@ -11,6 +11,7 @@ import click
 import pandas as pd
 
 from .generate_task_table import REQUIRED_SETTINGS, connect_to_snowflake, parse_dotenv
+from .plot_style import FIGURE_BACKGROUND
 
 TASK_TABLE = "EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS"
 SEQUENCE_TABLE = "EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS_WITH_SEQUENCE"
@@ -214,7 +215,7 @@ def create_chart(frame: pd.DataFrame, status: str, x_domain: list[float]) -> alt
         .encode(
             x=alt.X(
                 "bin_midpoint_seconds:Q",
-                title="Imputed DUR duration (seconds)",
+                title="DUR duration (seconds)",
                 scale=alt.Scale(domain=x_domain),
                 axis=alt.Axis(grid=True, gridColor="#b0b0b0", gridOpacity=1, gridWidth=1),
             ),
@@ -244,7 +245,8 @@ def create_chart(frame: pd.DataFrame, status: str, x_domain: list[float]) -> alt
                 anchor="start",
             ),
         )
-        .configure_view(stroke=None)
+        .configure(background=FIGURE_BACKGROUND)
+        .configure_view(stroke=None, fill=FIGURE_BACKGROUND)
     )
 
 
@@ -274,7 +276,7 @@ def create_combined_chart(frame: pd.DataFrame, x_domain: list[float]) -> alt.Cha
         .encode(
             x=alt.X(
                 "bin_midpoint_seconds:Q",
-                title="Imputed DUR duration (seconds)",
+                title="DUR duration (seconds)",
                 scale=alt.Scale(domain=x_domain),
                 axis=alt.Axis(grid=True, gridColor="#b0b0b0", gridOpacity=1, gridWidth=1),
             ),
@@ -337,7 +339,8 @@ def create_combined_chart(frame: pd.DataFrame, x_domain: list[float]) -> alt.Cha
                 anchor="start",
             ),
         )
-        .configure_view(stroke=None)
+        .configure(background=FIGURE_BACKGROUND)
+        .configure_view(stroke=None, fill=FIGURE_BACKGROUND)
         .configure_axis(grid=True, gridColor="#b0b0b0", gridOpacity=1, gridWidth=1)
     )
 

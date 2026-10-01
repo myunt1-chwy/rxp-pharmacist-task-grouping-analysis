@@ -11,10 +11,13 @@ import click
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 TARGET_TABLE = "EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS"
+MAPPING_TARGET_TABLE = "EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_RX_USAGE_TO_RX"
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 TEMPLATE_DIRECTORY = Path(__file__).resolve().parents[1] / "sql"
 TEMPLATE_NAME = "create_task_table.sql.j2"
+MAPPING_TEMPLATE_NAME = "create_rx_usage_to_rx_mapping.sql"
 GENERATED_SQL_PATH = REPOSITORY_ROOT / "generated" / "generate_task_table.sql"
+MAPPING_GENERATED_SQL_PATH = REPOSITORY_ROOT / "generated" / "create_rx_usage_to_rx_mapping.sql"
 REQUIRED_SETTINGS = (
     "RXP_SNOWFLAKE_ACCOUNT",
     "RXP_SNOWFLAKE_USER",
@@ -66,9 +69,18 @@ def render_sql(start_date: date, end_date: date) -> str:
     )
 
 
+def render_mapping_sql() -> str:
+    return (TEMPLATE_DIRECTORY / MAPPING_TEMPLATE_NAME).read_text(encoding="utf-8")
+
+
 def write_generated_sql(sql: str) -> None:
     GENERATED_SQL_PATH.parent.mkdir(parents=True, exist_ok=True)
     GENERATED_SQL_PATH.write_text(sql, encoding="utf-8")
+
+
+def write_generated_mapping_sql(sql: str) -> None:
+    MAPPING_GENERATED_SQL_PATH.parent.mkdir(parents=True, exist_ok=True)
+    MAPPING_GENERATED_SQL_PATH.write_text(sql, encoding="utf-8")
 
 
 def connect_to_snowflake(settings: dict[str, str]):
@@ -99,14 +111,18 @@ def main(start_date: datetime, end_date: datetime, env_file: Path, dry_run: bool
     if start >= end:
         raise click.UsageError("--start-date must be earlier than --end-date")
 
+    mapping_sql = render_mapping_sql()
     sql = render_sql(start, end)
     try:
+        write_generated_mapping_sql(mapping_sql)
         write_generated_sql(sql)
     except OSError as error:
         raise click.UsageError(f"could not write generated SQL: {error}") from error
+    click.echo(f"Wrote generated SQL: {MAPPING_GENERATED_SQL_PATH}")
     click.echo(f"Wrote generated SQL: {GENERATED_SQL_PATH}")
 
     if dry_run:
+        click.echo(mapping_sql, nl=False)
         click.echo(sql, nl=False)
         return
 
@@ -124,6 +140,7 @@ def main(start_date: datetime, end_date: datetime, env_file: Path, dry_run: bool
     try:
         cursor = connection.cursor()
         try:
+            cursor.execute(mapping_sql)
             cursor.execute(sql)
             cursor.execute(f"SELECT COUNT(*) FROM {TARGET_TABLE}")
             row_count = cursor.fetchone()[0]

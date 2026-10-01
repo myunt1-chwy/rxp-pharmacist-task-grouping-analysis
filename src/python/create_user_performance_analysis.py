@@ -11,6 +11,7 @@ import click
 import pandas as pd
 
 from .generate_task_table import REQUIRED_SETTINGS, connect_to_snowflake, parse_dotenv
+from .plot_style import FIGURE_BACKGROUND
 
 SOURCE_TABLE = "EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS"
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -242,7 +243,9 @@ def create_matrix(frame: pd.DataFrame, metric: str, title: str) -> alt.Chart:
             rows.append(alt.hconcat(*cells, spacing=8))
     return alt.vconcat(*rows, spacing=8).properties(
         title=alt.TitleParams(title, anchor="start")
-    ).configure_view(stroke="#d0d0d0")
+    ).configure(background=FIGURE_BACKGROUND).configure_view(
+        stroke="#d0d0d0", fill=FIGURE_BACKGROUND
+    )
 
 
 def complete_cohort_users(frame: pd.DataFrame, cohorts: list[str]) -> pd.DataFrame:
@@ -350,7 +353,9 @@ def create_performance_heatmaps(
             title,
             anchor="start",
         )
-    ).configure_view(stroke=None)
+    ).configure(background=FIGURE_BACKGROUND).configure_view(
+        stroke=None, fill=FIGURE_BACKGROUND
+    )
 
 
 def create_user_task_count_distribution(frame: pd.DataFrame) -> alt.Chart:
@@ -384,7 +389,9 @@ def create_user_task_count_distribution(frame: pd.DataFrame) -> alt.Chart:
         spacing=12,
     ).properties(
         title=alt.TitleParams("Distribution of DUR tasks completed per user", anchor="start")
-    ).configure_view(stroke=None)
+    ).configure(background=FIGURE_BACKGROUND).configure_view(
+        stroke=None, fill=FIGURE_BACKGROUND
+    )
 
 
 def create_user_median_duration_distribution(frame: pd.DataFrame) -> alt.Chart:
@@ -422,7 +429,9 @@ def create_user_median_duration_distribution(frame: pd.DataFrame) -> alt.Chart:
         spacing=12,
     ).properties(
         title=alt.TitleParams("Distribution of median DUR duration per user", anchor="start")
-    ).configure_view(stroke=None)
+    ).configure(background=FIGURE_BACKGROUND).configure_view(
+        stroke=None, fill=FIGURE_BACKGROUND
+    )
 
 
 def write_markdown(chart_files: list[tuple[str, str]]) -> Path:

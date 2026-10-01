@@ -11,6 +11,7 @@ import click
 import pandas as pd
 
 from .generate_task_table import REQUIRED_SETTINGS, connect_to_snowflake, parse_dotenv
+from .plot_style import FIGURE_BACKGROUND
 
 SOURCE_TABLE = "EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS"
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -271,7 +272,9 @@ def create_chart(frame: pd.DataFrame, scope_name: str) -> alt.Chart:
                 color=text_color,
             )
         )
-    return alt.layer(*layers).configure_view(stroke=None)
+    return alt.layer(*layers).configure(background=FIGURE_BACKGROUND).configure_view(
+        stroke=None, fill=FIGURE_BACKGROUND
+    )
 
 
 def filename_for_scope(scope_name: str) -> str:

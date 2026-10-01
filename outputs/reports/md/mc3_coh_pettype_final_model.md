@@ -1,0 +1,201 @@
+# Final MC3/COH/PETTYPE mixed-effects model
+
+## Purpose and analysis sample
+
+This is the final model. It estimates how same-cell sequence position relates
+to DUR duration while controlling for correction status, weekday, approval
+channel, prescription source, and MC3/COH/PETTYPE cell. It includes crossed
+random intercepts for user, process date, and parent part number.
+
+The source is `EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS`. Eligible rows have non-null user, task,
+process-start time, `MC3_COH_PETTYPE_SEQN`, and
+`MC3_COH_PETTYPE_BATCH_LEN`; sequence and batch length are at least one, and
+sequence does not exceed batch length. Duration is
+`IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS`.
+
+Let \(Y_i\) be the positive imputed duration in seconds for task \(i\). One
+global cutoff is calculated over all otherwise eligible tasks:
+
+\[
+q_{0.95}=\operatorname{APPROX\_PERCENTILE}(Y,0.95).
+\]
+
+The fitted sample keeps tasks satisfying \(0<Y_i<q_{0.95}\); the upper
+bound is strict. MC3, COH, PETTYPE, parent part number, approval channel, and
+prescription source blanks are represented by `<Missing>`.
+
+## Derived indicators
+
+For sequence number \(S_i\), batch length \(L_i\), and correction count
+\(N_i\), the three binary fixed effects are
+
+\[
+P_i=\mathbf{1}(L_i>1\ \land\ S_i>1),
+\qquad
+F_i=\mathbf{1}(L_i>1\ \land\ S_i<L_i),
+\qquad
+C_i=\mathbf{1}(N_i>0).
+\]
+
+Thus \(P_i\) is `SAME_PRECEDING`, \(F_i\) is `SAME_FOLLOWING`, and \(C_i\)
+is `HAS_CORRECTION`.
+
+## Outcome transformation
+
+The retained durations receive one global Box-Cox transformation:
+
+\[
+Z_i=g_\lambda(Y_i)=
+\begin{cases}
+\dfrac{Y_i^\lambda-1}{\lambda}, & \lambda\ne0,\\[4pt]
+\log(Y_i), & \lambda=0.
+\end{cases}
+\]
+
+The maximum-likelihood transformation estimate is
+\(\widehat{\lambda}=-0.08159843\). All coefficients, random
+effects, standard deviations, residuals, RMSE, and diagnostics are therefore
+on the Box-Cox scale.
+
+## Complete model formula
+
+Index task, fixed-effect cell, user, date, and parent part by \(i,c,u,d,p\).
+The model is
+
+\[
+\begin{aligned}
+Z_i={}&\gamma_{c(i)}+\beta_P P_i+\beta_F F_i+\beta_C C_i\\
+&+\sum_{w\ne\mathrm{Sun}}\delta_w\mathbf{1}(W_i=w)\\
+&+\sum_{a\ne a_0}\theta_a\mathbf{1}(A_i=a)
++\sum_{s\ne s_0}\phi_s\mathbf{1}(R_i=s)\\
+&+b_{u(i)}+h_{d(i)}+r_{p(i)}+\epsilon_i.
+\end{aligned}
+\]
+
+Here \(\gamma_{c(i)}\) is a fixed effect shared by all tasks in the same
+MC3 + COH + PETTYPE cell. The model uses a full set of cell effects and no
+separate overall intercept. Sunday is the weekday reference. The
+data-dependent categorical references are:
+
+- approval channel \(a_0\): `PH`
+- prescription source \(s_0\): `PRACTICE_HUB`
+
+Each reference is the most frequent retained level; lexicographic order breaks
+a frequency tie. The crossed random terms and level-1 error are mutually
+independent and satisfy
+
+\[
+b_u\sim N(0,\sigma_u^2),\qquad
+h_d\sim N(0,\sigma_d^2),\qquad
+r_p\sim N(0,\sigma_p^2),\qquad
+\epsilon_i\sim N(0,\sigma_e^2).
+\]
+
+The fixed effects and variance components are estimated jointly by REML. The
+conditional fitted value and residual are
+
+\[
+\widehat{Z}_i=\widehat{\gamma}_{c(i)}+x_i^T\widehat{\beta}
++\widehat{b}_{u(i)}+\widehat{h}_{d(i)}+\widehat{r}_{p(i)},
+\qquad e_i=Z_i-\widehat{Z}_i.
+\]
+
+## Inference and fit statistics
+
+For fixed effect \(k\), the report uses
+
+\[
+z_k=\frac{\widehat{\beta}_k}{SE(\widehat{\beta}_k)},\qquad
+p_k=2\Phi(-|z_k|),\qquad
+CI_{95\%}=\widehat{\beta}_k\pm1.96SE(\widehat{\beta}_k).
+\]
+
+Random-effect SD intervals use an observed-information Wald approximation on
+the log-SD scale. The residual-SD interval uses the chi-square distribution.
+The reported conditional metrics include all fixed and random effects:
+
+\[
+R_c^2=1-\frac{\sum_i e_i^2}{\sum_i(Z_i-\bar Z)^2},\qquad
+RMSE_c=\sqrt{\frac1n\sum_i e_i^2}.
+\]
+
+## Sample and fit
+
+| Quantity | Value |
+|---|---:|
+| Tasks | 3,433,218 |
+| MC3/COH/PETTYPE cells | 265 |
+| Users | 340 |
+| Dates | 182 |
+| Parent part numbers | 885 |
+| Approval-channel levels | 9 |
+| Prescription-source levels | 11 |
+| Global approximate P95 cutoff (seconds) | 156.598673 |
+| Box-Cox lambda | -0.08159843 |
+| Conditional R-squared | 0.308784 |
+| Conditional RMSE (Box-Cox scale) | 0.603674 |
+| REML negative log-likelihood | 3142827.127402 |
+| Converged | True |
+
+## Fixed effects
+
+| Term | Estimate | SE | z | p-value | 95% CI |
+|---|---:|---:|---:|---:|---:|
+| SAME_PRECEDING | -0.046157 | 0.000835 | -55.2813 | <1e-300 | [-0.047793, -0.044520] |
+| SAME_FOLLOWING | 0.001024 | 0.000835 | 1.2259 | 0.220231 | [-0.000613, 0.002661] |
+| HAS_CORRECTION | 0.271146 | 0.000788 | 344.0672 | <1e-300 | [0.269601, 0.272690] |
+| WEEKDAY_MON | 0.006416 | 0.019649 | 0.3265 | 0.74404 | [-0.032096, 0.044927] |
+| WEEKDAY_TUE | 0.014299 | 0.019646 | 0.7278 | 0.466718 | [-0.024206, 0.052803] |
+| WEEKDAY_WED | 0.010462 | 0.019650 | 0.5324 | 0.59444 | [-0.028051, 0.048975] |
+| WEEKDAY_THU | 0.008138 | 0.019652 | 0.4141 | 0.678785 | [-0.030379, 0.046655] |
+| WEEKDAY_FRI | 0.006015 | 0.019651 | 0.3061 | 0.75952 | [-0.032499, 0.044530] |
+| WEEKDAY_SAT | 0.002131 | 0.019666 | 0.1084 | 0.913702 | [-0.036413, 0.040675] |
+| APPROVAL_CHANNEL[CLINIC_EMAIL vs PH] | 0.235910 | 0.045211 | 5.2180 | 1.80853e-07 | [0.147299, 0.324522] |
+| APPROVAL_CHANNEL[CUSTOMER_MAIL vs PH] | 0.472534 | 0.013061 | 36.1785 | 1.32431e-286 | [0.446934, 0.498133] |
+| APPROVAL_CHANNEL[DIGITAL vs PH] | 0.146802 | 0.040724 | 3.6048 | 0.000312369 | [0.066985, 0.226619] |
+| APPROVAL_CHANNEL[FAX vs PH] | 0.208015 | 0.011227 | 18.5276 | 1.23668e-76 | [0.186010, 0.230020] |
+| APPROVAL_CHANNEL[PARTNER vs PH] | -0.034275 | 0.007967 | -4.3018 | 1.69381e-05 | [-0.049891, -0.018659] |
+| APPROVAL_CHANNEL[RHAPSODY vs PH] | 0.075320 | 0.052573 | 1.4327 | 0.15195 | [-0.027721, 0.178362] |
+| APPROVAL_CHANNEL[VERBAL vs PH] | -0.017687 | 0.010665 | -1.6585 | 0.097222 | [-0.038589, 0.003215] |
+| APPROVAL_CHANNEL[VET vs PH] | 0.003570 | 0.105720 | 0.0338 | 0.973059 | [-0.203638, 0.210779] |
+| PRESCRIPTION_SOURCE[CLINIC_EMAIL vs PRACTICE_HUB] | -0.003227 | 0.011181 | -0.2886 | 0.772878 | [-0.025141, 0.018687] |
+| PRESCRIPTION_SOURCE[CS_FIRST_CONTACT vs PRACTICE_HUB] | -0.086051 | 0.203897 | -0.4220 | 0.673003 | [-0.485682, 0.313580] |
+| PRESCRIPTION_SOURCE[CUSTOMER_MAIL vs PRACTICE_HUB] | 0.044423 | 0.012813 | 3.4672 | 0.000525987 | [0.019311, 0.069536] |
+| PRESCRIPTION_SOURCE[CVC vs PRACTICE_HUB] | 0.023167 | 0.052511 | 0.4412 | 0.659085 | [-0.079753, 0.126087] |
+| PRESCRIPTION_SOURCE[DIGITAL vs PRACTICE_HUB] | 0.020414 | 0.040106 | 0.5090 | 0.610753 | [-0.058192, 0.099020] |
+| PRESCRIPTION_SOURCE[FAX vs PRACTICE_HUB] | -0.004739 | 0.011224 | -0.4222 | 0.67286 | [-0.026738, 0.017260] |
+| PRESCRIPTION_SOURCE[PARTNER_API vs PRACTICE_HUB] | 0.018961 | 0.007944 | 2.3869 | 0.0169906 | [0.003392, 0.034530] |
+| PRESCRIPTION_SOURCE[RHAPSODY vs PRACTICE_HUB] | -0.029700 | 0.062733 | -0.4734 | 0.6359 | [-0.152655, 0.093254] |
+| PRESCRIPTION_SOURCE[TELEMEDICINE vs PRACTICE_HUB] | 0.185396 | 0.052942 | 3.5018 | 0.000462051 | [0.081631, 0.289161] |
+| PRESCRIPTION_SOURCE[VERBAL vs PRACTICE_HUB] | -0.002803 | 0.011736 | -0.2388 | 0.81126 | [-0.025805, 0.020200] |
+
+## Variance components
+
+| Component | SD | Approximate 95% CI |
+|---|---:|---:|
+| User random intercept | 0.422318 | [0.390500, 0.456728] |
+| Date random intercept | 0.070610 | [0.063513, 0.078500] |
+| Parent-part random intercept | 0.114187 | [0.107719, 0.121045] |
+| Residual | 0.603803 | [0.603351, 0.604255] |
+
+## Diagnostics
+
+![User Q–Q plot](../../charts/mc3-coh-pettype-final-model/user_random_intercepts_qq.png)
+
+![Date Q–Q plot](../../charts/mc3-coh-pettype-final-model/date_random_intercepts_qq.png)
+
+![Parent-part Q–Q plot](../../charts/mc3-coh-pettype-final-model/parent_part_random_intercepts_qq.png)
+
+![Residual Q–Q plot](../../charts/mc3-coh-pettype-final-model/conditional_residuals_qq.png)
+
+![Predicted versus outcome](../../charts/mc3-coh-pettype-final-model/predicted_vs_boxcox_actual.png)
+
+## Artifacts
+
+- [Generated SQL](../../../generated/mc3_coh_pettype_final_model.sql)
+- [Raw Snowflake data](../../data/mc3_coh_pettype_final_model_task_data.parquet)
+- [Transformed model data](../../data/mc3_coh_pettype_final_model_boxcox_data.parquet)
+- [Fixed-effect table](../../tables/mc3_coh_pettype_final_model_fixed_effects.md)
+- [User random effects](../../tables/mc3_coh_pettype_final_model_user_effects.md)
+- [Date random effects](../../tables/mc3_coh_pettype_final_model_date_effects.md)
+- [Parent-part random effects](../../tables/mc3_coh_pettype_final_model_parent_part_effects.md)

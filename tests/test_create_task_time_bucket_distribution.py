@@ -42,7 +42,7 @@ def test_query_contains_required_filters_buckets_and_metrics() -> None:
     assert "DATE_PART('HOUR', PROCESS_START_TIME)" in sql
     assert "PROCESS_START_TIME IS NOT NULL" in sql
     assert "DATE_PART('HOUR', CONVERT_TIMEZONE('UTC', STARTED_AT))" not in sql
-    assert ") * 4 AS BUCKET_START_HOUR" in sql
+    assert ") * 2 AS BUCKET_START_HOUR" in sql
     assert "COUNT(DISTINCT TASK_ID)" in sql
     assert "COUNT(DISTINCT USER_ID)" in sql
     assert "AVG(DURATION_SECONDS)" in sql

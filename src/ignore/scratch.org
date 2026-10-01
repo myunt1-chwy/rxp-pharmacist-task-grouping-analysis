@@ -1,0 +1,632 @@
+describe table BT_HCA_HCDM.RXP_RX_USAGE_ACTIONS;
+
+| name                     | type              | kind   | null? | default | primary key | unique key | check | expression | comment                                                                           | policy name | privacy domain | write default |
+| ACTION_ID                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A unique identifier for each action.                                              | NULL        | NULL           | NULL          |
+| RX_USAGE_ID              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Prescription usage identifiers.                                                   | NULL        | NULL           | NULL          |
+| ACTION_CREATION_DATETIME | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The date and time when the action was created.                                    | NULL        | NULL           | NULL          |
+| IS_VET_DIET_FLAG         | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A flag indicating whether the prescription is for a veterinary diet.              | NULL        | NULL           | NULL          |
+| ACTION_SPEC_ID           | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A unique identifier for a specific action specification.                          | NULL        | NULL           | NULL          |
+| FROM_STATE               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The state from which the prescription was originated.                             | NULL        | NULL           | NULL          |
+| TO_STATE                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The state to which a prescription was sent.                                       | NULL        | NULL           | NULL          |
+| PERSONA                  | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The role or position of the individual involved in the prescription usage action. | NULL        | NULL           | NULL          |
+| ACTION_NAME              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The type of action taken on a prescription.                                       | NULL        | NULL           | NULL          |
+| USER_ID                  | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | User ID.                                                                          | NULL        | NULL           | NULL          |
+| CLIENT_ID                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Client ID.                                                                        | NULL        | NULL           | NULL          |
+| BLOCK_REASONS            | ARRAY             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The reasons for blocking a prescription.                                          | NULL        | NULL           | NULL          |
+| CLINIC_ID                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The unique identifier for a clinic.                                               | NULL        | NULL           | NULL          |
+| CREATION_DATETIME        | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The date and time when the action was created.                                    | NULL        | NULL           | NULL          |
+| CUSTOMER_ID              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A unique identifier for each customer.                                            | NULL        | NULL           | NULL          |
+| DELETED                  | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A column holding data of type BooleanType.                                        | NULL        | NULL           | NULL          |
+| DISPENSED_AMOUNT         | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The amount of medication dispensed.                                               | NULL        | NULL           | NULL          |
+| FULFILLMENT_CENTER       | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Fulfillment center code.                                                          | NULL        | NULL           | NULL          |
+| NOTES                    | ARRAY             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Notes.                                                                            | NULL        | NULL           | NULL          |
+| ORDER_ID                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A unique identifier for each order.                                               | NULL        | NULL           | NULL          |
+| ORDER_ITEM_AMOUNT        | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | ULL        | The amount of each order item.                                                    | NULL        | NULL           | NULL          |
+| ORDER_ITEM_ID            | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A unique identifier for each order item.                                          | NULL        | NULL           | NULL          |
+| PART_NUMBER              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The part number.                                                                  | NULL        | NULL           | NULL          |
+| PET_ID                   | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Patient identification number.                                                    | NULL        | NULL           | NULL          |
+| PHARMACIST_ID            | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The identifier for the pharmacist.                                                | NULL        | NULL           | NULL          |
+| RX_ID                    | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Prescription IDs.                                                                 | NULL        | NULL           | NULL          |
+| SHIPPING_STATE           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The state where the prescription was shipped.                                     | NULL        | NULL           | NULL          |
+| STATE_CHANGE_REASON      | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The reason for a state change in the prescription usage actions.                  | NULL        | NULL           | NULL          |
+| STATE_CHANGED_DATETIME   | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The date and time when the state of the usage action was last changed.            | NULL        | NULL           | NULL          |
+| SUBSCRIPTION_ID          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A unique identifier for a subscription.                                           | NULL        | NULL           | NULL          |
+| UPDATED_DATETIME         | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Timestamps representing the date and time when the action was updated.            | NULL        | NULL           | NULL          |
+| USAGE_CONTEXTS           | ARRAY             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The types of actions taken on a prescription.                                     | NULL        | NULL           | NULL          |
+| VET_ID                   | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Veterinary identification numbers.                                                | NULL        | NULL           | NULL          |
+| IS_DELETED               | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A flag indicating whether the record has been deleted.                            | NULL        | NULL           | NULL          |
+| ACTION_RESULT            | VARIANT           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The result of the action taken on the prescription.                               | NULL        | NULL           | NULL          |
+| ACTION_REQUEST           | VARIANT           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The action requested for the prescription.                                        | NULL        | NULL           | NULL          |
+| REPLICATION_SYNCED       | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The timestamp when the replication was last synchronized.                         | NULL        | NULL           | NULL          |
+| REPLICATION_DELETED_FLAG | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A flag indicating whether the replication has been deleted.                       | NULL        | NULL           | NULL          |
+
+
+
+
+
+
+
+
+
+
+
+| TASK_ID                               | 0da3b901-41a4-4a55-a67e-255612c16aa2                           |
+| FINAL_STATUS                          | CLOSED                                                         |
+| TRANSITION_STARTED_AT                 | 2026-06-06 01:42:49.297 +0000                                  |
+| TRANSITION_ENDED_AT                   | 2026-06-06 14:58:15.902 +0000                                  |
+| USER_ID                               | 318516295                                                      |
+| USER_NAME                             | Lauren Gibson                                                  |
+| EMPLOYEE_MANAGER_NAME                 | *** PII ***                                                    |
+| USER_HISTORY                          | [                                                              |
+| "318516295"                           |                                                                |
+| ]                                     |                                                                |
+| USER_COUNT                            | 1                                                              |
+| CUMULATIVE_TIME_SECONDS               | 47726                                                          |
+| CUMULATIVE_TIME_MINUTES               | 795.433333                                                     |
+| DWELL_WAITING_TO_QUEUED_SECONDS       | 600                                                            |
+| DWELL_QUEUED_TO_ASSIGNED_SECONDS      | 47117                                                          |
+| DWELL_ASSIGNED_TO_IN_PROGRESS_SECONDS | 1                                                              |
+| DWELL_IN_PROGRESS_TO_CLOSED_SECONDS   | 8                                                              |
+| DWELL_WAITING_TO_QUEUED_MINUTES       | 10.000000                                                      |
+| DWELL_QUEUED_TO_ASSIGNED_MINUTES      | 785.283333                                                     |
+| DWELL_ASSIGNED_TO_IN_PROGRESS_MINUTES | 0.016667                                                       |
+| DWELL_IN_PROGRESS_TO_CLOSED_MINUTES   | 0.133333                                                       |
+| RX_USAGE_ID                           | DG1041702166                                                   |
+| PRESCRIPTION_ID                       | NULL                                                           |
+| TASK_TYPE                             | DUR                                                            |
+| ASSOCIATED_ENTITY_TYPE                | PRESCRIPTION_USAGE                                             |
+| ASSOCIATED_ENTITY_ID                  | DG1041702166                                                   |
+| PART_NUMBER                           | 205215                                                         |
+| PARENT_PRODUCT_PART_NUMBER            | 205214                                                         |
+| ITEM_COHORT                           | Cohort 2                                                       |
+| ORDER_ID                              | 5159750352                                                     |
+| MULTI_LINE_FLAG                       | Single-line                                                    |
+| DEFECT_DATA                           |                                                                |
+| DEFECT_COUNT                          | 0                                                              |
+| FIRST_PASS_FLAG                       | True                                                           |
+| ASSIGNED_AT                           | 2026-06-06 14:58:06.588 +0000                                  |
+| STARTED_AT                            | 2026-06-06 14:58:07.803 +0000                                  |
+| FORCE_CLOSED_FLAG                     | False                                                          |
+| IS_REFILL                             | false                                                          |
+| CURRENT_STATUS                        | CLOSED                                                         |
+| TASK_CREATED_AT                       | 2026-06-06 01:42:49.282 +0000                                  |
+| TASK_UPDATED_AT                       | 2026-06-06 14:58:15.885 +0000                                  |
+| PRIORITY                              | NULL                                                           |
+| TRANSITION_COUNT                      | 4                                                              |
+| CLOSED_AT                             | 2026-06-06 14:58:16.000 +0000                                  |
+| CLOSED_BY_USER_ID                     | 318516295                                                      |
+| CLOSE_REASON                          | Closed by user: 318516295 role: Role-PetHealth-PRD-Pharmacist1 |
+| HANDOFF_TYPE                          | NULL                                                           |
+| FOLLOW_UP_ACTION                      | NULL                                                           |
+| HANDOFF_REASON                        | NULL                                                           |
+| FOLLOW_UP_DESCRIPTION                 | *** PII ***                                                    |
+| USAGE_STATE                           | APPROVED                                                       |
+| FACT_CREATED_AT                       | 2026-06-08 14:45:34.093 +0000                                  |
+
+select TRANSITION_STARTED_AT,TRANSITION_ENDED_AT, task_type from EDLDB.PET_HEALTH_ANALYTICS_SANDBOX.FCT__TASKS_LIFECYCLE l where l.rx_usage_id='DG1041702166' order by transition_started_at asc;
+
+select TRANSITION_STARTED_AT,TRANSITION_ENDED_AT, STARTED_AT, CLOSED_AT,  task_type from EDLDB.PET_HEALTH_ANALYTICS_SANDBOX.FCT__TASKS_LIFECYCLE l where l.rx_usage_id='DG1041702166' order by transition_started_at asc;
+
+| TRANSITION_STARTED_AT         | TRANSITION_ENDED_AT           | TASK_TYPE |
+|-------------------------------+-------------------------------+-----------|
+| 2026-06-06 01:42:49.297 +0000 | 2026-06-06 14:58:15.902 +0000 | DUR       |
+1 Row(s) produced. Time Elapsed: 0.232s
+
+
+__EMACS_SNOWSQL__> select action_name,user_id, ACTION_CREATION_DATETIME, updated_DateTime from BT_HCA_HCDM.RXP_RX_USAGE_ACTIONS where rx_usage_id ='DG1041702166' order by updated_datetime asc;
+| ACTION_NAME                  | USER_ID                                 | ACTION_CREATION_DATETIME      | UPDATED_DATETIME              |
+|------------------------------+-----------------------------------------+-------------------------------+-------------------------------|
+| Create                       | rx-platform-workflow-service-s2s-client | 2026-06-04 20:47:32.284 +0000 | 2026-06-04 20:47:32.284 +0000 |
+| Update                       | rx-platform-workflow-service-s2s-client | 2026-06-04 20:47:32.284 +0000 | 2026-06-04 20:55:52.228 +0000 |
+| Update                       | rx-platform-workflow-service-s2s-client | 2026-06-04 20:47:32.284 +0000 | 2026-06-05 15:16:31.297 +0000 |
+| Validate                     | rx-platform-workflow-service-s2s-client | 2026-06-04 20:47:32.284 +0000 | 2026-06-06 01:42:39.042 +0000 |
+| ApproveDrugUtilizationReview | 318516295                               | 2026-06-04 20:47:32.284 +0000 | 2026-06-06 14:58:15.755 +0000 |
+
+
+select task_id, TRANSITION_STARTED_AT,TRANSITION_ENDED_AT, STARTED_AT, CLOSED_AT,  task_type from EDLDB.PET_HEALTH_ANALYTICS_SANDBOX.FCT__TASKS_LIFECYCLE l where l.rx_usage_id='DG1041702166' order by transition_started_at asc;
+| TRANSITION_STARTED_AT         | TRANSITION_ENDED_AT           | STARTED_AT                    | CLOSED_AT                     | TASK_TYPE |
+|-------------------------------+-------------------------------+-------------------------------+-------------------------------+-----------|
+| 2026-06-06 01:42:49.297 +0000 | 2026-06-06 14:58:15.902 +0000 | 2026-06-06 14:58:07.803 +0000 | 2026-06-06 14:58:16.000 +0000 | DUR       |
+
+
+select * from BT_HCA_HCDM.RXP_RX_USAGE_ACTIONS where action_id = 'cc91b662-7b28-4885-8665-35554e41b04f';
+***************************[ 1 ]***************************
+ACTION_ID                | cc91b662-7b28-4885-8665-35554e41b04f
+RX_USAGE_ID              | DG1041702166
+ACTION_CREATION_DATETIME | 2026-06-04 20:47:32.284 +0000
+IS_VET_DIET_FLAG         | False
+ACTION_SPEC_ID           | 23
+FROM_STATE               | VALIDATED
+TO_STATE                 | APPROVED
+PERSONA                  | PHARMACIST
+ACTION_NAME              | ApproveDrugUtilizationReview
+USER_ID                  | 318516295
+CLIENT_ID                | rxp-common-a-layer-service
+-s2s-client
+BLOCK_REASONS            |
+CLINIC_ID                | 134279722
+CREATION_DATETIME        | 2026-06-04 20:47:32.284 +0000
+CUSTOMER_ID              | 889296001
+DELETED                  | False
+DISPENSED_AMOUNT         | 10
+FULFILLMENT_CENTER       | PHX2
+NOTES                    |
+ORDER_ID                 | 5159750352
+ORDER_ITEM_AMOUNT        | 10
+ORDER_ITEM_ID            | 3358366265
+PART_NUMBER              | 205215
+PET_ID                   | 126921766
+PHARMACIST_ID            | 318516295
+RX_ID                    | DG129787369
+SHIPPING_STATE           | CA
+STATE_CHANGE_REASON      | NULL
+STATE_CHANGED_DATETIME   | 2026-06-06 14:58:15.755 +0000
+SUBSCRIPTION_ID          | 8729457017
+UPDATED_DATETIME         | 2026-06-06 14:58:15.755 +0000
+USAGE_CONTEXTS           |
+VET_ID                   | 65103695
+IS_DELETED               | False
+ACTION_RESULT            | {
+  "autoApprovalFailureReason": null,
+  "blockReasons": ,
+  "businessUnit": "B2C",
+  "clinicId": "134279722",
+  "creationDateTime": "2026-06-04T20:47:32.284506Z",
+  "customerId": "889296001",
+  "defects": ,
+  "deleted": false,
+  "dispensedAmount": 10,
+  "fulfillmentCenter": "PHX2",
+  "id": "DG1041702166",
+  "lineOfBusiness": {
+    "active": true,
+    "creationDateTime": "2024-08-16T19:47:20.976086Z",
+    "id": 1,
+    "legalEntity": "CHEWY",
+    "updatedDateTime": "2024-08-16T19:47:20.976086Z"
+  },
+  "notes": ,
+  "orderId": "5159750352",
+  "orderItemAmount": 10,
+  "orderItemId": "3358366265",
+  "partNumber": "205215",
+  "petId": "126921766",
+  "pharmacistId": "318516295",
+  "rxId": "DG129787369",
+  "shippedDateTime": null,
+  "shippingState": "CA",
+  "state": {
+    "active": true,
+    "creationDateTime": "2024-08-16T19:47:20.976086Z",
+    "id": 4,
+    "name": "APPROVED",
+    "updatedDateTime": "2024-08-16T19:47:20.976086Z"
+  },
+  "stateChangeReason": null,
+  "stateChangedDateTime": "2026-06-06T14:58:15.755151317Z",
+  "subscriptionId": "8729457017",
+  "updatedDateTime": "2026-06-06T14:58:15.755151317Z",
+  "usageContexts": ,
+  "vetId": "65103695"
+}
+ACTION_REQUEST           | {
+  "comments": null,
+  "reason": null
+}
+REPLICATION_SYNCED       | 2026-06-09 10:04:40.413 +0000
+REPLICATION_DELETED_FLAG | False
+
+select task_id, TRANSITION_STARTED_AT,TRANSITION_ENDED_AT, STARTED_AT, CLOSED_AT,  task_type from EDLDB.PET_HEALTH_ANALYTICS_SANDBOX.FCT__TASKS_LIFECYCLE l where l.rx_usage_id='DG1041702166' order by transition_started_at asc;
+***************************[ 1 ]***************************
+TASK_ID               | 0da3b901-41a4-4a55-a67e-255612c16aa2
+TRANSITION_STARTED_AT | 2026-06-06 01:42:49.297 +0000
+TRANSITION_ENDED_AT   | 2026-06-06 14:58:15.902 +0000
+STARTED_AT            | 2026-06-06 14:58:07.803 +0000
+CLOSED_AT             | 2026-06-06 14:58:16.000 +0000
+TASK_TYPE             | DUR
+
+
+* Defect counts (What counts as a defect?)
+
+
+
+* Pet Profile
+  :PROPERTIES:
+  :ID:       8FE3F5DA-6AA0-4989-9B15-84F28BA6C0D9
+  :END:
+describe table chewybi.customer_petprofiles;
++----------------------------------------+-------------------+--------+-------+---------+-------------+------------+-------+------------+---------+-------------+----------------+---------------+
+| name                                   | type              | kind   | null? | default | primary key | unique key | check | expression | comment | policy name | privacy domain | write default |
+|----------------------------------------+-------------------+--------+-------+---------+-------------+------------+-------+------------+---------+-------------+----------------+---------------|
+| PETPROFILE_ID                          | NUMBER(19,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_CUSTOMER_ID                 | NUMBER(19,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_MASTER_ID                   | NUMBER(19,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_CUSTOMER_MASTER_ID          | NUMBER(19,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_SUBMITTER_ID                | NUMBER(19,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_SUBMITTER_TYPE              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_SUBMITTER_LOGON             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_SUBMITTER_REGISTRATION_DTTM | TIMESTAMP_LTZ(6)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_PETNAME                     | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_PETTYPE_ID                  | NUMBER(19,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_PETTYPE_DESCRIPTION         | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_PETBREED_ID                 | NUMBER(19,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_PETBREED_DESCRIPTION        | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_PETBREED_SIZE_TYPE          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_GENDER                      | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_WEIGHT_TYPE                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_WEIGHT                      | NUMBER(19,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_SIZE_TYPE                   | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_BIRTHDAY                    | DATE              | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_BIRTHDAY_ESTIMATED          | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_LIFESTAGE                   | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_ADOPTED                     | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_ADOPTION_DTTM               | TIMESTAMP_LTZ(6)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_STATUS                      | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_STATUS_REASON               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_CREATED_DTTM                | TIMESTAMP_LTZ(6)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_UPDATED_DTTM                | TIMESTAMP_LTZ(6)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_PET_ALLERGY_COUNT           | NUMBER(20,2)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_PET_PHOTO_COUNT             | NUMBER(20,2)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_LAST_ADDED_DTTM             | TIMESTAMP_LTZ(6)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DW_CREATE_DTTM                         | TIMESTAMP_LTZ(6)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DW_UPDATE_DTTM                         | TIMESTAMP_LTZ(6)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_PETPHOTO_URL                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_MED_CONDITION_LIST          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_MEDICATION_LIST             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_FIRST_BIRTHDAY              | DATE              | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PETPROFILE_SEVEN_BIRTHDAY              | DATE              | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
++----------------------------------------+-------------------+--------+-------+---------+-------------+------------+-------+------------+---------+-------------+----------------+---------------+
+
+
+describe table PET_HEALTH_ANALYTICS_SANDBOX.fct__rx_result_field_change_summary;
+| name                      | type              | kind   | null? | default | primary key | unique key | check | expression | comment | policy name | privacy domain | write default |
+|---------------------------+-------------------+--------+-------+---------+-------------+------------+-------+------------+---------+-------------+----------------+---------------|
+| RX_ID                     | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ORDER_ID                  | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ORDER_ITEM_ID             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| APPROVAL_CHANNEL          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| INITIATION_CHANNEL        | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FIELD_NAME                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CUSTOMER_ID               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLINIC_ID                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLINIC_NAME               | VARCHAR(256)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PCM                       | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLINIC_TYPE               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PET_ID                    | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| VET_ID                    | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PART_NUMBER               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_CHANGED_DTTM         | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_PREV_VALUE           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CURRENT_VALUE             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_ACTION_ID            | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_ACTION_NAME          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_CHANGED_BY_USER_ID   | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_CHANGED_BY_ROLE      | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_CHANGED_BY_CLIENT_ID | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| EMPLOYEE_NAME             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| JOB_TITLE                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MODEL_RUN_DTTM            | TIMESTAMP_LTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+
+
+
+_EMACS_SNOWSQL__>  describe table PET_HEALTH_ANALYTICS_SANDBOX.fct__rx_result_field_change_summary;
+| name                      | type              | kind   | null? | default | primary key | unique key | check | expression | comment | policy name | privacy domain | write default |
+|---------------------------+-------------------+--------+-------+---------+-------------+------------+-------+------------+---------+-------------+----------------+---------------|
+| RX_ID                     | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ORDER_ID                  | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ORDER_ITEM_ID             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| APPROVAL_CHANNEL          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| INITIATION_CHANNEL        | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FIELD_NAME                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CUSTOMER_ID               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLINIC_ID                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLINIC_NAME               | VARCHAR(256)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PCM                       | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLINIC_TYPE               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PET_ID                    | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| VET_ID                    | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PART_NUMBER               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_CHANGED_DTTM         | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_PREV_VALUE           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CURRENT_VALUE             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_ACTION_ID            | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_ACTION_NAME          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_CHANGED_BY_USER_ID   | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_CHANGED_BY_ROLE      | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_CHANGED_BY_CLIENT_ID | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| EMPLOYEE_NAME             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| JOB_TITLE                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MODEL_RUN_DTTM            | TIMESTAMP_LTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+
+describe table PET_HEALTH_ANALYTICS_SANDBOX.FCT__TASKS_LIFECYCLE;
+| name                                  | type              | kind   | null? | default | primary key | unique key | check | expression | comment | policy name | privacy domain | write default |
+|---------------------------------------+-------------------+--------+-------+---------+-------------+------------+-------+------------+---------+-------------+----------------+---------------|
+| TASK_ID                               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FINAL_STATUS                          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| TRANSITION_STARTED_AT                 | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| TRANSITION_ENDED_AT                   | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| USER_ID                               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| USER_NAME                             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| EMPLOYEE_MANAGER_NAME                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| USER_HISTORY                          | ARRAY             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| USER_COUNT                            | NUMBER(18,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CUMULATIVE_TIME_SECONDS               | NUMBER(18,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CUMULATIVE_TIME_MINUTES               | NUMBER(24,6)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_WAITING_TO_QUEUED_SECONDS       | NUMBER(30,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_QUEUED_TO_ASSIGNED_SECONDS      | NUMBER(30,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_ASSIGNED_TO_IN_PROGRESS_SECONDS | NUMBER(30,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_IN_PROGRESS_TO_CLOSED_SECONDS   | NUMBER(30,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_WAITING_TO_QUEUED_MINUTES       | NUMBER(36,6)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_QUEUED_TO_ASSIGNED_MINUTES      | NUMBER(36,6)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_ASSIGNED_TO_IN_PROGRESS_MINUTES | NUMBER(36,6)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_IN_PROGRESS_TO_CLOSED_MINUTES   | NUMBER(36,6)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| RX_USAGE_ID                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRESCRIPTION_ID                       | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| TASK_TYPE                             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ASSOCIATED_ENTITY_TYPE                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ASSOCIATED_ENTITY_ID                  | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PART_NUMBER                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PARENT_PRODUCT_PART_NUMBER            | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ITEM_COHORT                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ORDER_ID                              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MULTI_LINE_FLAG                       | VARCHAR(11)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DEFECT_DATA                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DEFECT_COUNT                          | NUMBER(18,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FIRST_PASS_FLAG                       | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ASSIGNED_AT                           | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| STARTED_AT                            | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FORCE_CLOSED_FLAG                     | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| IS_REFILL                             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CURRENT_STATUS                        | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| TASK_CREATED_AT                       | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| TASK_UPDATED_AT                       | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRIORITY                              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL NULL           | NULL          |
+| TRANSITION_COUNT                      | NUMBER(18,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLOSED_AT                             | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLOSED_BY_USER_ID                     | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLOSE_REASON                          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| HANDOFF_TYPE                          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FOLLOW_UP_ACTION                      | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| HANDOFF_REASON                        | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FOLLOW_UP_DESCRIPTION                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| USAGE_STATE                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FACT_CREATED_AT                       | TIMESTAMP_LTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+
+
+
+describe table BT_HCA_HCDM.RXP_RX_USAGE_ACTIONS;
+
+| name                     | type              | kind   | null? | default | primary key | unique key | check | expression | comment                                                                           | policy name | privacy domain | write default |
+| ACTION_ID                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A unique identifier for each action.                                              | NULL        | NULL           | NULL          |
+| RX_USAGE_ID              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Prescription usage identifiers.                                                   | NULL        | NULL           | NULL          |
+| ACTION_CREATION_DATETIME | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The date and time when the action was created.                                    | NULL        | NULL           | NULL          |
+| IS_VET_DIET_FLAG         | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A flag indicating whether the prescription is for a veterinary diet.              | NULL        | NULL           | NULL          |
+| ACTION_SPEC_ID           | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A unique identifier for a specific action specification.                          | NULL        | NULL           | NULL          |
+| FROM_STATE               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The state from which the prescription was originated.                             | NULL        | NULL           | NULL          |
+| TO_STATE                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The state to which a prescription was sent.                                       | NULL        | NULL           | NULL          |
+| PERSONA                  | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The role or position of the individual involved in the prescription usage action. | NULL        | NULL           | NULL          |
+| ACTION_NAME              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The type of action taken on a prescription.                                       | NULL        | NULL           | NULL          |
+| USER_ID                  | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | User ID.                                                                          | NULL        | NULL           | NULL          |
+| CLIENT_ID                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Client ID.                                                                        | NULL        | NULL           | NULL          |
+| BLOCK_REASONS            | ARRAY             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The reasons for blocking a prescription.                                          | NULL        | NULL           | NULL          |
+| CLINIC_ID                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The unique identifier for a clinic.                                               | NULL        | NULL           | NULL          |
+| CREATION_DATETIME        | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The date and time when the action was created.                                    | NULL        | NULL           | NULL          |
+| CUSTOMER_ID              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A unique identifier for each customer.                                            | NULL        | NULL           | NULL          |
+| DELETED                  | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A column holding data of type BooleanType.                                        | NULL        | NULL           | NULL          |
+| DISPENSED_AMOUNT         | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The amount of medication dispensed.                                               | NULL        | NULL           | NULL          |
+| FULFILLMENT_CENTER       | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Fulfillment center code.                                                          | NULL        | NULL           | NULL          |
+| NOTES                    | ARRAY             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Notes.                                                                            | NULL        | NULL           | NULL          |
+| ORDER_ID                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A unique identifier for each order.                                               | NULL        | NULL           | NULL          |
+| ORDER_ITEM_AMOUNT        | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | ULL        | The amount of each order item.                                                    | NULL        | NULL           | NULL          |
+| ORDER_ITEM_ID            | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A unique identifier for each order item.                                          | NULL        | NULL           | NULL          |
+| PART_NUMBER              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The part number.                                                                  | NULL        | NULL           | NULL          |
+| PET_ID                   | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Patient identification number.                                                    | NULL        | NULL           | NULL          |
+| PHARMACIST_ID            | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The identifier for the pharmacist.                                                | NULL        | NULL           | NULL          |
+| RX_ID                    | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Prescription IDs.                                                                 | NULL        | NULL           | NULL          |
+| SHIPPING_STATE           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The state where the prescription was shipped.                                     | NULL        | NULL           | NULL          |
+| STATE_CHANGE_REASON      | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The reason for a state change in the prescription usage actions.                  | NULL        | NULL           | NULL          |
+| STATE_CHANGED_DATETIME   | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The date and time when the state of the usage action was last changed.            | NULL        | NULL           | NULL          |
+| SUBSCRIPTION_ID          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A unique identifier for a subscription.                                           | NULL        | NULL           | NULL          |
+| UPDATED_DATETIME         | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Timestamps representing the date and time when the action was updated.            | NULL        | NULL           | NULL          |
+| USAGE_CONTEXTS           | ARRAY             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The types of actions taken on a prescription.                                     | NULL        | NULL           | NULL          |
+| VET_ID                   | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | Veterinary identification numbers.                                                | NULL        | NULL           | NULL          |
+| IS_DELETED               | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A flag indicating whether the record has been deleted.                            | NULL        | NULL           | NULL          |
+| ACTION_RESULT            | VARIANT           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The result of the action taken on the prescription.                               | NULL        | NULL           | NULL          |
+| ACTION_REQUEST           | VARIANT           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The action requested for the prescription.                                        | NULL        | NULL           | NULL          |
+| REPLICATION_SYNCED       | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | The timestamp when the replication was last synchronized.                         | NULL        | NULL           | NULL          |
+| REPLICATION_DELETED_FLAG | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | A flag indicating whether the replication has been deleted.                       | NULL        | NULL           | NULL          |
+
+
+_EMACS_SNOWSQL__>  describe table PET_HEALTH_ANALYTICS_SANDBOX.fct__rx_result_field_change_summary;
+| name                      | type              | kind   | null? | default | primary key | unique key | check | expression | comment | policy name | privacy domain | write default |
+|---------------------------+-------------------+--------+-------+---------+-------------+------------+-------+------------+---------+-------------+----------------+---------------|
+| RX_ID                     | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ORDER_ID                  | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ORDER_ITEM_ID             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| APPROVAL_CHANNEL          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| INITIATION_CHANNEL        | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FIELD_NAME                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CUSTOMER_ID               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLINIC_ID                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLINIC_NAME               | VARCHAR(256)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PCM                       | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLINIC_TYPE               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PET_ID                    | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| VET_ID                    | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PART_NUMBER               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_CHANGED_DTTM         | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_PREV_VALUE           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CURRENT_VALUE             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_ACTION_ID            | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_ACTION_NAME          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_CHANGED_BY_USER_ID   | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_CHANGED_BY_ROLE      | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_CHANGED_BY_CLIENT_ID | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| EMPLOYEE_NAME             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| JOB_TITLE                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MODEL_RUN_DTTM            | TIMESTAMP_LTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+
+
+| name                                  | type              | kind   | null? | default | primary key | unique key | check | expression | comment | policy name | privacy domain | write default |
+|---------------------------------------+-------------------+--------+-------+---------+-------------+------------+-------+------------+---------+-------------+----------------+---------------|
+| TASK_ID                               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FINAL_STATUS                          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| TRANSITION_STARTED_AT                 | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| TRANSITION_ENDED_AT                   | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| USER_ID                               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| USER_NAME                             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| EMPLOYEE_MANAGER_NAME                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| USER_HISTORY                          | ARRAY             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| USER_COUNT                            | NUMBER(18,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CUMULATIVE_TIME_SECONDS               | NUMBER(18,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CUMULATIVE_TIME_MINUTES               | NUMBER(24,6)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_WAITING_TO_QUEUED_SECONDS       | NUMBER(30,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_QUEUED_TO_ASSIGNED_SECONDS      | NUMBER(30,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_ASSIGNED_TO_IN_PROGRESS_SECONDS | NUMBER(30,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_IN_PROGRESS_TO_CLOSED_SECONDS   | NUMBER(30,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_WAITING_TO_QUEUED_MINUTES       | NUMBER(36,6)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_QUEUED_TO_ASSIGNED_MINUTES      | NUMBER(36,6)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_ASSIGNED_TO_IN_PROGRESS_MINUTES | NUMBER(36,6)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DWELL_IN_PROGRESS_TO_CLOSED_MINUTES   | NUMBER(36,6)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| RX_USAGE_ID                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRESCRIPTION_ID                       | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| TASK_TYPE                             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ASSOCIATED_ENTITY_TYPE                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ASSOCIATED_ENTITY_ID                  | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PART_NUMBER                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PARENT_PRODUCT_PART_NUMBER            | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ITEM_COHORT                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ORDER_ID                              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MULTI_LINE_FLAG                       | VARCHAR(11)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DEFECT_DATA                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DEFECT_COUNT                          | NUMBER(18,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FIRST_PASS_FLAG                       | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ASSIGNED_AT                           | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| STARTED_AT                            | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FORCE_CLOSED_FLAG                     | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| IS_REFILL                             | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CURRENT_STATUS                        | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| TASK_CREATED_AT                       | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| TASK_UPDATED_AT                       | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRIORITY                              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL NULL   | NULL           |               |
+| TRANSITION_COUNT                      | NUMBER(18,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLOSED_AT                             | TIMESTAMP_TZ(9)   | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLOSED_BY_USER_ID                     | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CLOSE_REASON                          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| HANDOFF_TYPE                          | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FOLLOW_UP_ACTION                      | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| HANDOFF_REASON                        | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FOLLOW_UP_DESCRIPTION                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| USAGE_STATE                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FACT_CREATED_AT                       | TIMESTAMP_LTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+
+
+
+
+with corrections as
+( select   order_id,
+           rx_id,
+           last_changed_by_user_id as user_id,
+           last_action_name as action_name,
+           part_number,
+           LAST_CHANGED_DTTM,
+           field_name
+           from edldb.PET_HEALTH_ANALYTICS_SANDBOX.fct__rx_result_field_change_summary
+           where field_name in ('directions','remainingAmount','refillAmount','expirationDateTime','prescribedAmount','prescribedDateTime')
+           and LAST_ACTION_NAME = 'ApproveDrugUtilizationReview' and last_changed_by_user_id is not null  limit 100)
+  select a.user_id, a.task_id, a.handoff_type,a.part_number, b.part_number,b.field_name, b.action_name
+  from EDLDB.PET_HEALTH_ANALYTICS_SANDBOX.FCT__TASKS_LIFECYCLE a
+  join corrections b
+    on b.order_id = a.order_id
+   and array_contains(b.user_id::VARIANT, a.user_history)
+   and a.part_number = b.part_number
+   and a.task_type = 'DUR'
+   and b.last_changed_dttm between a.started_at and a.transition_ended_at;
+
+
+   WITH corrections AS (
+      SELECT
+          order_id,
+          rx_id,
+          last_changed_by_user_id AS user_id,
+          last_action_name AS action_name,
+          part_number,
+          last_changed_dttm,
+          field_name
+      FROM EDLDB.PET_HEALTH_ANALYTICS_SANDBOX.FCT__RX_RESULT_FIELD_CHANGE_SUMMARY
+      WHERE lower(field_name) IN (
+          'directions',
+          'remainingamount',
+          'refillamount',
+          'expirationdatetime',
+          'prescribedamount',
+          'prescribeddatetime',
+          'verbaldetail',
+          'notes',
+          'daysofsupply'
+      )
+        AND last_action_name = 'ApproveDrugUtilizationReview'
+        AND last_changed_by_user_id IS NOT NULL
+      LIMIT 100
+  )
+  SELECT
+      a.user_id,
+      a.task_id,
+      a.handoff_type,
+      a.part_number,
+      b.part_number,
+      b.field_name,
+      b.action_name
+  FROM EDLDB.PET_HEALTH_ANALYTICS_SANDBOX.FCT__TASKS_LIFECYCLE AS a
+  JOIN corrections AS b
+      ON b.order_id = a.order_id
+     AND ARRAY_CONTAINS(b.user_id::VARIANT, a.user_history)
+     --AND a.part_number = b.part_number
+     AND a.task_type = 'DUR'
+     AND b.last_changed_dttm BETWEEN a.started_at AND a.transition_ended_at
+     AND a.handoff_type is null;
+
+
+
+
+# Filter by dates ask AI to process
+with corrections as
+( select   rx_id,
+           order_id,
+           order_item_id,
+           part_number,
+           last_changed_by_user_id as user_id,
+           last_action_name        as action_name,
+           last_changed_dttm,
+           field_name
+           from edldb.pet_health_analytics_sandbox.fct__rx_result_field_change_summary
+           where lower(field_name) in ('directions','remainingamount','refillamount','expirationdatetime','prescribedamount','prescribeddatetime', 'verbaldetail',
+          'notes', 'daysofsupply')
+           and lower(last_action_name) = 'approvedrugutilizationreview' and last_changed_by_user_id is not null
+           and LAST_CHANGED_BY_ROLE <> 'SYSTEM'
+           and rx_id is not null
+           and last_changed_dttm between 2026-02-01'and 2026-08-01'
+),
+rx_usage_ids as
+( select
+     b.rx_id,
+     b.rx_usage_id,
+     b.user_id,
+     b.order_id,
+     a.last_changed_dttm,
+     a.action_name,
+     a.field_name,
+ from edldb.bt_hca_hcdm.rxp_rx_usage_actions b join corrections a
+ on a.order_id = b.order_id and a.order_item_id = b.order_item_id and a.action_name = b.action_name and a.rx_id = b.rx_id
+ and b.user_id is not null and rx_usage_id is not null and b.rx_id is not null
+ )
+select a.user_id, b.rx_id, a.task_type, b.rx_usage_id, task_id, task_type,transition_started_at, transition_ended_at, b.field_name, b.last_changed_dttm, from edldb.pet_health_analytics_sandbox.fct__tasks_lifecycle a
+join rx_usage_ids b
+on a.order_id = b.order_id
+and lower(a.task_type) ='dur'
+and handoff_type is null
+-- and array_contains(b.user_id::variant, a.user_history)
+and (case when lower(associated_entity_type) = 'prescription_usage' then a.associated_entity_id = b.rx_usage_id when lower(associated_entity_type) = 'prescription'  then a.associated_entity_id = b.rx_id else false end )
+and b.last_changed_dttm between a.started_at and a.transition_ended_at
+AND TASK_CREATED_AT >= '2026-02-01'
+AND TASK_CREATED_AT < '2026-08-01';
