@@ -42,15 +42,27 @@ and
 | Parasiticide |           11 | 158998      | Cat     |                                          11 | 2026-07-15 02:20:23.000 +0000 |                      | PH               | OMS                |
 | Parasiticide |           12 | 158998      | Cat     |                                          29 | 2026-07-15 02:20:36.000 +0000 |                      | PH               | OMS                |
 
+There seems to be an inherent variabilty in the DUR times looking at
+the second trace. Using a model, we would like to quantify this.
 
-- Another motivation to simulate what-if scenarios where different people do  a task and see statistically how the DUR duration would change. We can use the model to predict DUR times for task - user combinations that did not occur in the past with possible error bounds.
+- Another motivation to simulate what-if scenarios where different
+  people do a task and see statistically how the DUR duration would
+  change. We can use the model to predict DUR times for task - user
+  combinations that did not occur in the past with possible error
+  bounds.
+
+The model does predict that if the previous task is "similar" for a
+user, there is a statistically significant effect. However, the model
+also predicts that there is a lot of noise.
+
 <!---USER-MANAGED-CONTEXT--->
-
 
 In this regard, we build a model see [Model Details](#model-details) in the Appendix.
 
+
 <!---USER-MANAGED-CONTEXT--->
-The model predicts that if the previous
+
+
 
 
 
