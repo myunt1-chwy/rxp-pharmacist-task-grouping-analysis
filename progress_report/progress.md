@@ -3,8 +3,58 @@
 ## 2026-10-01
 
 ### Modeling DUR Durations
+<!---USER-MANAGED-CONTEXT--->
+A model was built to predict DUR durations for the following reasons:
+- The analysis in  [ Would Grouping Similar Work Make Pharmacists Faster? What the data says](https://chewyinc.atlassian.net/wiki/x/hYRyRQE ) in concludes that there is no effect if the previous task is the same.  We would like to know if we can control for other factors than MC3, Cohort or part number, the result would change? And is there a definition of similarity that is more suitable to use. Can we get bounds on the uncertainty?
 
-See [Model Details](#model-details) in the Appendix.
+Consider the 2 task sequences of the same user:
+| MC3          | MC3_PET_SEQN | PART_NUMBER | PETTYPE | IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS | PROCESS_START_TIME            | ARRAY_TO_STRING(CORRECTION_FIELD_NAMES,',') | APPROVAL_CHANNEL | INITIATION_CHANNEL |
+|---|---:|---:|---|---:|---|---|---|---|
+| Parasiticide |            1 | 146066      | Dog     |                                          40 | 2026-04-30 06:42:54.000 +0000 |                                             | PH               | AUTOSHIP           |
+| Parasiticide |            2 | 152702      | Dog     |                                          27 | 2026-04-30 06:43:36.000 +0000 | directions                                  | PH               | AUTOSHIP           |
+| Parasiticide |            3 | 146391      | Dog     |                                          40 | 2026-04-30 06:44:06.000 +0000 |                                             | PH               | AUTOSHIP           |
+| Parasiticide |            4 | 151583      | Dog     |                                           7 | 2026-04-30 06:44:48.000 +0000 |                                             | PH               | AUTOSHIP           |
+| Parasiticide |            5 | 146138      | Dog     |                                           7 | 2026-04-30 06:44:56.000 +0000 |                                             | PH               | AUTOSHIP           |
+| Parasiticide |            6 | 146142      | Dog     |                                          43 | 2026-04-30 06:45:05.000 +0000 | directions                                  | PH               | AUTOSHIP           |
+| Parasiticide |            7 | 146142      | Dog     |                                          35 | 2026-04-30 06:45:49.000 +0000 | directions                                  | PH               | AUTOSHIP           |
+| Parasiticide |            8 | 146064      | Dog     |                                          39 | 2026-04-30 06:46:26.000 +0000 | directions                                  | PH               | AUTOSHIP           |
+| Parasiticide |            9 | 146167      | Dog     |                                          12 | 2026-04-30 06:47:07.000 +0000 |                                             | PH               | AUTOSHIP           |
+| Parasiticide |           10 | 146322      | Dog     |                                           9 | 2026-04-30 06:47:21.000 +0000 | directions                                  | PH               | AUTOSHIP           |
+| Parasiticide |           11 | 146167      | Dog     |                                          97 | 2026-04-30 06:47:32.000 +0000 | directions                                  | PH               | AUTOSHIP           |
+| Parasiticide |           12 | 146050      | Dog     |                                           6 | 2026-04-30 06:49:11.000 +0000 |                                             | PH               | AUTOSHIP           |
+| Parasiticide |           13 | 146387      | Dog     |                                          54 | 2026-04-30 06:49:19.000 +0000 |                                             | PH               | AUTOSHIP           |
+
+and
+
+| MC3          | MC3_PET_SEQN | PART_NUMBER | PETTYPE | IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS | PROCESS_START_TIME            | CORRECTION_FIELD_NAMES || APPROVAL_CHANNEL | INITIATION_CHANNEL |
+|---|---:|---:|---|---:|---|---|---|---|
+| Parasiticide |            1 | 158995      | Cat     |                                          11 | 2026-07-15 02:17:23.000 +0000 |                      | PH               | OMS                |
+| Parasiticide |            2 | 158995      | Cat     |                                          35 | 2026-07-15 02:17:36.000 +0000 |                      | PH               | OMS                |
+| Parasiticide |            3 | 158995      | Cat     |                                           3 | 2026-07-15 02:18:13.000 +0000 |                      | PH               | OMS                |
+| Parasiticide |            4 | 158995      | Cat     |                                          13 | 2026-07-15 02:18:17.000 +0000 |                      | PH               | OMS                |
+| Parasiticide |            5 | 158995      | Cat     |                                          13 | 2026-07-15 02:18:31.000 +0000 |                      | PH               | OMS                |
+| Parasiticide |            6 | 158995      | Cat     |                                           6 | 2026-07-15 02:18:46.000 +0000 |                      | PH               | OMS                |
+| Parasiticide |            7 | 158995      | Cat     |                                          16 | 2026-07-15 02:18:53.000 +0000 |                      | PH               | OMS                |
+| Parasiticide |            8 | 158995      | Cat     |                                          13 | 2026-07-15 02:19:11.000 +0000 |                      | PH               | OMS                |
+| Parasiticide |            9 | 158995      | Cat     |                                           6 | 2026-07-15 02:19:25.000 +0000 |                     | PH               | OMS                |
+| Parasiticide |           10 | 158995      | Cat     |                                          50 | 2026-07-15 02:19:32.000 +0000 |                      | PH               | OMS                |
+| Parasiticide |           11 | 158998      | Cat     |                                          11 | 2026-07-15 02:20:23.000 +0000 |                      | PH               | OMS                |
+| Parasiticide |           12 | 158998      | Cat     |                                          29 | 2026-07-15 02:20:36.000 +0000 |                      | PH               | OMS                |
+
+
+- Another motivation to simulate what-if scenarios where different people do  a task and see statistically how the DUR duration would change. We can use the model to predict DUR times for task - user combinations that did not occur in the past with possible error bounds.
+<!---USER-MANAGED-CONTEXT--->
+
+
+In this regard, we build a model see [Model Details](#model-details) in the Appendix.
+
+<!---USER-MANAGED-CONTEXT--->
+The model predicts that if the previous
+
+
+
+
+
 
 ### EDA on Factors Affecting DUR
 
@@ -15,6 +65,25 @@ See [Factors Affecting DUR](#factors-affecting-successful-durs) in the Appendix.
 #### Model Details
 
 ##### Final MC3/COH/PETTYPE mixed-effects model
+
+<!--USER-MANAGED-CONTENT-->
+
+The model is built to understand the factors affecting approved DUR task durations.
+It uses MC3, cohort, and pet type to define groups of similar DUR tasks.
+
+The model controls for weekday, approval channel, prescription source, parent part number, and user (pharmacist, pharmacy technician, etc.) and weekday and alterations to the data e.g. update the directions on the prescription.
+
+There are two treatments based on whether the current task is adjacent to another task in the same MC3, cohort, and pet type equivalence class for a given user. Adjacent tasks must be no more than one hour apart. Failed DURs and DUR tasks that overlap in time with other DUR tasks are excluded; these cases occur for certain orders. If a preceding task belongs to the same equivalence class, the `SAME_PRECEDING` treatment is true. If the following task belongs to the same equivalence class, the `SAME_FOLLOWING` treatment is true. `SAME_FOLLOWING` is expected to have a coefficient near zero. It exists to check whether the model captures confounding factors adequately.
+
+The model assigns the difference of each user from a mean performance.
+The model does the same for parent part number and the calendar day.
+
+The model predicts that if the preceding task is the same for a user, there is a decrease in the duration of a DUR.  The model also suggests that given the same MC3, cohort, pet type and parent product type, there is no statistically significant effect from the future.
+
+The week day is not significantly important, but if the prescription
+
+
+<!--USER-MANAGED-CONTENT-->
 
 ###### Purpose and analysis sample
 
@@ -224,3 +293,15 @@ $$
 #### Factors Affecting Successful DURs
 
 [DUR detailed diagram](../outputs/charts/DUR_detailed.png)
+
+
+#### Cohort Descriptions
+<!--USER-MANAGED-CONTENT-->
+- Cohort 1: Boxed parasiticides. This was the best starting point because it represents roughly 40% of total DUR volume and the majority of the initial digital volume, while the clinical rules are relatively standardized and label-driven. The primary checks are species, weight range, monthly directions, days' supply, duplicate parasite coverage, and known contraindications. This gave us a high-volume population with relatively low variability for validating the core RxBuddy and DUR Copilot experience.
+
+- Cohort 2: Non-controlled, non-boxed medications. This represents roughly 29% of total DUR volume and materially expands coverage, but the clinical review is more complex. These medications require generalized dosing evaluation, including strength, dose, frequency, route, indication, species appropriateness, duplicate therapy, contraindications, and potential interactions. We separated this cohort so those broader AI checks could be validated without also introducing compounding or controlled-substance requirements at the same time.
+
+- Cohort 3: Non-controlled compounded medications. This is a smaller segment at roughly 4.4% of DUR volume, but it has distinct clinical and compliance requirements. Compounds require a documented compounding reason, formulation-specific directions, and validation that the prescribed days' supply does not exceed the product's beyond-use date. BUD rules vary by dosage form, storage conditions, formulation, and stability-study results. Keeping compounds separate allowed us to test these specialized workflows and manage their impact on pharmacist throughput independently.
+
+- Cohort 4: gabapentin and the high-scrutiny regulatory workflow. This represents roughly 1.1% of DUR volume. The implemented Phase 4 scope focused on uncontrolled gabapentin rather than the full controlled-substance population, but it was separated because it introduces site eligibility, pharmacist skill gating, regulatory indicators, mixed-order handling, and state-specific scrutiny. It also gave us a contained way to validate infrastructure that will be needed for broader controlled-substance support later.
+<!--USER-MANAGED-CONTENT-->
