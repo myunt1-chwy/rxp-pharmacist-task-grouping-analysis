@@ -8,8 +8,9 @@ A model was built to predict DUR durations for the following reasons:
 - The analysis in  [ Would Grouping Similar Work Make Pharmacists Faster? What the data says](https://chewyinc.atlassian.net/wiki/x/hYRyRQE ) in concludes that there is no effect if the previous task is the same.  We would like to know if we can control for other factors than MC3, Cohort or part number, the result would change? And is there a definition of similarity that is more suitable to use. Can we get bounds on the uncertainty?
 
 Consider the 2 task sequences of the same user:
-| MC3          | SEQUENCE ORDER | PART_NUMBER | PETTYPE | DURATION | START TIME            | UPDATED FIELDS | APPROVAL CHANNEL | INITIATION CHANNEL |
-|---|---:|---:|---|---:|---|---|---|---|
+
+| MC3          | SEQUENCE ORDER | PART_NUMBER | PET | DURATION | START TIME            | UPDATED FIELDS | APPROVAL CHANNEL | INITIATION CHANNEL |
+| --- | ---: | ---: | --- | ---: | --- | --- | --- | --- |
 | Parasiticide |            1 | 146066      | Dog     |                                          40 | 2026-04-30 06:42:54.000 +0000 |                                             | PH               | AUTOSHIP           |
 | Parasiticide |            2 | 152702      | Dog     |                                          27 | 2026-04-30 06:43:36.000 +0000 | directions                                  | PH               | AUTOSHIP           |
 | Parasiticide |            3 | 146391      | Dog     |                                          40 | 2026-04-30 06:44:06.000 +0000 |                                             | PH               | AUTOSHIP           |
@@ -26,8 +27,8 @@ Consider the 2 task sequences of the same user:
 
 and
 
-| MC3          | MC3_PET_SEQN | PART_NUMBER | PETTYPE | IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS | PROCESS_START_TIME            | CORRECTION_FIELD_NAMES || APPROVAL_CHANNEL | INITIATION_CHANNEL |
-|---|---:|---:|---|---:|---|---|---|---|
+| MC3          | SEQUENCE ORDER | PART_NUMBER | PET | DURATION | START TIME            | UPDATED FIELDS | APPROVAL CHANNEL | INITIATION CHANNEL |
+| --- | ---: | ---: | --- | ---: | --- | --- | --- | --- |
 | Parasiticide |            1 | 158995      | Cat     |                                          11 | 2026-07-15 02:17:23.000 +0000 |                      | PH               | OMS                |
 | Parasiticide |            2 | 158995      | Cat     |                                          35 | 2026-07-15 02:17:36.000 +0000 |                      | PH               | OMS                |
 | Parasiticide |            3 | 158995      | Cat     |                                           3 | 2026-07-15 02:18:13.000 +0000 |                      | PH               | OMS                |
