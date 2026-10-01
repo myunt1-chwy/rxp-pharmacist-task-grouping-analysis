@@ -346,7 +346,7 @@ $$
 ##### Edits on Prescriptions
 
 The more the edits, the longer the DUR
-
+- [View the Cohort 1 correction-field analysis](../outputs/charts/ncorrection-fields-analysis/ncorrection-fields-analysis-cohort-1.png)
 - [View the Cohort 2 correction-field analysis](../outputs/charts/ncorrection-fields-analysis/ncorrection-fields-analysis-cohort-2.png)
 - [View the Cohort 3 correction-field analysis](../outputs/charts/ncorrection-fields-analysis/ncorrection-fields-analysis-cohort-3.png)
 - [View the Cohort 4 correction-field analysis](../outputs/charts/ncorrection-fields-analysis/ncorrection-fields-analysis-cohort-4.png)
