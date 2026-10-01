@@ -1,0 +1,135 @@
+CREATE OR REPLACE TRANSIENT TABLE EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS_WITH_SEQUENCE AS
+WITH tasks AS (
+    SELECT
+        USER_ID,
+        TASK_ID,
+        PROCESS_START_TIME,
+        CLOSED_AT
+    FROM EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS
+    WHERE USER_ID IS NOT NULL
+      AND TASK_ID IS NOT NULL
+      AND PROCESS_START_TIME IS NOT NULL
+      AND CLOSED_AT IS NOT NULL
+      AND PROCESS_START_TIME <= CLOSED_AT
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY USER_ID, TASK_ID
+        ORDER BY PROCESS_START_TIME, CLOSED_AT
+    ) = 1
+),
+closed_events AS (
+    SELECT
+        USER_ID,
+        CLOSED_AT,
+        MIN(TASK_ID) AS TASK_ID
+    FROM tasks
+    GROUP BY USER_ID, CLOSED_AT
+),
+start_events AS (
+    SELECT
+        USER_ID,
+        PROCESS_START_TIME,
+        MIN(TASK_ID) AS TASK_ID
+    FROM tasks
+    GROUP BY USER_ID, PROCESS_START_TIME
+),
+with_preceding AS (
+    SELECT
+        current_task.USER_ID,
+        current_task.TASK_ID,
+        current_task.PROCESS_START_TIME,
+        current_task.CLOSED_AT,
+        preceding.TASK_ID AS TASK_ID_PRECEDING,
+        preceding.CLOSED_AT AS PRECEDING_CLOSED_AT
+    FROM tasks AS current_task
+    ASOF JOIN closed_events AS preceding
+        MATCH_CONDITION(current_task.PROCESS_START_TIME > preceding.CLOSED_AT)
+        ON current_task.USER_ID = preceding.USER_ID
+),
+with_neighbors AS (
+    SELECT
+        current_task.USER_ID,
+        current_task.TASK_ID,
+        current_task.PROCESS_START_TIME,
+        current_task.CLOSED_AT,
+        current_task.TASK_ID_PRECEDING,
+        current_task.PRECEDING_CLOSED_AT,
+        next_event.TASK_ID AS TASK_ID_FOLLOWING,
+        next_event.PROCESS_START_TIME AS FOLLOWING_PROCESS_START_TIME
+    FROM with_preceding AS current_task
+    ASOF JOIN start_events AS next_event
+        MATCH_CONDITION(current_task.CLOSED_AT < next_event.PROCESS_START_TIME)
+        ON current_task.USER_ID = next_event.USER_ID
+),
+raw_events AS (
+    SELECT
+        USER_ID,
+        PROCESS_START_TIME AS EVENT_AT,
+        1 AS START_COUNT,
+        0 AS END_COUNT
+    FROM tasks
+
+    UNION ALL
+
+    SELECT
+        USER_ID,
+        CLOSED_AT AS EVENT_AT,
+        0 AS START_COUNT,
+        1 AS END_COUNT
+    FROM tasks
+),
+event_counts AS (
+    SELECT
+        USER_ID,
+        EVENT_AT,
+        SUM(START_COUNT) AS START_COUNT,
+        SUM(END_COUNT) AS END_COUNT
+    FROM raw_events
+    GROUP BY USER_ID, EVENT_AT
+),
+timeline AS (
+    SELECT
+        USER_ID,
+        EVENT_AT,
+        SUM(START_COUNT) OVER (
+            PARTITION BY USER_ID
+            ORDER BY EVENT_AT
+            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+        ) AS STARTS_THROUGH_EVENT,
+        COALESCE(
+            SUM(END_COUNT) OVER (
+                PARTITION BY USER_ID
+                ORDER BY EVENT_AT
+                ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+            ),
+            0
+        ) AS ENDS_BEFORE_EVENT
+    FROM event_counts
+)
+SELECT
+    task.USER_ID,
+    task.TASK_ID,
+    task.TASK_ID_PRECEDING,
+    DATEDIFF(
+        'second',
+        task.PRECEDING_CLOSED_AT,
+        task.PROCESS_START_TIME
+    ) AS DELTA_T_WITH_PRECEDING,
+    task.TASK_ID_FOLLOWING,
+    DATEDIFF(
+        'second',
+        task.CLOSED_AT,
+        task.FOLLOWING_PROCESS_START_TIME
+    ) AS DELTA_T_WITH_FOLLOWING,
+    GREATEST(
+        close_event.STARTS_THROUGH_EVENT
+            - start_event.ENDS_BEFORE_EVENT
+            - 1,
+        0
+    ) AS N_INTERSECTING_TASKS
+FROM with_neighbors AS task
+JOIN timeline AS start_event
+    ON task.USER_ID = start_event.USER_ID
+   AND task.PROCESS_START_TIME = start_event.EVENT_AT
+JOIN timeline AS close_event
+    ON task.USER_ID = close_event.USER_ID
+   AND task.CLOSED_AT = close_event.EVENT_AT;

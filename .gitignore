@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.env
+*.parquet
+outputs/charts/mc3-analysis/
+outputs/charts/purchase-brand-analysis/
+outputs/charts/cohort-sequence-difference-distributions/
+outputs/tables/purchase-brand-analysis-top-10-by-median.md
