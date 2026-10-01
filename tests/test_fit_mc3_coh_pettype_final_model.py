@@ -174,4 +174,7 @@ def test_report_documents_complete_model_formula(tmp_path, monkeypatch) -> None:
     assert "\\(" not in report
     assert "\\operatorname" not in report
     assert "\\mathrm{APPROX\\_PERCENTILE}" in report
+    assert "CI_{95\\%}" not in report
+    assert "\\mathrm{CI}_{95}" in report
+    assert "\\lvert z_k\\rvert" in report
     assert "$$" in report

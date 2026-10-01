@@ -105,9 +105,9 @@ $$
 For fixed effect $k$, the report uses
 
 $$
-z_k=\frac{\widehat{\beta}_k}{SE(\widehat{\beta}_k)},\qquad
-p_k=2\Phi(-|z_k|),\qquad
-CI_{95\%}=\widehat{\beta}_k\pm1.96SE(\widehat{\beta}_k).
+z_k=\frac{\widehat{\beta}_k}{\mathrm{SE}(\widehat{\beta}_k)},\qquad
+p_k=2\Phi(-\lvert z_k\rvert),\qquad
+\mathrm{CI}_{95}=\widehat{\beta}_k\pm1.96\,\mathrm{SE}(\widehat{\beta}_k).
 $$
 
 The fixed-effect table labels an estimate `Significant = Yes` when its 95%
