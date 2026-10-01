@@ -1,3 +1,4 @@
+
 # Progress Report
 
 ## 2026-10-01
@@ -67,24 +68,33 @@ The predicted effect on various DUR tasks is:
 The model predicts that users differ in their processing speed,
 products differ in speed and the day of ther week does not matter.
 
+Obviously, if there is an alteration of prescription data, the model
+predicts longer DUR times.
 
 <!---USER-MANAGED-CONTEXT--->
 
 For details see [Model Details](#model-details) in the Appendix.
 
-T<!---USER-MANAGED-CONTEXT--->
-
-
-
-
-
-
-
-
 ### EDA on Factors Affecting DUR
-
 See [Factors Affecting DUR](#factors-affecting-successful-durs) in the Appendix.
+<!---USER-MANAGED-CONTEXT--->
+We assume DUR durations are affected by these for main groups of factors
+1. The user
+   - Are some users inherently slower? Are they slower or faster all across the board.
+2. The prescription
+   - Medication
+   - Content (typos, missing information)
+   - Pet
+     - Pet health history
+3. Business Process
+4. Outside disturbances such as inbound calls
+5. The user's task history
+   - Did they do similar tasks before
+6. Environment
+7. Software Platform.
 
+A more detailed breakdown can be found [here](../outputs/charts/DUR_detailed.png).
+<!---USER-MANAGED-CONTEXT--->
 ### Appendix
 
 #### Model Details
@@ -105,8 +115,9 @@ The model does the same for parent part number and the calendar day.
 
 The model predicts that if the preceding task is the same for a user, there is a decrease in the duration of a DUR.  The model also suggests that given the same MC3, cohort, pet type and parent product type, there is no statistically significant effect from the future.
 
-The week day is not significantly important, but if the prescription
-
+The week day is not significantly important, the approval channel and
+prescription source matter.  Customer originating prescriptions take
+longer.
 
 <!--USER-MANAGED-CONTENT-->
 
