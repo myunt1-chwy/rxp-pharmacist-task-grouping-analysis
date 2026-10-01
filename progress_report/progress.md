@@ -73,7 +73,8 @@ predicts longer DUR times.
 
 <!---USER-MANAGED-CONTEXT--->
 
-For details see [Model Details](#model-details) in the Appendix.
+The question is how reliable will our estimates be for any what if scenarios regarding sequencing?
+
 
 ### EDA on Factors Affecting DUR
 See [Factors Affecting DUR](#factors-affecting-successful-durs) in the Appendix.
@@ -95,6 +96,9 @@ We assume DUR durations are affected by these for main groups of factors
 
 A more detailed breakdown can be found [here](../outputs/charts/DUR_detailed.png).
 <!---USER-MANAGED-CONTEXT--->
+
+For details see [Model Details](#model-details) in the Appendix.
+
 ### Appendix
 
 #### Model Details
@@ -327,8 +331,47 @@ $$
 - [Parent-part random effects](../outputs/tables/mc3_coh_pettype_final_model_parent_part_effects.md)
 
 #### Factors Affecting Successful DURs
-
 [DUR detailed diagram](../outputs/charts/DUR_detailed.png)
+
+##### User Performance
+
+- Users' performance is correlated across all 4 cohorts.
+[View the user-performance scatter matrix](../outputs/charts/user-performance-analysis/user-performance-median-all-cohorts-scatter-matrix.png).
+- Users' performance across cohorts vary
+[View the user median DUR-duration distributions](../outputs/charts/user-performance-analysis/user-median-dur-duration-distributions.png).
+
+- Effect of Job Title
+[View task duration by job title across all cohorts](../outputs/charts/tasks-based-distributions/task-duration-by-job-title-all-cohorts-boxplots.png).
+
+##### Edits on Prescriptions
+
+The more the edits, the longer the DUR
+
+- [View the Cohort 2 correction-field analysis](../outputs/charts/ncorrection-fields-analysis/ncorrection-fields-analysis-cohort-2.png)
+- [View the Cohort 3 correction-field analysis](../outputs/charts/ncorrection-fields-analysis/ncorrection-fields-analysis-cohort-3.png)
+- [View the Cohort 4 correction-field analysis](../outputs/charts/ncorrection-fields-analysis/ncorrection-fields-analysis-cohort-4.png)
+
+
+##### Pet Types Matter
+
+- [View the Cohort 1 pet-type analysis](../outputs/charts/pettype-analysis/pettype-analysis-cohort-1.png)
+- [View the Cohort 2 pet-type analysis](../outputs/charts/pettype-analysis/pettype-analysis-cohort-2.png)
+- [View the Cohort 3 pet-type analysis](../outputs/charts/pettype-analysis/pettype-analysis-cohort-3.png)
+- [View the Cohort 4 pet-type analysis](../outputs/charts/pettype-analysis/pettype-analysis-cohort-4.png)
+
+#### Prescription Source
+
+- [View the Cohort 1 prescription-source analysis](../outputs/charts/prescription-source-analysis/prescription-source-analysis-cohort-1.png)
+- [View the Cohort 2 prescription-source analysis](../outputs/charts/prescription-source-analysis/prescription-source-analysis-cohort-2.png)
+- [View the Cohort 3 prescription-source analysis](../outputs/charts/prescription-source-analysis/prescription-source-analysis-cohort-3.png)
+- [View the Cohort 4 prescription-source analysis](../outputs/charts/prescription-source-analysis/prescription-source-analysis-cohort-4.png)
+
+### Approval Channel
+
+- [View the Cohort 1 approval-channel analysis](../outputs/charts/approval-channel-analysis/approval-channel-analysis-cohort-1.png)
+- [View the Cohort 2 approval-channel analysis](../outputs/charts/approval-channel-analysis/approval-channel-analysis-cohort-2.png)
+- [View the Cohort 3 approval-channel analysis](../outputs/charts/approval-channel-analysis/approval-channel-analysis-cohort-3.png)
+- [View the Cohort 4 approval-channel analysis](../outputs/charts/approval-channel-analysis/approval-channel-analysis-cohort-4.png)
 
 
 #### Cohort Descriptions
