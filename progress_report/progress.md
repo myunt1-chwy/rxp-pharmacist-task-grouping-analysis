@@ -336,11 +336,14 @@ $$
 ##### User Performance
 
 - Users' performance is correlated across all 4 cohorts.
+
 [View the user-performance scatter matrix](../outputs/charts/user-performance-analysis/user-performance-median-all-cohorts-scatter-matrix.png).
 - Users' performance across cohorts vary
+
 [View the user median DUR-duration distributions](../outputs/charts/user-performance-analysis/user-median-dur-duration-distributions.png).
 
 - Effect of Job Title
+
 [View task duration by job title across all cohorts](../outputs/charts/tasks-based-distributions/task-duration-by-job-title-all-cohorts-boxplots.png).
 
 ##### Edits on Prescriptions
