@@ -22,10 +22,11 @@ sequence does not exceed batch length. Duration is
 `IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS`.
 
 Let $Y_i$ be the positive imputed duration in seconds for task $i$. One
-global cutoff is calculated over all otherwise eligible tasks:
+global cutoff is calculated over all otherwise eligible tasks with Snowflake's
+`APPROX_PERCENTILE` function:
 
 $$
-q_{0.95}=\mathrm{APPROX\_PERCENTILE}(Y,0.95).
+q_{0.95}=\mathrm{APPROX\;PERCENTILE}(Y,0.95).
 $$
 
 The fitted sample keeps tasks satisfying $0<Y_i<q_{0.95}$; the upper
