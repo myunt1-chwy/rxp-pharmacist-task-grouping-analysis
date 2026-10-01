@@ -55,12 +55,24 @@ The model does predict that if the previous task is "similar" for a
 user, there is a statistically significant effect. However, the model
 also predicts that there is a lot of noise.
 
+The predicted effect on various DUR tasks is:
+
+| Duration without same preceding task | Duration with same preceding task | -1 SD bound | +1 SD bound | Difference | Percentage change |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 15.00 s | 14.16 s | 6.84 s | 30.70 s | -0.84 s | -5.58% |
+| 50.00 s | 46.93 s | 21.09 s | 110.44 s | -3.07 s | -6.14% |
+| 150.00 s | 139.96 s | 58.53 s | 357.84 s | -10.04 s | -6.69% |
+
+
+The model predicts that users differ in their processing speed,
+products differ in speed and the day of ther week does not matter.
+
+
 <!---USER-MANAGED-CONTEXT--->
 
-In this regard, we build a model see [Model Details](#model-details) in the Appendix.
+For details see [Model Details](#model-details) in the Appendix.
 
-
-<!---USER-MANAGED-CONTEXT--->
+T<!---USER-MANAGED-CONTEXT--->
 
 
 
