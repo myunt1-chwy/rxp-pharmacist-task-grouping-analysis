@@ -139,3 +139,8 @@ def test_report_documents_complete_model_formula(tmp_path, monkeypatch) -> None:
     assert "b_u\\sim N(0,\\sigma_u^2)" in report
     assert "r_p\\sim N(0,\\sigma_p^2)" in report
     assert "SAME_PRECEDING" in report
+    assert "| Significant |" in report
+    assert "| Yes |" in report
+    assert "\\[" not in report
+    assert "\\(" not in report
+    assert "$$" in report
