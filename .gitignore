@@ -1,6 +1,5 @@
 __pycache__/
 *.py[cod]
-generated/
 .env
 *.parquet
 outputs/charts/mc3-analysis/

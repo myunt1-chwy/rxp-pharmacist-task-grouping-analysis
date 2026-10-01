@@ -17,7 +17,7 @@ Let $Y_i$ be the positive imputed duration in seconds for task $i$. One
 global cutoff is calculated over all otherwise eligible tasks:
 
 $$
-q_{0.95}=\operatorname{APPROX\_PERCENTILE}(Y,0.95).
+q_{0.95}=\mathrm{APPROX\_PERCENTILE}(Y,0.95).
 $$
 
 The fitted sample keeps tasks satisfying $0<Y_i<q_{0.95}$; the upper
@@ -109,6 +109,10 @@ z_k=\frac{\widehat{\beta}_k}{SE(\widehat{\beta}_k)},\qquad
 p_k=2\Phi(-|z_k|),\qquad
 CI_{95\%}=\widehat{\beta}_k\pm1.96SE(\widehat{\beta}_k).
 $$
+
+The fixed-effect table labels an estimate `Significant = Yes` when its 95%
+confidence interval excludes zero; intervals that cross or touch zero are
+marked `No`.
 
 Random-effect SD intervals use an observed-information Wald approximation on
 the log-SD scale. The residual-SD interval uses the chi-square distribution.

@@ -94,6 +94,35 @@ def test_design_uses_most_frequent_category_references() -> None:
     assert "PRESCRIPTION_SOURCE[FAX vs PRACTICE_HUB]" in design.labels
 
 
+def test_fixed_effect_significance_uses_confidence_interval() -> None:
+    effects = pd.DataFrame(
+        {
+            "term": ["POSITIVE", "CROSSES_ZERO", "TOUCHES_ZERO"],
+            "estimate": [0.2, 0.0, -0.1],
+            "std_error": [0.05, 0.05, 0.05],
+            "z_value": [4.0, 0.0, -2.0],
+            "p_value": [0.001, 1.0, 0.05],
+            "ci_lower": [0.1, -0.1, -0.2],
+            "ci_upper": [0.3, 0.1, 0.0],
+        }
+    )
+
+    table = final_model._fixed_effects_markdown(effects)
+
+    assert (
+        "| POSITIVE | 0.200000 | 0.050000 | 4.0000 | 0.001 | "
+        "[0.100000, 0.300000] | Yes |" in table
+    )
+    assert (
+        "| CROSSES_ZERO | 0.000000 | 0.050000 | 0.0000 | 1 | "
+        "[-0.100000, 0.100000] | No |" in table
+    )
+    assert (
+        "| TOUCHES_ZERO | -0.100000 | 0.050000 | -2.0000 | 0.05 | "
+        "[-0.200000, 0.000000] | No |" in table
+    )
+
+
 def test_report_documents_complete_model_formula(tmp_path, monkeypatch) -> None:
     frame = final_model.normalize_frame(simulated_frame().head(100))
     design = final_model.build_fixed_effect_design(frame)
@@ -141,6 +170,8 @@ def test_report_documents_complete_model_formula(tmp_path, monkeypatch) -> None:
     assert "SAME_PRECEDING" in report
     assert "| Significant |" in report
     assert "| Yes |" in report
-    assert "\\[" not in report
+    assert not {"\\[", "\\]"}.intersection(report.splitlines())
     assert "\\(" not in report
+    assert "\\operatorname" not in report
+    assert "\\mathrm{APPROX\\_PERCENTILE}" in report
     assert "$$" in report
