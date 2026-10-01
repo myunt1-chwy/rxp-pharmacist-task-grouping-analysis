@@ -366,7 +366,7 @@ The more the edits, the longer the DUR
 - [View the Cohort 3 prescription-source analysis](../outputs/charts/prescription-source-analysis/prescription-source-analysis-cohort-3.png)
 - [View the Cohort 4 prescription-source analysis](../outputs/charts/prescription-source-analysis/prescription-source-analysis-cohort-4.png)
 
-### Approval Channel
+#### Approval Channel
 
 - [View the Cohort 1 approval-channel analysis](../outputs/charts/approval-channel-analysis/approval-channel-analysis-cohort-1.png)
 - [View the Cohort 2 approval-channel analysis](../outputs/charts/approval-channel-analysis/approval-channel-analysis-cohort-2.png)
@@ -374,7 +374,7 @@ The more the edits, the longer the DUR
 - [View the Cohort 4 approval-channel analysis](../outputs/charts/approval-channel-analysis/approval-channel-analysis-cohort-4.png)
 
 
-#### Cohort Descriptions
+### Cohort Descriptions
 <!--USER-MANAGED-CONTENT-->
 - Cohort 1: Boxed parasiticides. This was the best starting point because it represents roughly 40% of total DUR volume and the majority of the initial digital volume, while the clinical rules are relatively standardized and label-driven. The primary checks are species, weight range, monthly directions, days' supply, duplicate parasite coverage, and known contraindications. This gave us a high-volume population with relatively low variability for validating the core RxBuddy and DUR Copilot experience.
 
