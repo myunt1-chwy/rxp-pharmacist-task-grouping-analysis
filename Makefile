@@ -6,10 +6,13 @@ REDRAW ?= 0
 CAUSAL_DIAGRAM_SOURCE ?= src/mermaid/DUR.mmd
 CAUSAL_DIAGRAM_OUTPUT ?= outputs/charts/DUR_detailed.png
 
-.PHONY: setup generate-task-table generate-task-intersection-table generate-task-sequence-table drop-task-table generate-valid-dur-task-table drop-valid-dur-task-table create-causal-diagram create-task-based-distributions create-task-time-bucket-distribution create-task-intersection-duration-distributions create-part-number-analysis create-mc3-analysis create-purchase-brand-analysis create-initiation-channel-analysis create-prescription-source-analysis create-approval-channel-analysis create-pettype-analysis create-npet-conditions-analysis create-ncorrection-fields-analysis create-prior-approved-rx-analysis create-prior-approved-non-vet-diet-rx-analysis create-correction-field-analysis create-mc3-pettype-analysis create-mc3-coh-pettype-final-model create-santhosh-analysis create-santhosh-analysis-one-sided create-santhosh-analysis-user create-santhosh-analysis-user-one-sided estimate-differences-reml user-performance-analysis test
+.PHONY: setup docs generate-task-table generate-task-intersection-table generate-task-sequence-table drop-task-table generate-valid-dur-task-table drop-valid-dur-task-table create-causal-diagram create-task-based-distributions create-task-time-bucket-distribution create-task-intersection-duration-distributions create-part-number-analysis create-mc3-analysis create-purchase-brand-analysis create-initiation-channel-analysis create-prescription-source-analysis create-approval-channel-analysis create-pettype-analysis create-npet-conditions-analysis create-ncorrection-fields-analysis create-prior-approved-rx-analysis create-prior-approved-non-vet-diet-rx-analysis create-correction-field-analysis create-mc3-pettype-analysis create-mc3-coh-pettype-final-model create-santhosh-analysis create-santhosh-analysis-one-sided create-santhosh-analysis-user create-santhosh-analysis-user-one-sided estimate-differences-reml user-performance-analysis test
 
 setup:
 	uv sync
+
+docs:
+	uv run sphinx-build -W --keep-going -b html docs docs/_build/html
 
 generate-task-table:
 	uv run python -m src.python.generate_task_table --start-date "$(START_DATE)" --end-date "$(END_DATE)"

@@ -23,7 +23,7 @@ This project uses `uv` and the repository's `.venv`; global Python packages are 
 
 Before running the generator, create a local `.env` containing the Snowflake connection settings:
 
-```dotenv
+```text
 RXP_SNOWFLAKE_ACCOUNT=your-account
 RXP_SNOWFLAKE_USER=your-user
 RXP_SNOWFLAKE_DATABASE=EDLDB_DEV
@@ -903,6 +903,18 @@ Run the repository test suite with:
 make test
 ```
 
+## Build Sphinx documentation
+
+Build the Markdown-first Sphinx documentation site with:
+
+```bash
+make docs
+```
+
+The generated HTML site is written to `docs/_build/html/`; open
+`docs/_build/html/index.html` to view it locally. The build treats warnings as
+errors so broken documentation references are caught early.
+
 ## Available targets
 
 The current targets are:
@@ -936,6 +948,7 @@ The current targets are:
 | `create-santhosh-analysis-user` | Compare same-cohort and different-cohort user-level means with paired tests. |
 | `create-santhosh-analysis-user-one-sided` | Run the directional paired user-level test that Same Cohort work time is less than Different Cohort work time. |
 | `estimate-differences-reml` | Estimate precision-weighted paired user differences and between-user heterogeneity with REML. |
+| `docs` | Build the Markdown-first Sphinx documentation site as HTML. |
 | `user-performance-analysis` | Render mean and median user-performance scatter matrices by cohort. |
 | `test` | Run the test suite. |
 

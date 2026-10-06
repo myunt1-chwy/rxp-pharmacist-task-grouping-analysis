@@ -2,6 +2,7 @@ __pycache__/
 *.py[cod]
 .env
 *.parquet
+docs/_build/
 outputs/charts/mc3-analysis/
 outputs/charts/purchase-brand-analysis/
 outputs/charts/cohort-sequence-difference-distributions/
