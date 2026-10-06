@@ -3,12 +3,14 @@
 
 ## 2026-10-01
 
-### Modeling DUR Durations
-<!---USER-MANAGED-CONTEXT--->
-A model was built to predict DUR durations for the following reasons:
-- The analysis in  [ Would Grouping Similar Work Make Pharmacists Faster? What the data says](https://chewyinc.atlassian.net/wiki/x/hYRyRQE ) in concludes that there is no effect if the previous task is the same.  We would like to know if we can control for other factors than MC3, Cohort or part number, the result would change? And is there a definition of similarity that is more suitable to use. Can we get bounds on the uncertainty?
+### Modeling DUR Processing Time
 
-Consider the 2 task sequences of the same user:
+<!---USER-MANAGED-CONTEXT--->
+
+A model was built to predict DUR durations for the following reasons:
+- The analysis [Would Grouping Similar Work Make Pharmacists Faster? What the data says](https://chewyinc.atlassian.net/wiki/x/hYRyRQE) concludes that the previous task has no effect. We would like to know whether the result changes after controlling for factors other than MC3, cohort, or part number. We also want to determine whether another definition of similarity is more appropriate and quantify the uncertainty in the estimate.
+
+Consider two task sequences from the same user:
 
 | MC3          | SEQUENCE ORDER | PART_NUMBER | PET | DURATION | START TIME            | UPDATED FIELDS | APPROVAL CHANNEL | INITIATION CHANNEL |
 | --- | ---: | ---: | --- | ---: | --- | --- | --- | --- |
@@ -43,61 +45,64 @@ and
 | Parasiticide |           11 | 158998      | Cat     |                                          11 | 2026-07-15 02:20:23.000 +0000 |                      | PH               | OMS                |
 | Parasiticide |           12 | 158998      | Cat     |                                          29 | 2026-07-15 02:20:36.000 +0000 |                      | PH               | OMS                |
 
-There seems to be an inherent variabilty in the DUR times looking at
-the second trace. Using a model, we would like to quantify this.
+The second sequence demonstrates substantial inherent variability in
+DUR times. Using a model, we would like to quantify this variability.
 
-- Another motivation to simulate what-if scenarios where different
-  people do a task and see statistically how the DUR duration would
-  change. We can use the model to predict DUR times for task - user
-  combinations that did not occur in the past with possible error
-  bounds.
+- Another motivation is to simulate what-if scenarios in which different
+  users perform a task. The model could estimate DUR times for task-user
+  combinations that were not observed historically, with associated
+  uncertainty bounds.
 
-The model does predict that if the previous task is "similar" for a
-user, there is a statistically significant effect. However, the model
-also predicts that there is a lot of noise.
+The model predicts a statistically significant effect when the preceding
+task is "similar" for a user. However, substantial unexplained variation
+remains.
 
-The predicted effect on various DUR tasks is:
+The predicted effect at several baseline DUR durations is:
 
-| Duration without same preceding task | Duration with same preceding task | -1 SD bound | +1 SD bound | Difference | Percentage change |
+| Duration without same preceding task | Duration with same preceding task | -1 residual SD bound | +1 residual SD bound | Difference | Percentage change |
 | ---: | ---: | ---: | ---: | ---: | ---: |
 | 15.00 s | 14.16 s | 6.84 s | 30.70 s | -0.84 s | -5.58% |
 | 50.00 s | 46.93 s | 21.09 s | 110.44 s | -3.07 s | -6.14% |
 | 150.00 s | 139.96 s | 58.53 s | 357.84 s | -10.04 s | -6.69% |
 
 
-The model predicts that users differ in their processing speed,
-products differ in speed and the day of ther week does not matter.
+The model predicts that users and products differ in processing speed,
+while day of the week has no statistically significant effect.
 
-Obviously, if there is an alteration of prescription data, the model
-predicts longer DUR times.
+The model also predicts longer DUR times when prescription data are
+altered.
 
 <!---USER-MANAGED-CONTEXT--->
 
-The question is how reliable will our estimates be for any what if scenarios regarding sequencing?
+How reliable are our estimates for hypothetical sequencing scenarios?
 
 
 ### EDA on Factors Affecting DUR
+
 See [Factors Affecting DUR](#factors-affecting-successful-durs) in the Appendix.
+
 <!---USER-MANAGED-CONTEXT--->
-We assume DUR durations are affected by these for main groups of factors
+
+We assume that the following groups of factors affect DUR duration:
+
 1. The user
-   - Are some users inherently slower? Are they slower or faster all across the board.
+   - Are some users inherently slower? Are they consistently slower or faster across cohorts?
 2. The prescription
    - Medication
    - Content (typos, missing information)
    - Pet
      - Pet health history
-3. Business Process
-4. Outside disturbances such as inbound calls
+3. Business process
+4. Outside disturbances, such as inbound calls
 5. The user's task history
-   - Did they do similar tasks before
+   - Did they perform similar tasks previously?
 6. Environment
-7. Software Platform.
+7. Software platform
 
 A more detailed breakdown can be found [here](../outputs/charts/DUR_detailed.png).
 <!---USER-MANAGED-CONTEXT--->
 
-For details see [Model Details](#model-details) in the Appendix.
+For details, see [Model Details](#model-details) in the Appendix.
 
 ### Appendix
 
@@ -110,18 +115,18 @@ For details see [Model Details](#model-details) in the Appendix.
 The model is built to understand the factors affecting approved DUR task durations.
 It uses MC3, cohort, and pet type to define groups of similar DUR tasks.
 
-The model controls for weekday, approval channel, prescription source, parent part number, and user (pharmacist, pharmacy technician, etc.) and weekday and alterations to the data e.g. update the directions on the prescription.
+The model controls for weekday, approval channel, prescription source, parent part number, user (for example, pharmacist or pharmacy technician), and changes to prescription data, such as updated directions.
 
 There are two treatments based on whether the current task is adjacent to another task in the same MC3, cohort, and pet type equivalence class for a given user. Adjacent tasks must be no more than one hour apart. Failed DURs and DUR tasks that overlap in time with other DUR tasks are excluded; these cases occur for certain orders. If a preceding task belongs to the same equivalence class, the `SAME_PRECEDING` treatment is true. If the following task belongs to the same equivalence class, the `SAME_FOLLOWING` treatment is true. `SAME_FOLLOWING` is expected to have a coefficient near zero. It exists to check whether the model captures confounding factors adequately.
 
-The model assigns the difference of each user from a mean performance.
-The model does the same for parent part number and the calendar day.
+The model estimates each user's deviation from mean performance.
+It does the same for each parent part number and each calendar date.
 
-The model predicts that if the preceding task is the same for a user, there is a decrease in the duration of a DUR.  The model also suggests that given the same MC3, cohort, pet type and parent product type, there is no statistically significant effect from the future.
+The model predicts that, for a given user, a task preceded by a task in the same cell has a shorter DUR duration. After controlling for MC3, cohort, pet type, and parent part number, the model finds no statistically significant association with `SAME_FOLLOWING`.
 
-The week day is not significantly important, the approval channel and
-prescription source matter.  Customer originating prescriptions take
-longer.
+The weekday fixed effects are not statistically significant, whereas some
+approval-channel and prescription-source effects are. Customer-originated
+prescriptions take longer.
 
 <!--USER-MANAGED-CONTENT-->
 
@@ -185,7 +190,7 @@ on the Box-Cox scale.
 
 ###### Complete model formula
 
-Index task, fixed-effect cell, user, date, and parent part by $i,c,u,d,p$.
+Index task, fixed-effect cell, user, date, and parent part by $i, c, u, d, p$.
 The model is
 
 $$
@@ -331,24 +336,19 @@ $$
 - [Parent-part random effects](../outputs/tables/mc3_coh_pettype_final_model_parent_part_effects.md)
 
 #### Factors Affecting Successful DURs
+
 [DUR detailed diagram](../outputs/charts/DUR_detailed.png)
 
 ##### User Performance
 
-- Users' performance is correlated across all 4 cohorts.
-
-[View the user-performance scatter matrix](../outputs/charts/user-performance-analysis/user-performance-median-all-cohorts-scatter-matrix.png).
-- Users' performance across cohorts vary
-
-[View the user median DUR-duration distributions](../outputs/charts/user-performance-analysis/user-median-dur-duration-distributions.png).
-
-- Effect of Job Title
-
-[View task duration by job title across all cohorts](../outputs/charts/tasks-based-distributions/task-duration-by-job-title-all-cohorts-boxplots.png).
+- User performance is correlated across all four cohorts. [View the user-performance scatter matrix](../outputs/charts/user-performance-analysis/user-performance-median-all-cohorts-scatter-matrix.png).
+- User performance varies across cohorts. [View the user median DUR-duration distributions](../outputs/charts/user-performance-analysis/user-median-dur-duration-distributions.png).
+- DUR processing time differs by job title. [View task duration by job title across all cohorts](../outputs/charts/tasks-based-distributions/task-duration-by-job-title-all-cohorts-boxplots.png).
 
 ##### Edits on Prescriptions
 
-The more the edits, the longer the DUR
+DUR processing time tends to increase with the number of prescription edits.
+
 - [View the Cohort 1 correction-field analysis](../outputs/charts/ncorrection-fields-analysis/ncorrection-fields-analysis-cohort-1.png)
 - [View the Cohort 2 correction-field analysis](../outputs/charts/ncorrection-fields-analysis/ncorrection-fields-analysis-cohort-2.png)
 - [View the Cohort 3 correction-field analysis](../outputs/charts/ncorrection-fields-analysis/ncorrection-fields-analysis-cohort-3.png)
@@ -362,14 +362,14 @@ The more the edits, the longer the DUR
 - [View the Cohort 3 pet-type analysis](../outputs/charts/pettype-analysis/pettype-analysis-cohort-3.png)
 - [View the Cohort 4 pet-type analysis](../outputs/charts/pettype-analysis/pettype-analysis-cohort-4.png)
 
-#### Prescription Source
+##### Prescription Source
 
 - [View the Cohort 1 prescription-source analysis](../outputs/charts/prescription-source-analysis/prescription-source-analysis-cohort-1.png)
 - [View the Cohort 2 prescription-source analysis](../outputs/charts/prescription-source-analysis/prescription-source-analysis-cohort-2.png)
 - [View the Cohort 3 prescription-source analysis](../outputs/charts/prescription-source-analysis/prescription-source-analysis-cohort-3.png)
 - [View the Cohort 4 prescription-source analysis](../outputs/charts/prescription-source-analysis/prescription-source-analysis-cohort-4.png)
 
-#### Approval Channel
+##### Approval Channel
 
 - [View the Cohort 1 approval-channel analysis](../outputs/charts/approval-channel-analysis/approval-channel-analysis-cohort-1.png)
 - [View the Cohort 2 approval-channel analysis](../outputs/charts/approval-channel-analysis/approval-channel-analysis-cohort-2.png)
@@ -377,13 +377,15 @@ The more the edits, the longer the DUR
 - [View the Cohort 4 approval-channel analysis](../outputs/charts/approval-channel-analysis/approval-channel-analysis-cohort-4.png)
 
 
-### Cohort Descriptions
+#### Cohort Descriptions
+
 <!--USER-MANAGED-CONTENT-->
+
 - Cohort 1: Boxed parasiticides. This was the best starting point because it represents roughly 40% of total DUR volume and the majority of the initial digital volume, while the clinical rules are relatively standardized and label-driven. The primary checks are species, weight range, monthly directions, days' supply, duplicate parasite coverage, and known contraindications. This gave us a high-volume population with relatively low variability for validating the core RxBuddy and DUR Copilot experience.
 
 - Cohort 2: Non-controlled, non-boxed medications. This represents roughly 29% of total DUR volume and materially expands coverage, but the clinical review is more complex. These medications require generalized dosing evaluation, including strength, dose, frequency, route, indication, species appropriateness, duplicate therapy, contraindications, and potential interactions. We separated this cohort so those broader AI checks could be validated without also introducing compounding or controlled-substance requirements at the same time.
 
 - Cohort 3: Non-controlled compounded medications. This is a smaller segment at roughly 4.4% of DUR volume, but it has distinct clinical and compliance requirements. Compounds require a documented compounding reason, formulation-specific directions, and validation that the prescribed days' supply does not exceed the product's beyond-use date. BUD rules vary by dosage form, storage conditions, formulation, and stability-study results. Keeping compounds separate allowed us to test these specialized workflows and manage their impact on pharmacist throughput independently.
 
-- Cohort 4: gabapentin and the high-scrutiny regulatory workflow. This represents roughly 1.1% of DUR volume. The implemented Phase 4 scope focused on uncontrolled gabapentin rather than the full controlled-substance population, but it was separated because it introduces site eligibility, pharmacist skill gating, regulatory indicators, mixed-order handling, and state-specific scrutiny. It also gave us a contained way to validate infrastructure that will be needed for broader controlled-substance support later.
+- Cohort 4: Gabapentin and the high-scrutiny regulatory workflow. This represents roughly 1.1% of DUR volume. The implemented Phase 4 scope focused on uncontrolled gabapentin rather than the full controlled-substance population, but it was separated because it introduces site eligibility, pharmacist skill gating, regulatory indicators, mixed-order handling, and state-specific scrutiny. It also gave us a contained way to validate infrastructure that will be needed for broader controlled-substance support later.
 <!--USER-MANAGED-CONTENT-->
