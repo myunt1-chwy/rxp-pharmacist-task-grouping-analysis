@@ -872,6 +872,29 @@ The one-sided paired report is written to
 `outputs/reports/md/santosh_analysis_user_one_sided.md` and tests whether the
 within-user difference **Same Cohort − Different Cohort** is less than zero.
 
+## Estimate paired differences with REML
+
+Estimate user-level Same Cohort minus Different Cohort differences with a
+precision-weighted random-effects model fitted by REML:
+
+```bash
+make estimate-differences-reml
+```
+
+The report at
+`outputs/reports/md/estimating_differences_using_REML.md` estimates each
+user's sampling variance from their task counts and within-user variance, then
+estimates between-user heterogeneity (`tau`) separately for each cohort. It
+uses the one-sided hypothesis that Same Cohort is faster than Different Cohort
+and documents the pooled-variance fallback for user-pattern cells with one
+task.
+
+Rebuild from the cached REML input data with:
+
+```bash
+make estimate-differences-reml REDRAW=1
+```
+
 ## Run tests
 
 Run the repository test suite with:
@@ -912,6 +935,7 @@ The current targets are:
 | `create-santhosh-analysis-one-sided` | Run the directional task-level test that Same Cohort work time is less than Different Cohort work time. |
 | `create-santhosh-analysis-user` | Compare same-cohort and different-cohort user-level means with paired tests. |
 | `create-santhosh-analysis-user-one-sided` | Run the directional paired user-level test that Same Cohort work time is less than Different Cohort work time. |
+| `estimate-differences-reml` | Estimate precision-weighted paired user differences and between-user heterogeneity with REML. |
 | `user-performance-analysis` | Render mean and median user-performance scatter matrices by cohort. |
 | `test` | Run the test suite. |
 
