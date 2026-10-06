@@ -52,6 +52,17 @@ def test_welch_test_rejects_missing_allocation_group() -> None:
         analysis.welch_test(frame)
 
 
+def test_welch_test_supports_same_cohort_less_than_different_cohort() -> None:
+    two_sided = analysis.welch_test(sample_frame(), cohort="Cohort 1")
+    one_sided = analysis.welch_test(
+        sample_frame(), cohort="Cohort 1", alternative="less"
+    )
+
+    assert one_sided["p_value"] == pytest.approx(two_sided["p_value"] / 2)
+    assert one_sided["ci_low"] == float("-inf")
+    assert one_sided["ci_high"] < 0
+
+
 def test_analysis_sql_preserves_source_filters_and_returns_task_level_rows() -> None:
     sql = analysis.read_sql()
 
@@ -107,6 +118,22 @@ def test_write_report_contains_results_query_and_chart(tmp_path: Path) -> None:
     assert "## Cohort 1" in contents
     assert "SELECT allocation_pattern, work_min FROM source" in contents
     assert "![Work-time distribution — Cohort 1]" in contents
+
+
+def test_write_report_can_emit_one_sided_results(tmp_path: Path) -> None:
+    report_path = tmp_path / "santosh_analysis_one_sided.md"
+    chart_paths = {
+        f"Cohort {number}": f"cohort-{number}.png" for number in range(1, 5)
+    }
+
+    analysis.write_report(
+        sample_frame(), report_path, "SELECT 1", chart_paths, alternative="less"
+    )
+
+    contents = report_path.read_text(encoding="utf-8")
+    assert "one-sided Welch two-sample t-test" in contents
+    assert "One-sided p-value" in contents
+    assert "95% one-sided upper bound" in contents
 
 
 def test_create_outputs_writes_chart_and_report(monkeypatch, tmp_path: Path) -> None:

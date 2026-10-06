@@ -18,6 +18,9 @@ SQL_PATH = REPOSITORY_ROOT / "src" / "sql" / "santhosh_analysis.sql"
 OUTPUT_DIRECTORY = REPOSITORY_ROOT / "outputs" / "charts" / "santhosh-analysis"
 DATA_PATH = REPOSITORY_ROOT / "outputs" / "data" / "santhosh-analysis.parquet"
 REPORT_PATH = REPOSITORY_ROOT / "outputs" / "reports" / "md" / "santosh_analysis.md"
+ONE_SIDED_REPORT_PATH = (
+    REPOSITORY_ROOT / "outputs" / "reports" / "md" / "santosh_analysis_one_sided.md"
+)
 CHART_FILENAME = "santosh-analysis-distribution.png"
 ALLOCATION_ORDER = ("Same Cohort", "Different Cohort")
 COHORT_ORDER = ("Cohort 1", "Cohort 2", "Cohort 3", "Cohort 4")
@@ -106,7 +109,10 @@ def welch_test(
     frame: pd.DataFrame,
     alpha: float = 0.05,
     cohort: str | None = None,
+    alternative: str = "two-sided",
 ) -> dict[str, float | int]:
+    if alternative not in {"two-sided", "less"}:
+        raise ValueError("alternative must be 'two-sided' or 'less'")
     normalized = normalize_frame(frame)
     if cohort is not None:
         normalized = cohort_frame(normalized, cohort)
@@ -134,9 +140,20 @@ def welch_test(
         )
     )
     mean_difference = same_mean - different_mean
-    critical_value = float(stats.t.ppf(1 - alpha / 2, degrees_of_freedom))
+    critical_probability = 1 - alpha / 2 if alternative == "two-sided" else 1 - alpha
+    critical_value = float(stats.t.ppf(critical_probability, degrees_of_freedom))
     t_statistic = mean_difference / standard_error
-    p_value = float(2 * stats.t.sf(abs(t_statistic), degrees_of_freedom))
+    p_value = (
+        float(2 * stats.t.sf(abs(t_statistic), degrees_of_freedom))
+        if alternative == "two-sided"
+        else float(stats.t.cdf(t_statistic, degrees_of_freedom))
+    )
+    ci_low = (
+        mean_difference - critical_value * standard_error
+        if alternative == "two-sided"
+        else float("-inf")
+    )
+    ci_high = mean_difference + critical_value * standard_error
     return {
         "same_n": same_n,
         "different_n": different_n,
@@ -147,8 +164,8 @@ def welch_test(
         "degrees_of_freedom": float(degrees_of_freedom),
         "t_statistic": float(t_statistic),
         "p_value": p_value,
-        "ci_low": mean_difference - critical_value * standard_error,
-        "ci_high": mean_difference + critical_value * standard_error,
+        "ci_low": ci_low,
+        "ci_high": ci_high,
     }
 
 
@@ -210,18 +227,32 @@ def write_report(
     report_path: Path,
     query: str,
     chart_paths: dict[str, str],
+    alternative: str = "two-sided",
 ) -> Path:
+    if alternative not in {"two-sided", "less"}:
+        raise ValueError("alternative must be 'two-sided' or 'less'")
     normalized = normalize_frame(frame)
+    p_value_label = "One-sided p-value" if alternative == "less" else "Two-sided p-value"
+    interval_label = (
+        "95% one-sided upper bound"
+        if alternative == "less"
+        else "95% CI for mean difference"
+    )
     cohort_sections = []
     for cohort in COHORT_ORDER:
         summary = descriptive_summary(normalized, cohort)
-        result = welch_test(normalized, cohort=cohort)
+        result = welch_test(normalized, cohort=cohort, alternative=alternative)
         summary_rows = "\n".join(
             "| {allocation_pattern} | {n:,} | {mean_min:.4f} | {std_min:.4f} | "
             "{median_min:.4f} | {p25_min:.4f} | {p75_min:.4f} |".format(**row)
             for row in summary.to_dict(orient="records")
         )
         significance = "reject" if result["p_value"] < 0.05 else "do not reject"
+        interval_text = (
+            f"(-∞, {_format(result['ci_high'])}]"
+            if alternative == "less"
+            else f"[{_format(result['ci_low'])}, {_format(result['ci_high'])}]"
+        )
         cohort_sections.append(
             f"""## {cohort}
 
@@ -236,15 +267,26 @@ def write_report(
 | Same Cohort mean (minutes) | {_format(result["same_mean"])} |
 | Different Cohort mean (minutes) | {_format(result["different_mean"])} |
 | Mean difference (minutes) | {_format(result["mean_difference"])} |
-| 95% CI for mean difference | [{_format(result["ci_low"])}, {_format(result["ci_high"])}] |
+| {interval_label} | {interval_text} |
 | Welch t-statistic | {_format(result["t_statistic"])} |
 | Welch degrees of freedom | {_format(result["degrees_of_freedom"])} |
-| Two-sided p-value | {_format_p_value(result["p_value"])} |
+| {p_value_label} | {_format_p_value(result["p_value"])} |
 
 At the 0.05 level, we **{significance}** the null hypothesis for {cohort}.
 """
         )
     cohort_report = "\n".join(cohort_sections)
+    hypothesis_text = (
+        "The primary test is a one-sided Welch two-sample t-test. The null "
+        "hypothesis is that Same Cohort is not faster than Different Cohort "
+        "(Same Cohort − Different Cohort ≥ 0); the alternative is that the "
+        "contrast is less than zero, with alpha = 0.05."
+        if alternative == "less"
+        else "The primary test is a two-sided Welch two-sample t-test. The null "
+        "hypothesis is\nthat the two population means are equal; the alternative "
+        "is that they differ.\nThe reported contrast is **Same Cohort − Different "
+        "Cohort**, with alpha = 0.05."
+    )
     report = f"""# Santhosh Query Analysis
 
 ## Purpose
@@ -263,9 +305,7 @@ from minutes to seconds, with a base-10 logarithmic x-axis.
 
 ## Hypothesis test
 
-The primary test is a two-sided Welch two-sample t-test. The null hypothesis is
-that the two population means are equal; the alternative is that they differ.
-The reported contrast is **Same Cohort − Different Cohort**, with alpha = 0.05.
+{hypothesis_text}
 
 {cohort_report}
 
@@ -291,8 +331,14 @@ source query's ordering and filtering choices.
     return report_path
 
 
-def create_outputs(frame: pd.DataFrame) -> list[Path]:
+def create_outputs(
+    frame: pd.DataFrame,
+    report_path: Path | None = None,
+    alternative: str = "two-sided",
+) -> list[Path]:
     normalized = normalize_frame(frame)
+    if report_path is None:
+        report_path = REPORT_PATH
     OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
     chart_paths: dict[str, str] = {}
     output_paths: list[Path] = []
@@ -302,7 +348,15 @@ def create_outputs(frame: pd.DataFrame) -> list[Path]:
         distribution_chart(normalized, cohort).save(chart_path, scale_factor=2)
         output_paths.append(chart_path)
         chart_paths[cohort] = f"../../charts/{OUTPUT_DIRECTORY.name}/{cohort_filename}"
-    output_paths.append(write_report(normalized, REPORT_PATH, read_sql(), chart_paths))
+    output_paths.append(
+        write_report(
+            normalized,
+            report_path,
+            read_sql(),
+            chart_paths,
+            alternative=alternative,
+        )
+    )
     return output_paths
 
 
@@ -319,7 +373,12 @@ def create_outputs(frame: pd.DataFrame) -> list[Path]:
     is_flag=True,
     help="Redraw from cached Parquet data without connecting to Snowflake.",
 )
-def main(env_file: Path, redraw_only: bool) -> None:
+@click.option(
+    "--one-sided",
+    is_flag=True,
+    help="Use the directional alternative Same Cohort < Different Cohort and write a separate report.",
+)
+def main(env_file: Path, redraw_only: bool, one_sided: bool) -> None:
     """Run the Santhosh cohort-allocation analysis."""
     try:
         if redraw_only:
@@ -337,7 +396,11 @@ def main(env_file: Path, redraw_only: bool) -> None:
             frame = fetch_data(settings)
             data_path = write_data(frame)
             click.echo(f"Saved analysis data: {data_path}")
-        outputs = create_outputs(frame)
+        outputs = create_outputs(
+            frame,
+            report_path=ONE_SIDED_REPORT_PATH if one_sided else REPORT_PATH,
+            alternative="less" if one_sided else "two-sided",
+        )
     except (ImportError, OSError, ValueError) as error:
         raise click.ClickException(str(error)) from error
     click.echo(f"Created {len(outputs) - 1} cohort charts and report: {outputs[-1]}")

@@ -17,6 +17,13 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_DIRECTORY = REPOSITORY_ROOT / "outputs" / "charts" / "santhosh-analysis-user"
 DATA_PATH = REPOSITORY_ROOT / "outputs" / "data" / "santhosh-analysis-user.parquet"
 REPORT_PATH = REPOSITORY_ROOT / "outputs" / "reports" / "md" / "santosh_analysis_user.md"
+ONE_SIDED_REPORT_PATH = (
+    REPOSITORY_ROOT
+    / "outputs"
+    / "reports"
+    / "md"
+    / "santosh_analysis_user_one_sided.md"
+)
 CHART_FILENAME_PREFIX = "santosh-analysis-user"
 
 
@@ -133,7 +140,10 @@ def paired_test(
     frame: pd.DataFrame,
     cohort: str,
     alpha: float = 0.05,
+    alternative: str = "two-sided",
 ) -> dict[str, float | int]:
+    if alternative not in {"two-sided", "less"}:
+        raise ValueError("alternative must be 'two-sided' or 'less'")
     selected = cohort_frame(frame, cohort)
     differences = selected["difference_min"].to_numpy()
     n_users = len(differences)
@@ -144,14 +154,35 @@ def paired_test(
     standard_error = std_difference / n_users**0.5
     degrees_of_freedom = n_users - 1
     if standard_error == 0:
-        t_statistic = float("inf") if mean_difference != 0 else 0.0
-        p_value = 0.0 if mean_difference != 0 else 1.0
-        ci_low = ci_high = mean_difference
+        t_statistic = (
+            float("inf")
+            if mean_difference > 0
+            else float("-inf")
+            if mean_difference < 0
+            else 0.0
+        )
+        if mean_difference == 0:
+            p_value = 1.0
+        elif alternative == "less":
+            p_value = 0.0 if mean_difference < 0 else 1.0
+        else:
+            p_value = 0.0
+        ci_low = float("-inf") if alternative == "less" else mean_difference
+        ci_high = mean_difference
     else:
         t_statistic = mean_difference / standard_error
-        p_value = float(2 * stats.t.sf(abs(t_statistic), degrees_of_freedom))
-        critical_value = float(stats.t.ppf(1 - alpha / 2, degrees_of_freedom))
-        ci_low = mean_difference - critical_value * standard_error
+        p_value = (
+            float(2 * stats.t.sf(abs(t_statistic), degrees_of_freedom))
+            if alternative == "two-sided"
+            else float(stats.t.cdf(t_statistic, degrees_of_freedom))
+        )
+        critical_probability = 1 - alpha / 2 if alternative == "two-sided" else 1 - alpha
+        critical_value = float(stats.t.ppf(critical_probability, degrees_of_freedom))
+        ci_low = (
+            mean_difference - critical_value * standard_error
+            if alternative == "two-sided"
+            else float("-inf")
+        )
         ci_high = mean_difference + critical_value * standard_error
     return {
         "n_users": n_users,
@@ -247,17 +278,31 @@ def write_report(
     report_path: Path,
     query: str,
     chart_paths: dict[str, str],
+    alternative: str = "two-sided",
 ) -> Path:
+    if alternative not in {"two-sided", "less"}:
+        raise ValueError("alternative must be 'two-sided' or 'less'")
     normalized = normalize_user_frame(frame)
+    p_value_label = "One-sided p-value" if alternative == "less" else "Two-sided p-value"
+    interval_label = (
+        "95% one-sided upper bound"
+        if alternative == "less"
+        else "95% CI for paired difference"
+    )
     sections = []
     for cohort in task_analysis.COHORT_ORDER:
-        result = paired_test(normalized, cohort)
+        result = paired_test(normalized, cohort, alternative=alternative)
         summary_rows = "\n".join(
             "| {allocation_pattern} | {n_users:,} | {mean_min:.4f} | {std_min:.4f} | "
             "{median_min:.4f} | {p25_min:.4f} | {p75_min:.4f} |".format(**row)
             for row in _user_summary(normalized, cohort)
         )
         significance = "reject" if result["p_value"] < 0.05 else "do not reject"
+        interval_text = (
+            f"(-∞, {_format(result['ci_high'])}]"
+            if alternative == "less"
+            else f"[{_format(result['ci_low'])}, {_format(result['ci_high'])}]"
+        )
         sections.append(
             f"""## {cohort}
 
@@ -274,14 +319,26 @@ observations in both allocation patterns.
 | Quantity | Result |
 |---|---:|
 | Mean paired difference (minutes) | {_format(result["mean_difference"])} |
-| 95% CI for paired difference | [{_format(result["ci_low"])}, {_format(result["ci_high"])}] |
+| {interval_label} | {interval_text} |
 | Paired t-statistic | {_format(result["t_statistic"])} |
 | Degrees of freedom | {result["degrees_of_freedom"]} |
-| Two-sided p-value | {_format_p_value(result["p_value"])} |
+| {p_value_label} | {_format_p_value(result["p_value"])} |
 
 At the 0.05 level, we **{significance}** the null hypothesis for {cohort}.
 """
         )
+    hypothesis_text = (
+        "The paired test is a one-sided paired t-test. The null hypothesis is "
+        "that Same Cohort is not faster than Different Cohort "
+        "(Same Cohort − Different Cohort ≥ 0); the alternative is that this "
+        "difference is less than zero, with alpha = 0.05.\nThe density plots "
+        "show the two distributions of user-level means on a base-10 "
+        "logarithmic x-axis."
+        if alternative == "less"
+        else "The paired test is a two-sided paired t-test on the within-user difference\n"
+        "**Same Cohort − Different Cohort**, with alpha = 0.05. The density plots show\n"
+        "the two distributions of user-level means on a base-10 logarithmic x-axis."
+    )
     report = f"""# Santhosh User-Level Analysis
 
 ## Purpose and method
@@ -291,9 +348,7 @@ users, separately for Cohorts 1–4. Task durations are first averaged within
 each user, cohort, and allocation pattern. Only users with both allocation
 patterns in the same cohort are retained, so the comparison is paired by user.
 
-The paired test is a two-sided paired t-test on the within-user difference
-**Same Cohort − Different Cohort**, with alpha = 0.05. The density plots show
-the two distributions of user-level means on a base-10 logarithmic x-axis.
+{hypothesis_text}
 
 The source query keeps transitions on or after 2026-08-01, DUR tasks with final
 status `CLOSED`, non-null user and start time, work time between 0.01 and 5
@@ -319,8 +374,14 @@ observational and does not establish that cohort allocation causes a difference.
     return report_path
 
 
-def create_outputs(frame: pd.DataFrame) -> list[Path]:
+def create_outputs(
+    frame: pd.DataFrame,
+    report_path: Path | None = None,
+    alternative: str = "two-sided",
+) -> list[Path]:
     normalized = normalize_user_frame(frame)
+    if report_path is None:
+        report_path = REPORT_PATH
     OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
     chart_paths: dict[str, str] = {}
     output_paths: list[Path] = []
@@ -331,7 +392,13 @@ def create_outputs(frame: pd.DataFrame) -> list[Path]:
         output_paths.append(chart_path)
         chart_paths[cohort] = f"../../charts/{OUTPUT_DIRECTORY.name}/{filename}"
     output_paths.append(
-        write_report(normalized, REPORT_PATH, task_analysis.read_sql(), chart_paths)
+        write_report(
+            normalized,
+            report_path,
+            task_analysis.read_sql(),
+            chart_paths,
+            alternative=alternative,
+        )
     )
     return output_paths
 
@@ -349,7 +416,12 @@ def create_outputs(frame: pd.DataFrame) -> list[Path]:
     is_flag=True,
     help="Redraw from the cached user-level Parquet data without connecting to Snowflake.",
 )
-def main(env_file: Path, redraw_only: bool) -> None:
+@click.option(
+    "--one-sided",
+    is_flag=True,
+    help="Use the directional alternative Same Cohort < Different Cohort and write a separate report.",
+)
+def main(env_file: Path, redraw_only: bool, one_sided: bool) -> None:
     """Run the paired user-level Santhosh cohort analysis."""
     try:
         if redraw_only:
@@ -372,7 +444,11 @@ def main(env_file: Path, redraw_only: bool) -> None:
             frame = aggregate_user_means(task_frame)
             data_path = write_data(frame)
             click.echo(f"Saved user-level analysis data: {data_path}")
-        outputs = create_outputs(frame)
+        outputs = create_outputs(
+            frame,
+            report_path=ONE_SIDED_REPORT_PATH if one_sided else REPORT_PATH,
+            alternative="less" if one_sided else "two-sided",
+        )
     except (ImportError, OSError, ValueError) as error:
         raise click.ClickException(str(error)) from error
     click.echo(f"Created {len(outputs) - 1} user-level charts and report: {outputs[-1]}")

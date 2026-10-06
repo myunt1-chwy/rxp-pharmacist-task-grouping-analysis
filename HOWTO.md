@@ -827,6 +827,18 @@ Redraw the four charts and report without querying Snowflake with:
 make create-santhosh-analysis REDRAW=1
 ```
 
+Generate a separate one-sided report for the directional hypothesis that Same
+Cohort work time is less than Different Cohort work time:
+
+```bash
+make create-santhosh-analysis-one-sided
+```
+
+The one-sided report is written to
+`outputs/reports/md/santosh_analysis_one_sided.md`. It reports one-sided
+p-values and 95% upper bounds for the contrast **Same Cohort − Different
+Cohort**, while preserving the two-sided report above.
+
 ## Analyze paired user-level differences
 
 Aggregate the same task-level extract to user means within each cohort and
@@ -849,6 +861,16 @@ Redraw from the user-level cache without querying Snowflake with:
 ```bash
 make create-santhosh-analysis-user REDRAW=1
 ```
+
+Generate the separate one-sided paired user report with:
+
+```bash
+make create-santhosh-analysis-user-one-sided
+```
+
+The one-sided paired report is written to
+`outputs/reports/md/santosh_analysis_user_one_sided.md` and tests whether the
+within-user difference **Same Cohort − Different Cohort** is less than zero.
 
 ## Run tests
 
@@ -887,7 +909,9 @@ The current targets are:
 | `create-correction-field-analysis` | Query Snowflake and render four cohort correction-field-name duration boxplot charts. |
 | `create-mc3-coh-pettype-final-model` | Fit the final fixed-effects model with crossed user, date, and parent-part-number random intercepts. |
 | `create-santhosh-analysis` | Compare same-cohort and different-cohort DUR work-time distributions with a Welch two-sample test. |
+| `create-santhosh-analysis-one-sided` | Run the directional task-level test that Same Cohort work time is less than Different Cohort work time. |
 | `create-santhosh-analysis-user` | Compare same-cohort and different-cohort user-level means with paired tests. |
+| `create-santhosh-analysis-user-one-sided` | Run the directional paired user-level test that Same Cohort work time is less than Different Cohort work time. |
 | `user-performance-analysis` | Render mean and median user-performance scatter matrices by cohort. |
 | `test` | Run the test suite. |
 

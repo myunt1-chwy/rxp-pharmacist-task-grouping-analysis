@@ -66,6 +66,16 @@ def test_paired_test_uses_within_user_differences() -> None:
     assert result["ci_low"] < result["mean_difference"] < result["ci_high"]
 
 
+def test_paired_test_supports_same_cohort_less_than_different_cohort() -> None:
+    frame = analysis.aggregate_user_means(sample_task_frame())
+    two_sided = analysis.paired_test(frame, "Cohort 1")
+    one_sided = analysis.paired_test(frame, "Cohort 1", alternative="less")
+
+    assert one_sided["p_value"] == pytest.approx(two_sided["p_value"] / 2)
+    assert one_sided["ci_low"] == float("-inf")
+    assert one_sided["ci_high"] < 0
+
+
 def test_user_distribution_chart_has_density_transform_and_log_axis() -> None:
     specification = analysis.user_distribution_chart(
         analysis.aggregate_user_means(sample_task_frame()), "Cohort 1"
@@ -98,6 +108,26 @@ def test_write_report_contains_paired_results_and_chart(tmp_path: Path) -> None:
     assert "within-user difference" in contents
     assert "## Cohort 4" in contents
     assert "SELECT task_id, user_id, cohort, allocation_pattern, work_min FROM source" in contents
+
+
+def test_write_report_can_emit_one_sided_results(tmp_path: Path) -> None:
+    report_path = tmp_path / "santosh_analysis_user_one_sided.md"
+    chart_paths = {
+        f"Cohort {number}": f"cohort-{number}.png" for number in range(1, 5)
+    }
+
+    analysis.write_report(
+        analysis.aggregate_user_means(sample_task_frame()),
+        report_path,
+        "SELECT 1",
+        chart_paths,
+        alternative="less",
+    )
+
+    contents = report_path.read_text(encoding="utf-8")
+    assert "one-sided paired t-test" in contents
+    assert "One-sided p-value" in contents
+    assert "95% one-sided upper bound" in contents
 
 
 def test_create_outputs_writes_four_user_charts_and_report(
