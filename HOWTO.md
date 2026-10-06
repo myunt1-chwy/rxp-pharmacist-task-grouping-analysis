@@ -818,7 +818,8 @@ four cohort distribution charts are written to
 `outputs/reports/md/santosh_analysis.md` contains separate descriptive
 statistics and Welch two-sample tests with confidence intervals for Cohorts 1–4,
 limits DUR work time to five minutes, uses a base-10 logarithmic x-axis with
-two-second bins, and includes the query, limitations, and all four charts.
+density lines for Same Cohort and Different Cohort, and includes the query,
+limitations, and all four charts.
 
 Redraw the four charts and report without querying Snowflake with:
 

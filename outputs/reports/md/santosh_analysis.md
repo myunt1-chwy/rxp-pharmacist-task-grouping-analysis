@@ -10,9 +10,9 @@ The source query keeps the original filters: transitions on or after
 2026-08-01, DUR tasks with final status `CLOSED`, non-null user and start time,
 work time between 0.01 and 5 minutes, and known item cohorts. The previous
 cohort is calculated within user and transition date, ordered by `STARTED_AT`.
-Rows without a previous cohort are excluded. Distribution charts use two-second
-bins after converting work time from minutes to seconds, with a base-10
-logarithmic x-axis.
+Rows without a previous cohort are excluded. Distribution charts show separate
+kernel-density lines for the two allocation patterns after converting work time
+from minutes to seconds, with a base-10 logarithmic x-axis.
 
 ## Hypothesis test
 

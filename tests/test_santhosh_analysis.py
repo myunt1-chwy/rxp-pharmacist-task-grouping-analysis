@@ -67,16 +67,20 @@ def test_analysis_sql_preserves_source_filters_and_returns_task_level_rows() -> 
     assert "ITEM_COHORT AS cohort" in sql
 
 
-def test_distribution_chart_uses_two_second_bins_and_allocation_pattern() -> None:
+def test_distribution_chart_uses_two_density_lines_and_log_axis() -> None:
     specification = analysis.distribution_chart(sample_frame(), "Cohort 1").to_dict()
 
     assert specification["title"]["text"] == (
         "DUR work-time distribution by allocation pattern — Cohort 1"
     )
-    assert specification["encoding"]["x"]["field"] == "bin_start_seconds"
-    assert specification["encoding"]["x2"]["field"] == "bin_end_seconds"
+    assert specification["mark"]["type"] == "line"
+    assert specification["transform"][0]["density"] == "work_seconds"
+    assert specification["transform"][0]["groupby"] == ["allocation_pattern"]
+    assert specification["encoding"]["x"]["field"] == "work_seconds"
     assert specification["encoding"]["x"]["title"] == "Work time (seconds, log10 scale)"
     assert specification["encoding"]["x"]["scale"] == {"base": 10, "type": "log"}
+    assert specification["encoding"]["y"]["field"] == "density"
+    assert specification["encoding"]["y"]["title"] == "Density"
     assert specification["encoding"]["color"]["field"] == "allocation_pattern"
 
 

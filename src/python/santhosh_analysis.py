@@ -155,29 +155,23 @@ def welch_test(
 def distribution_chart(frame: pd.DataFrame, cohort: str) -> alt.Chart:
     chart_frame = cohort_frame(frame, cohort)[["allocation_pattern", "work_min"]].copy()
     chart_frame["work_seconds"] = chart_frame["work_min"] * 60
-    chart_frame["bin_start_seconds"] = (
-        ((chart_frame["work_seconds"] - 1) // 2) * 2 + 1
-    )
-    chart_frame["bin_end_seconds"] = chart_frame["bin_start_seconds"] + 2
-    histogram = (
-        chart_frame.groupby(
-            ["allocation_pattern", "bin_start_seconds", "bin_end_seconds"],
-            as_index=False,
-        )
-        .size()
-        .rename(columns={"size": "tasks"})
-    )
     return (
-        alt.Chart(histogram)
-        .mark_bar(opacity=0.55)
+        alt.Chart(chart_frame)
+        .transform_density(
+            "work_seconds",
+            as_=["work_seconds", "density"],
+            groupby=["allocation_pattern"],
+            extent=[1, 300],
+            steps=150,
+        )
+        .mark_line(strokeWidth=3)
         .encode(
             x=alt.X(
-                "bin_start_seconds:Q",
+                "work_seconds:Q",
                 scale=alt.Scale(type="log", base=10),
                 title="Work time (seconds, log10 scale)",
             ),
-            x2=alt.X2("bin_end_seconds:Q"),
-            y=alt.Y("tasks:Q", title="Tasks", scale=alt.Scale(domainMin=0)),
+            y=alt.Y("density:Q", title="Density", scale=alt.Scale(domainMin=0)),
             color=alt.Color(
                 "allocation_pattern:N",
                 title="Allocation pattern",
@@ -185,15 +179,14 @@ def distribution_chart(frame: pd.DataFrame, cohort: str) -> alt.Chart:
             ),
             tooltip=[
                 alt.Tooltip("allocation_pattern:N", title="Pattern"),
-                alt.Tooltip("bin_start_seconds:Q", title="Bin start (seconds)"),
-                alt.Tooltip("bin_end_seconds:Q", title="Bin end (seconds)"),
-                alt.Tooltip("tasks:Q", title="Tasks"),
+                alt.Tooltip("work_seconds:Q", title="Work time (seconds)"),
+                alt.Tooltip("density:Q", title="Density"),
             ],
         )
         .properties(
             title=alt.TitleParams(
                 f"DUR work-time distribution by allocation pattern — {cohort}",
-                subtitle="Task-level work time limited to five minutes with two-second bins",
+                subtitle="Task-level kernel density with work time limited to five minutes",
                 anchor="start",
             ),
             width=900,
@@ -264,9 +257,9 @@ The source query keeps the original filters: transitions on or after
 2026-08-01, DUR tasks with final status `CLOSED`, non-null user and start time,
 work time between 0.01 and 5 minutes, and known item cohorts. The previous
 cohort is calculated within user and transition date, ordered by `STARTED_AT`.
-Rows without a previous cohort are excluded. Distribution charts use two-second
-bins after converting work time from minutes to seconds, with a base-10
-logarithmic x-axis.
+Rows without a previous cohort are excluded. Distribution charts show separate
+kernel-density lines for the two allocation patterns after converting work time
+from minutes to seconds, with a base-10 logarithmic x-axis.
 
 ## Hypothesis test
 
