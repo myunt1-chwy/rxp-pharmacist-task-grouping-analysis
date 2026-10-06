@@ -915,6 +915,16 @@ The generated HTML site is written to `docs/_build/html/`; open
 `docs/_build/html/index.html` to view it locally. The build treats warnings as
 errors so broken documentation references are caught early.
 
+Build the standalone Sphinx PDF for `progress_report/progress.md` with:
+
+```bash
+make progress-pdf
+```
+
+The separate PDF is written to
+`outputs/reports/pdf/progress_report_sphinx.pdf`. This build uses XeLaTeX and
+keeps the existing progress-report PDFs unchanged.
+
 ## Available targets
 
 The current targets are:
@@ -949,6 +959,7 @@ The current targets are:
 | `create-santhosh-analysis-user-one-sided` | Run the directional paired user-level test that Same Cohort work time is less than Different Cohort work time. |
 | `estimate-differences-reml` | Estimate precision-weighted paired user differences and between-user heterogeneity with REML. |
 | `docs` | Build the Markdown-first Sphinx documentation site as HTML. |
+| `progress-pdf` | Build a standalone XeLaTeX PDF from `progress_report/progress.md`. |
 | `user-performance-analysis` | Render mean and median user-performance scatter matrices by cohort. |
 | `test` | Run the test suite. |
 

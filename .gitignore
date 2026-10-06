@@ -3,6 +3,7 @@ __pycache__/
 .env
 *.parquet
 docs/_build/
+progress_report/_build/
 outputs/charts/mc3-analysis/
 outputs/charts/purchase-brand-analysis/
 outputs/charts/cohort-sequence-difference-distributions/
