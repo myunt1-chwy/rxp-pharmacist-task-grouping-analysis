@@ -111,10 +111,30 @@ def aggregate_user_effects(frame: pd.DataFrame) -> pd.DataFrame:
 
 
 def _reml_objective(log_scale: float, effects: np.ndarray, variances: np.ndarray) -> float:
+    """Return the restricted negative log-likelihood criterion.
+
+    For a candidate between-user variance tau_squared, the model covariance is
+    diagonal with entries ``V_i = v_i + tau_squared``. The fixed effect is one
+    intercept, estimated at the weighted mean ``mu_tau``. Up to a constant,
+    minus twice the restricted log likelihood is:
+
+    ``sum(log(V_i)) + log(sum(1 / V_i))``
+    ``+ sum((d_i - mu_tau)**2 / V_i)``.
+
+    The optimizer works on ``log_scale`` rather than tau_squared directly. The
+    transformation below maps the bounded, nonnegative search parameter to
+    ``tau_squared = scale * (exp(log_scale) - 1)``. This guarantees that the
+    estimated variance cannot become negative while keeping the optimization
+    numerically well-scaled across cohorts.
+    """
     scale = max(float(np.var(effects, ddof=1)), float(np.median(variances)), 1e-12)
+    # log_scale = 0 is the tau_squared = 0 boundary. Larger values increase
+    # the residual variance shared by all user effects.
     tau_squared = scale * np.expm1(log_scale)
     total_variance = variances + tau_squared
     weights = 1 / total_variance
+    # For one fixed intercept, X'V^-1X reduces to sum(weights), and the GLS
+    # estimate of the intercept is the corresponding weighted mean.
     weighted_mean = float(np.sum(weights * effects) / np.sum(weights))
     residual = effects - weighted_mean
     return float(
@@ -130,7 +150,14 @@ def reml_test(
     alpha: float = 0.05,
     alternative: str = "less",
 ) -> dict[str, float | int]:
-    """Fit a one-intercept random-effects model by REML for one cohort."""
+    """Fit a one-intercept random-effects model by REML for one cohort.
+
+    The scalar optimization minimizes the restricted negative log likelihood
+    over the transformed parameter ``log_scale`` in [0, 20]. The exact zero
+    boundary is evaluated separately because bounded scalar optimization need
+    not land exactly on an endpoint. If the boundary is at least as good as
+    the interior candidate, tau_squared is set to zero.
+    """
     if alternative not in {"two-sided", "less"}:
         raise ValueError("alternative must be 'two-sided' or 'less'")
     selected = frame.loc[frame["cohort"] == cohort].copy()
@@ -141,6 +168,10 @@ def reml_test(
     if len(effects) < 2:
         raise ValueError("REML needs at least two paired users")
 
+    # Search for an interior variance component after accounting for the
+    # user-specific sampling variances. The upper bound is intentionally broad
+    # on the log scale: it allows tau_squared to be many orders of magnitude
+    # larger than the effect or sampling variance when the data support it.
     objective_at_zero = _reml_objective(0.0, effects, variances)
     optimized = optimize.minimize_scalar(
         _reml_objective,
@@ -149,6 +180,9 @@ def reml_test(
         method="bounded",
         options={"xatol": 1e-10},
     )
+    # REML estimates can lie on the tau_squared = 0 boundary. Compare the
+    # explicit boundary value with the best interior result before selecting
+    # the final variance component.
     log_scale = 0.0 if objective_at_zero <= optimized.fun else float(optimized.x)
     scale = max(float(np.var(effects, ddof=1)), float(np.median(variances)), 1e-12)
     tau_squared = float(scale * np.expm1(log_scale))
@@ -259,6 +293,28 @@ for each user's sampling variance. The random-effects weight is
 `1 / (v_i + tau^2)`, so users with more precise means receive more weight,
 while genuine user-to-user heterogeneity prevents any single precise user from
 dominating.
+
+## REML optimization objective
+
+For each candidate `tau2`, the analysis defines `V_i = v_i + tau2` and
+`w_i = 1 / V_i`. The fixed effect at that candidate is the generalized
+least-squares weighted mean:
+
+`mu_tau = sum(w_i * d_i) / sum(w_i)`
+
+The function `_reml_objective` minimizes the following criterion:
+
+`J(tau2) = sum(log(V_i)) + log(sum(w_i)) + sum(w_i * (d_i - mu_tau)^2)`
+
+This is minus twice the restricted log likelihood, up to a constant, for a
+model with one fixed intercept. The three terms represent the covariance
+volume, the fixed-effect adjustment, and the weighted residual sum of squares.
+
+The implementation optimizes the transformed parameter `log_scale` over the
+bounded interval `[0, 20]`, using `tau2 = scale * (exp(log_scale) - 1)`.
+The transformation enforces `tau2 >= 0`. The exact `tau2 = 0` boundary is
+evaluated separately and selected whenever it is at least as good as the
+interior optimizer result.
 
 The reported p-value is a lower-tail normal/Wald test of `H0: mu >= 0`
 against `H1: mu < 0`. The interval is the corresponding one-sided 95%

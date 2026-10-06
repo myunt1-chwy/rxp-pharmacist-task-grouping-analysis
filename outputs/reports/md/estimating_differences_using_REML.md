@@ -25,6 +25,28 @@ for each user's sampling variance. The random-effects weight is
 while genuine user-to-user heterogeneity prevents any single precise user from
 dominating.
 
+## REML optimization objective
+
+For each candidate `tau2`, the analysis defines `V_i = v_i + tau2` and
+`w_i = 1 / V_i`. The fixed effect at that candidate is the generalized
+least-squares weighted mean:
+
+`mu_tau = sum(w_i * d_i) / sum(w_i)`
+
+The function `_reml_objective` minimizes the following criterion:
+
+`J(tau2) = sum(log(V_i)) + log(sum(w_i)) + sum(w_i * (d_i - mu_tau)^2)`
+
+This is minus twice the restricted log likelihood, up to a constant, for a
+model with one fixed intercept. The three terms represent the covariance
+volume, the fixed-effect adjustment, and the weighted residual sum of squares.
+
+The implementation optimizes the transformed parameter `log_scale` over the
+bounded interval `[0, 20]`, using `tau2 = scale * (exp(log_scale) - 1)`.
+The transformation enforces `tau2 >= 0`. The exact `tau2 = 0` boundary is
+evaluated separately and selected whenever it is at least as good as the
+interior optimizer result.
+
 The reported p-value is a lower-tail normal/Wald test of `H0: mu >= 0`
 against `H1: mu < 0`. The interval is the corresponding one-sided 95%
 upper bound. This is an asymptotic random-effects inference; uncertainty in the
