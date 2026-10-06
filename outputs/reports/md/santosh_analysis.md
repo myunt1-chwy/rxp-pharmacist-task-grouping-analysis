@@ -8,10 +8,11 @@ same cohort versus a different cohort, separately for Cohorts 1–4. Work time i
 
 The source query keeps the original filters: transitions on or after
 2026-08-01, DUR tasks with final status `CLOSED`, non-null user and start time,
-work time between 0.01 and 30 minutes, and known item cohorts. The previous
+work time between 0.01 and 5 minutes, and known item cohorts. The previous
 cohort is calculated within user and transition date, ordered by `STARTED_AT`.
 Rows without a previous cohort are excluded. Distribution charts use two-second
-bins after converting work time from minutes to seconds.
+bins after converting work time from minutes to seconds, with a base-10
+logarithmic x-axis.
 
 ## Hypothesis test
 
@@ -25,18 +26,18 @@ The reported contrast is **Same Cohort − Different Cohort**, with alpha = 0.05
 
 | Allocation pattern | Tasks | Mean (min) | SD (min) | Median (min) | P25 (min) | P75 (min) |
 |---|---:|---:|---:|---:|---:|---:|
-| Same Cohort | 464,716 | 0.6864 | 1.6594 | 0.2667 | 0.1500 | 0.5500 |
-| Different Cohort | 383,270 | 0.7486 | 1.7677 | 0.2833 | 0.1500 | 0.6167 |
+| Same Cohort | 455,487 | 0.4884 | 0.6661 | 0.2500 | 0.1333 | 0.5167 |
+| Different Cohort | 373,088 | 0.5187 | 0.6881 | 0.2667 | 0.1500 | 0.5667 |
 
 | Quantity | Result |
 |---|---:|
-| Same Cohort mean (minutes) | 0.6864 |
-| Different Cohort mean (minutes) | 0.7486 |
-| Mean difference (minutes) | -0.0622 |
-| 95% CI for mean difference | [-0.0696, -0.0549] |
-| Welch t-statistic | -16.5797 |
-| Welch degrees of freedom | 796024.3236 |
-| Two-sided p-value | 1.00014e-61 |
+| Same Cohort mean (minutes) | 0.4884 |
+| Different Cohort mean (minutes) | 0.5187 |
+| Mean difference (minutes) | -0.0303 |
+| 95% CI for mean difference | [-0.0332, -0.0273] |
+| Welch t-statistic | -20.2019 |
+| Welch degrees of freedom | 786244.1846 |
+| Two-sided p-value | 9.94179e-91 |
 
 At the 0.05 level, we **reject** the null hypothesis for Cohort 1.
 
@@ -46,18 +47,18 @@ At the 0.05 level, we **reject** the null hypothesis for Cohort 1.
 
 | Allocation pattern | Tasks | Mean (min) | SD (min) | Median (min) | P25 (min) | P75 (min) |
 |---|---:|---:|---:|---:|---:|---:|
-| Same Cohort | 316,985 | 0.8807 | 1.8554 | 0.3667 | 0.1833 | 0.8000 |
-| Different Cohort | 384,471 | 0.8965 | 1.8867 | 0.3667 | 0.1833 | 0.8000 |
+| Same Cohort | 307,488 | 0.6254 | 0.7526 | 0.3500 | 0.1833 | 0.7333 |
+| Different Cohort | 373,742 | 0.6323 | 0.7605 | 0.3500 | 0.1833 | 0.7333 |
 
 | Quantity | Result |
 |---|---:|
-| Same Cohort mean (minutes) | 0.8807 |
-| Different Cohort mean (minutes) | 0.8965 |
-| Mean difference (minutes) | -0.0159 |
-| 95% CI for mean difference | [-0.0246, -0.0071] |
-| Welch t-statistic | -3.5355 |
-| Welch degrees of freedom | 680225.6028 |
-| Two-sided p-value | 0.00040709 |
+| Same Cohort mean (minutes) | 0.6254 |
+| Different Cohort mean (minutes) | 0.6323 |
+| Mean difference (minutes) | -0.0069 |
+| 95% CI for mean difference | [-0.0105, -0.0033] |
+| Welch t-statistic | -3.7486 |
+| Welch degrees of freedom | 658683.7410 |
+| Two-sided p-value | 0.000177823 |
 
 At the 0.05 level, we **reject** the null hypothesis for Cohort 2.
 
@@ -67,18 +68,18 @@ At the 0.05 level, we **reject** the null hypothesis for Cohort 2.
 
 | Allocation pattern | Tasks | Mean (min) | SD (min) | Median (min) | P25 (min) | P75 (min) |
 |---|---:|---:|---:|---:|---:|---:|
-| Same Cohort | 9,975 | 1.1783 | 2.1497 | 0.5500 | 0.2667 | 1.1500 |
-| Different Cohort | 97,245 | 1.2265 | 2.1568 | 0.5833 | 0.3000 | 1.2167 |
+| Same Cohort | 9,472 | 0.8202 | 0.8535 | 0.5167 | 0.2667 | 1.0167 |
+| Different Cohort | 93,352 | 0.8692 | 0.8818 | 0.5500 | 0.2833 | 1.1000 |
 
 | Quantity | Result |
 |---|---:|
-| Same Cohort mean (minutes) | 1.1783 |
-| Different Cohort mean (minutes) | 1.2265 |
-| Mean difference (minutes) | -0.0482 |
-| 95% CI for mean difference | [-0.0925, -0.0039] |
-| Welch t-statistic | -2.1320 |
-| Welch degrees of freedom | 12126.7487 |
-| Two-sided p-value | 0.0330299 |
+| Same Cohort mean (minutes) | 0.8202 |
+| Different Cohort mean (minutes) | 0.8692 |
+| Mean difference (minutes) | -0.0490 |
+| 95% CI for mean difference | [-0.0671, -0.0309] |
+| Welch t-statistic | -5.3067 |
+| Welch degrees of freedom | 11619.9546 |
+| Two-sided p-value | 1.13674e-07 |
 
 At the 0.05 level, we **reject** the null hypothesis for Cohort 3.
 
@@ -88,18 +89,18 @@ At the 0.05 level, we **reject** the null hypothesis for Cohort 3.
 
 | Allocation pattern | Tasks | Mean (min) | SD (min) | Median (min) | P25 (min) | P75 (min) |
 |---|---:|---:|---:|---:|---:|---:|
-| Same Cohort | 15,344 | 1.6087 | 2.6346 | 0.7667 | 0.3833 | 1.6000 |
-| Different Cohort | 57,454 | 1.5841 | 2.5902 | 0.7667 | 0.4167 | 1.5667 |
+| Same Cohort | 14,073 | 1.0330 | 0.9618 | 0.6833 | 0.3667 | 1.3333 |
+| Different Cohort | 54,189 | 1.0496 | 0.9534 | 0.7167 | 0.4000 | 1.3333 |
 
 | Quantity | Result |
 |---|---:|
-| Same Cohort mean (minutes) | 1.6087 |
-| Different Cohort mean (minutes) | 1.5841 |
-| Mean difference (minutes) | 0.0247 |
-| 95% CI for mean difference | [-0.0221, 0.0714] |
-| Welch t-statistic | 1.0337 |
-| Welch degrees of freedom | 23861.9380 |
-| Two-sided p-value | 0.301268 |
+| Same Cohort mean (minutes) | 1.0330 |
+| Different Cohort mean (minutes) | 1.0496 |
+| Mean difference (minutes) | -0.0166 |
+| 95% CI for mean difference | [-0.0344, 0.0012] |
+| Welch t-statistic | -1.8252 |
+| Welch degrees of freedom | 21801.7320 |
+| Two-sided p-value | 0.0679842 |
 
 At the 0.05 level, we **do not reject** the null hypothesis for Cohort 4.
 
@@ -136,7 +137,7 @@ WITH ordered AS (
     AND FINAL_STATUS = 'CLOSED'
     AND USER_ID IS NOT NULL
     AND STARTED_AT IS NOT NULL
-    AND DWELL_IN_PROGRESS_TO_CLOSED_MINUTES BETWEEN 0.01 AND 30
+    AND DWELL_IN_PROGRESS_TO_CLOSED_MINUTES BETWEEN 0.01 AND 5
     AND ITEM_COHORT != 'Unknown'
 )
 SELECT

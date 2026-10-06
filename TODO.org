@@ -1,73 +1,898 @@
-* PROJECT:TODO [#B] Similar Task Sequencing Analysis:
-:PROPERTIES:
-:CATEGORY: chewy
-:PROJECT: RxP Similar Task Sequencing Analysis
-:END:
-** DONE [#B] Investigation
-   :LOGBOOK:
-   CLOCK: [2026-09-16 Wed 11:42]--[2026-09-18 Fri 12:14] => 48:32
-   CLOCK: [2026-09-16 Wed 09:52]--[2026-09-16 Wed 10:34] =>  0:42
-   CLOCK: [2026-09-15 Tue 14:44]--[2026-09-16 Wed 09:04] => 18:20
+* 1. PROJECT:INPROGRESS [#A]  Task Grouping Analysis
+  :PROPERTIES:
+  :PROJECT:  Task Grouping Analysis
+  :CATEGORY: chewy
+  :REFNUM:   1.
+  :END:
+** DONE Validate DUR task sequencing and source SQL
+   :PROPERTIES:
+   :REFNUM:   1.1.
    :END:
-- [2026-09-16 Wed 09:53] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/TODO.org::*Investigation][Investigation]]
-   Meet the people in person that attend the regular catch up
-  - [ ] Sachin Khandekar
-  - [ ] Yiru Cang
-  - [ ] Minghan Liang
-  - [ ] Zack Rosenthal
-  - [ ] Courtney Gleede
-  - [ ] Joan Tucker
-  - [ ] Bence Magyar
-  - [ ] Sherry Pallath
-  - [ ] JD Wright
-- [2026-09-16 Wed 09:56] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/src/sql/original_queries.sql::SELECT DISTINCT LOWER(EMPLOYEE_USER_NAME) AS UN]]
-  - Read the updated charter again
-- [2026-09-16 Wed 09:57] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/src/sql/original_queries.sql::SELECT DISTINCT LOWER(EMPLOYEE_USER_NAME) AS UN]]
-   Not so guangho about validating other people's analysis especially if it is not clear what they are doing.
-- Comments on the Pharmacist Grouping Analysis
-  - The Delta:
-    - Involve DS from the get go/brain storm together
-      - We can help design the analysis and carry it out as well.
-    - Divide up the analysis to smaller junks
-      - Grouping
-      - Call Assigment
-  - The good
-    - Clear ask from DS
-- [2026-09-16 Wed 10:02] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/src/sql/original_queries.sql::WITH t AS (]]
-  - Data cleanliness
-- [2026-09-16 Wed 10:03] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/src/sql/original_queries.sql::)]]
-  - How to keep track of the pipeline of ideas to investigate
-    - Stages
-      - Idea
-      - Initial Feasibility Discussion/Vetting (Pass/Fail)
-        - Is the relevant data there?
-        - Is the result actionable?
-          - Even if there is an effect, can we take action? Can we take reasonable action? Intial monetary estimate? Back of the envelope calculation
-        - Does this make sense from first principles stand point? (What does this mean)
-      - Refine the Question
-      - Develop and analysis Plan
-        - How can we validate?
-          - A/B Experimentation or similar --> Setup with DS
-          - Observational Study --> Setup with DS
-        - What is the output
-      - Execution
-- [2026-09-16 Wed 10:29] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/TODO.org::*Investigation][Investigation]]
-   We also need an alignment on calculating durations
-- [2026-09-16 Wed 10:22] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/src/sql/original_queries.sql::CONVERT_TIMEZONE('UTC', STARTED_AT)::DATE AS D]]
-   We need a clarification on RACI
-- [2026-09-16 Wed 11:42] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/TODO.org::*Investigation][Investigation]]
-   Does the task grouping analysis change if you use only happy path ? Suggest that to Sachin.
-- [2026-09-16 Wed 14:17] [[file:~/repos/rxp/analyses/rxp-pharmacist-task-grouping-analysis/TODO.org::*Investigation][Investigation]] Does the methodology work for
-  synthetic data? It would be good to test this on synthetic data
-  really.
-** TODO [#A] Data Analysis
-   * TODO Task 1: Create a ta
+   Confirm that DUR tasks occur one after another as expected, and validate that the SQL provided by Sachin is correct.
+   The table checks that the previous DUR was the the same cohort or product.  It does not check
+   if there is anything intervening.
+   There is an issue in the SQL
+
+** DONE Build the task table filtered by pharmacist tasks
+   :PROPERTIES:
+   :REFNUM:   1.2.
+   :END:
+   The name of the table is EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.my_rxp_tasks. it is a temp table.
+   Create a table containing,:
+     From the Snowflake table    EDLDB.PET_HEALTH_ANALYTICS_SANDBOX.FCT__TASKS_LIFECYCLE
+   - USER_ID
+   - STARTED_AT
+   - CLOSED_AT
+   - PRESCRIPTION_ID
+   - RX_USAGE_ID
+   - ITEM_COHORT AS COH
+   - PART_NUMBER
+   - TASK_ID
+   - TASK_TYPE
+   - ORDER_ID
+   - IS_REFILL
+   - HANDOFF_TYPE
+   - HANDOFF_REASON
+   - DATE of STARTED_AT
+   - DWELL_IN_PROGRESS_TO_CLOSED_SECONDS
+
+   Fields from  EDLDB.BT_PET_HEALTH_RX_OPERATIONS.RX_DIM_EMPLOYEES
+   - JOB_TITLE
+   - WH_ID
+   - SHIFT
+
+   Join on   USER_ID  in EDLDB.PET_HEALTH_ANALYTICS_SANDBOX.FCT__TASKS_LIFECYCLE and EMPLOYEE_KYRIOS_ID in  EDLDB.BT_PET_HEALTH_RX_OPERATIONS.RX_DIM_EMPLOYEES
+
+   FILTER ON
+   #+begin_src
+     JOB_TITLE IN (Pharmacist,
+ Area Manager, Pharmacist II,
+ Technical Services Pharmacist,
+ Compounding Pharmacist,
+ Pharmacist Lead,
+ Regional Operations Excellence Rx,
+ Sr Product Manager,
+ Manager, Pharmacy Operations,
+ Director Pharmacy Operations,
+ Chief of Staff Rx Operations,
+ Pharmacist in Charge,            )
+   #+end_src
+
+ AND
+ #+begin_src sql
+l.TASK_CREATED_AT >= '2026-02-01' AND l.TASK_CREATED_AT < '2026-08-01'
+ #+end_src
+Parameterize the dates
+
+   1. Generate the SQL as a jinja template
+   2. Create python code to run the SQL  using duckdb or snowflake connector
+   3. Use the .venv for python and use uv to update for any necessary packages
+   4. Add the SCHEMAS of the 2 tables into rxp-sql skill as and add a note we can join these tables using  Join on   USER_ID  in EDLDB.PET_HEALTH_ANALYTICS_SANDBOX.FCT__TASKS_LIFECYCLE and EMPLOYEE_KYRIOS_ID in  EDLDB.BT_PET_HEALTH_RX_OPERATIONS.RX_DIM_EMPLOYEES
+   5. Add a make target called generate-task-table.
+   4. Create log.org in the  root directory file where you summarize the task and what has been done. Do not update the file before asking me if the task is donė
+
+** DONE Generate a make target to drop the EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS table
+   :PROPERTIES:
+   :REFNUM:   1.3.
+   :END:
+  - Update HOWTO.md
+  - Update LOG.org
+** DONE Generate analysis distribution charts in png from EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS
+   :PROPERTIES:
+   :REFNUM:   1.4.
+   :END:
+   - Generate the following tables using altair in the outputs/charts/tasks-based-distributions on task_type='DUR' and cohort != 'Unknown' and IS_REFILL='false' and HANDOFF_TYPE=NULL
+   I want tables using the altair package. Each cell contains the number of
+   unique task IDs and the mean, median, and standard deviation of
+   DWELL_IN_PROGRESS_TO_CLOSED_SECONDS.
+   1.  columns=COH, rows=shift
+   2.  columns=COH, rows=job_title
+   3.  columns=COH, rows=wh_id
+   Generate a make target called create-task-based-distributions
+   Create a separate file to generate altair plots
+   Also generate a markdown file in the same directory that embeds these plots (they should be PNG) for viewing.
+
+** DONE Generate a chart that shows  the statistics in 4 hour day sections
+   :PROPERTIES:
+   :REFNUM:   1.5.
+   :END:
+   - Divide up task_type='DUR' and cohort != 'Unknown' and IS_REFILL='false' and HANDOFF_TYPE=NULL entries according to
+     which time bucket they started in UTC. Time buckets should start at 0 hour and be 4 hours long.
+     Create 4 strips for each cohort where the time buckets are horizontal and contain the statistics
+     distinct task_id, distinct user_id, median DWELL_IN_PROGRESS_TO_CLOSED_SECONDS, average and the standard deviation.
+  -  Generate one four-cohort chart for the overall population and a separate
+     four-cohort chart for each warehouse.
+  -  Day and Night counts were removed from the final chart because they were not useful.
+  -  Create the make target create-task-time-bucket-distribution
+  -  Create a separate python file; write out the generated SQL under repo root generated directory
+  -  Update the HOWTO.md and LOG.org after you confirm task is done
+
+** DONE Add the field process_start_time to the EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS
+   :PROPERTIES:
+   :REFNUM:   1.6.
+   :END:
+   - The process_start_time is the UTC timestamp obtained by subtracting
+     IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS from CLOSED_AT.
+   - IMPUTED_DWELL_IN_PROGRESS_TO_CLOSED_SECONDS is defined as
+     COALESCE(DWELL_IN_PROGRESS_TO_CLOSED_SECONDS, 1).
+     - [X] Add the imputed dwell, process_start_time, and process_start_date fields to EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS.
+     - [X] Remove started_date while retaining started_at.
+     - [X] Alter the charts that bucket DUR tasks to use process_start_time.
+     - [X] After approval, update LOG.org and HOWTO.md.
+
+** DONE Add another chart to distribution of imputed_dwell_in_progress_to_closed_seconds by item_cohort and day of the week
+   :PROPERTIES:
+   :REFNUM:   1.7.
+   :END:
+   - Tasks
+     - [X] Add to the make target create-task-based-distributions
+     - [X] The dimensions are rows: day of the week and the columns are cohorts
+     - [X] Determine the day of the week from the process_start_time
+     - [X] Display unique task and user counts plus the same duration statistics as the other charts
+     - [X] After approval, update LOG.org and HOWTO.md.
+
+** DONE Create a table called EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS_WITH_SEQUENCE
+   :PROPERTIES:
+   :REFNUM:   1.8.
+   :END:
+   - The table should contain the following fields
+     - [X] USER_ID
+     - [X] TASK_ID
+     - [X] TASK_ID_PRECEDING :: The task that closed before process_start_time of the current task by the same user_id. The preceding task's closed_at is strictly before the current process_start_time.
+     - [X] DELTA_T_WITH_PRECEDING :: The time difference in seconds between process_start_time and the preceding task's closed_at.
+     - [X] TASK_ID_FOLLOWING :: The task that immediately starts after this task is closed.
+       The process_start_time has to be after the closed_at time of the task
+     - [X] DELTA_T_WITH_FOLLOWING ::
+       Time difference between closed_at of current tasks and the following tasks process_start_time.
+     - [X] N_INTERSECTING_TASKS
+       This is the number of intersecting tasks with this task if any.
+   - [X] Create a make target and a separate Python file.
+   - [X] Write generated SQL under the repo-root generated directory.
+   - [X] After approval, update LOG.org and HOWTO.md.
+
+** DONE Tasks durations of tasks that have intersections
+   :PROPERTIES:
+   :REFNUM:   1.9.
+   :END:
+   - [X] Using the sequence and task tables, filter to task_type 'DUR', cohort != 'Unknown', IS_REFILL='false', and HANDOFF_TYPE=NULL.
+   - [X] Generate one combined density chart with one density panel per cohort.
+   - [X] Use imputed DUR duration below the approximate 95th percentile on a shared 100-bin x-axis and density on the y-axis.
+   - [X] Label tasks with intersections =multitasking= and tasks without intersections =singletasking=, with mean/median annotations and independent zero-based y-axes.
+   - [X] Add a make target and write the generated SQL under the repo-root generated directory.
+   - [X] Write the PNGs and README under outputs/charts/task-intersection-duration-distributions/.
+   - [X] After approval, update LOG.org and HOWTO.md.
+
+** DONE Analyze USER performance by cohort
+   :PROPERTIES:
+   :REFNUM:   1.10.
+   :END:
+   - [X] Use EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS.
+   - [X] Filter to DUR tasks with known cohort, non-refill status, and no handoff.
+   - [X] Exclude durations at or above the filtered population's approximate 95th percentile.
+   - [X] Compute per-user/per-cohort task count, mean, median, and standard deviation in SQL, preserving NULLs for missing cohorts.
+   - [X] Generate separate upper-half scatter matrices for mean and median duration.
+   - [X] Generate one PNG containing four cohort heatmaps by warehouse and job title, with each cell equal to the average of per-user mean duration.
+   - [X] Generate a corres1ponding four-cohort heatmap using the median of per-user median duration.
+   - [X] Generate a four-cohort distribution graph with binned DUR tasks per user on the x-axis and user counts on the y-axis.
+   - [X] Generate a corresponding four-cohort histogram of median DUR duration per user.
+   - [X] Require at least 10 tasks in both cohorts for every compared cohort pair.
+   - [X] Add the =user-performance-analysis= Make target.
+   - [X] Write generated SQL under the repo-root generated directory and support =REDRAW=1=.
+   - [X] Update HOWTO.md and LOG.org.
+
+** DONE Analyze Cohort Composition
+   :PROPERTIES:
+   :REFNUM:   1.11.
+   :END:
+   - Using the EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS table
+   - [X] Filter to DUR tasks with known cohort, non-refill status, and no handoff.
+   - [X] Exclude durations at or above the filtered population's approximate 95th percentile.
+   - [X] Compute the median, mean, standard deviation, number of DUR
+       tasks, number od distinct users  by cohort and
+       part_number
+   - [X] Create a create-part-number analysis target that plots 4 graphs for each cohort. The x axis is part number, order by part_number. We plot average with an error-bar for each using the standard deviation.
+   - [X] Make sure we do the REDRAW=1 option
+   - [X] Update HOWTO.md and LOG.org
+** DONE Analyze the MC3 distributions
+   :PROPERTIES:
+   :REFNUM:   1.12.
+   :END:
+   - [X] EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS table
+   - [X] Filter to DUR tasks with known cohort, non-refill status, and no handoff.
+   - [X] Exclude durations at or above the filtered population's approximate 95th percentile.
+   - [X] Join to edldb.pdm.product table on PART_NUMBER. The table schema is as follows
+       #+begin_quote
+       describe table edldb.pdm.product;
+| name                                                           | type              | kind   | null? | default | primary key | unique key | check | expression | comment | policy name | privacy domain | write default |
+|----------------------------------------------------------------+-------------------+--------+-------+---------+-------------+------------+-------+------------+---------+-------------+----------------+---------------|
+| SNAPSHOT_DATE                                                  | DATE              | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_ID                                                     | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PART_NUMBER                                                    | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| TYPE                                                           | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| NAME                                                           | VARCHAR(1500)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DESCRIPTION_LONG                                               | VARCHAR(20000)    | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MANUFACTURER_NAME                                              | VARCHAR(200)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CATEGORY_LEVEL1                                                | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CATEGORY_LEVEL2                                                | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CATEGORY_LEVEL3                                                | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRICE                                                          | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LIST_PRICE                                                     | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MAP_PRICE                                                      | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MAP_ENFORCED_FLAG                                              | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| BUYABLE_FLAG                                                   | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PUBLISHED_FLAG                                                 | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DISCONTINUED_FLAG                                              | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ON_SPECIAL_FLAG                                                | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DISALLOW_RECURRING_FLAG                                        | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| START_DTTM                                                     | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| AVAILABILITY_DTTM                                              | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DISCONTINUE_DTTM                                               | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| RATING_AVG                                                     | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| RATING_CNT                                                     | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ATTR_PET_TYPE                                                  | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ATTR_FOOD_FORM                                                 | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ATTR_SPECIAL_DIET                                              | VARCHAR(1000)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| IS_FOOD_FLAG                                                   | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| RX_VET_AUTH_FLAG                                               | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| IS_CONSUMABLE_FLAG                                             | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_PRICE_UPDATE_DTTM                                         | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_UPDATED_DTTM                                              | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MARK_FOR_DELETE                                                | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PARENT_ID                                                      | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PARENT_PART_NUMBER                                             | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PARENT_PRODUCT_TYPE                                            | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PARENT_NAME                                                    | VARCHAR(1500)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PARENT_SHORT_DESCRIPTION                                       | VARCHAR(1500)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ITEM_SHORT_DESCRIPTION                                         | VARCHAR(1500)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| AUTOSHIP_SAVE_ELIGIBLE_FLAG                                    | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PURCHASE_BRAND                                                 | VARCHAR(255)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MAIN_INGREDIENTS                                               | VARCHAR(1000)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| COUNTRY_ORIGIN                                                 | VARCHAR(1000)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LIFESTAGE                                                      | VARCHAR(1000)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| UNIT_OF_MEASURE                                                | VARCHAR(10)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| SHIPPABLE_UOM                                                  | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| INGREDIENTS                                                    | VARCHAR(10000)    | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRICE_RULE_DEFAULT                                             | VARCHAR(1000)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRICE_RULE_OVERRIDE                                            | VARCHAR(1000)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| AUTOSHIP_SAVE_DESCRIPTION                                      | VARCHAR(65000)    | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| KEYWORDS                                                       | VARCHAR(8000)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRICE_MAP                                                      | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRICE_CURRENT                                                  | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| STRIKETHROUGH_PRICE                                            | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| COMPARE_PRICE                                                  | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRIVATE_LABEL_FLAG                                             | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| SELLING_STRATEGY_CLASSIFICATION                                | VARCHAR(20)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DISCONTINUED_REASON_CODE                                       | VARCHAR(80)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DISCONTINUED_REASON_DESCRIPTION                                | VARCHAR(80)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FIRST_ORDER_DTTM                                               | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FIRST_RECEIPT_DTTM                                             | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| SETUP_COMPLETED_FLAG                                           | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| SETUP_COMPLETED_DTTM                                           | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FORECAST_COMPLETED_FLAG                                        | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FORECAST_COMPLETED_DTTM                                        | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FAMILY_PUBLISHED_FLAG                                          | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| COMPANY_DESCRIPTION                                            | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ON_DEAL_FLAG                                                   | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ABC_CODE                                                       | VARCHAR(10)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MERCH_CLASSIFICATION1                                          | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MERCH_CLASSIFICATION2                                          | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | ULL           | NULL          |
+| PARENT_COMPANY                                                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CATEGORY_OWNER                                                 | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MERCH_ASSISTANT                                                | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DEMAND_PLANNER                                                 | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_TYPE                                                   | VARCHAR(5000)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| BREED_SIZE                                                     | VARCHAR(5000)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LIFE_STAGE                                                     | VARCHAR(5000)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PET_TYPES                                                      | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| OCCASIONS                                                      | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| EXCLUDE_FROM_MARKETING                                         | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| GTIN                                                           | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| FULLIMAGE                                                      | VARCHAR(1024)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CATEGORY_LIST                                                  | VARCHAR(256)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| WEIGHT                                                         | NUMBER(10,2)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| WEIGHT_UOM                                                     | VARCHAR(20)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PACKAGED_WEIGHT                                                | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| RX_PHARMACY_FLAG                                               | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| GIFT_CARD_FLAG                                                 | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| COUNT_STANDARD                                                 | VARCHAR(128)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| SIZE_STANDARD                                                  | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| SPECIAL_DIET                                                   | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| COMPANY                                                        | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MERCH_CLASSIFICATION3                                          | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| THUMBNAIL                                                      | VARCHAR(300)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| UNIT_COST                                                      | NUMBER(38,20)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LENGTH                                                         | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| WIDTH                                                          | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| HEIGHT                                                         | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| SIZE_UOM                                                       | VARCHAR(10)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PACKAGED_LENGTH                                                | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PACKAGED_WIDTH                                                 | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PACKAGED_HEIGHT                                                | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| WAREHOUSE_PACKAGED_WEIGHT                                      | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| WAREHOUSE_PACKAGED_LENGTH                                      | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| WAREHOUSE_PACKAGED_WIDTH                                       | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| WAREHOUSE_PACKAGED_HEIGHT                                      | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_RETURN_DESIRED_FLAG                                    | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PHARMACY_PART_NUMBER                                           | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DROPSHIP_FLAG                                                  | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_IS_COMPOUND                                            | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_IMAGE_COUNT                                            | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_VIDEO_COUNT                                            | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_DETAIL_PAGE_ENHANCED_FLAG                              | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_DESCRIPTION_WORD_COUNT                                 | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_MANUFACTURER_PART_NUMBER                               | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| BUNDLE_FLAG_TYPE                                               | VARCHAR(20)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| BUNDLE_TITLE                                                   | VARCHAR(1000)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ONETIMEBUY                                                     | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| SEASON                                                         | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_SETUP_INITIATED_DATE                                   | DATE              | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CARTONIZATION_FLAG                                             | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_FIRST_PUBLICATION_DTTM                                 | DATE              | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_RESERVEDFORSUBS_FLAG                                   | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| RESERVED_FOR_AUTOSHIP                                          | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_COLLECTION_ATTRIBUTE                                   | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ATTRIBUTE_ONETIMEBUY_FLAG                                      | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_FIRST_PUBLISHED_WITHIN_90_DAYS_OR_SETUP_COMPLETED_FLAG | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| ATTRIBUTE_FRESH_FLAG                                           | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_DISALLOW_RECURRING_FLAG                                | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_REPLENISHMENT_STATUS                                   | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_CREATE_DTTM                                            | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DO_NOT_PUBLISH_UPDATE_DTTM                                     | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DO_NOT_PUBLISH_REASON_CODE                                     | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DO_NOT_PUBLISH_NOTES                                           | VARCHAR(200)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DO_NOT_PUBLISH_CREATE_DTTM                                     | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DO_NOT_PUBLISH_CREATED_BY                                      | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DO_NOT_PUBLISH_REQUESTED_BY                                    | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DO_NOT_PUBLISH_REMOVED_DTTM                                    | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DO_NOT_PUBLISH_REMOVED_BY                                      | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DO_NOT_PUBLISH_REMOVAL_REQUESTED_BY                            | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_CHEWY_CASH_FLAG                                        | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| AUTOSHIP_PRICE                                                 | NUMBER(16,2)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MAP_ENFORCED_DISCOUNT                                          | NUMBER(16,2)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| NEW_FLAG                                                       | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| RX_REQUIRED_FLAG                                               | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MANUALDEAL                                                     | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PLMID                                                          | VARCHAR(36)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_FULFILLMENT_ELIGIBILITY                                | VARCHAR(20)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRICING_UOM                                                    | VARCHAR(5)        | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRICING_UOM_UNITS                                              | FLOAT             | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| MERCH_CLASSIFICATION4                                          | VARCHAR(250)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| VGP_FLAG                                                       | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| WEIGHT_METRIC                                                  | NUMBER(36,20)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| WEIGHT_UOM_METRIC                                              | VARCHAR(20)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PACKAGED_WEIGHT_METRIC                                         | NUMBER(36,20)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_LENGTH_METRIC                                          | NUMBER(36,20)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_WIDTH_METRIC                                           | NUMBER(36,20)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_HEIGHT_METRIC                                          | NUMBER(36,20)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_SIZE_UOM_METRIC                                        | VARCHAR(3)        | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_PACKAGED_LENGTH_METRIC                                 | NUMBER(36,20)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_PACKAGED_WIDTH_METRIC                                  | NUMBER(36,20)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_PACKAGED_HEIGHT_METRIC                                 | NUMBER(36,20)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_WAREHOUSE_PACKAGED_WEIGHT_METRIC                       | NUMBER(36,20)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_WAREHOUSE_PACKAGED_LENGTH_METRIC                       | NUMBER(36,20)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_WAREHOUSE_PACKAGED_WIDTH_METRIC                        | NUMBER(36,20)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_WAREHOUSE_PACKAGED_HEIGHT_METRIC                       | NUMBER(36,20)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_PRICE_LOCAL                                            | NUMBER(16,4)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_LIST_PRICE_LOCAL                                       | NUMBER(16,4)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_MAP_PRICE_LOCAL                                        | NUMBER(16,4)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_STRIKETHROUGH_PRICE_LOCAL                              | NUMBER(16,4)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_COMPARE_PRICE_LOCAL                                    | NUMBER(16,4)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRICE_MIN_LOCAL                                                | NUMBER(16,4)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRICE_MAX_LOCAL                                                | NUMBER(16,4)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PRODUCT_UNIT_COST_LOCAL                                        | NUMBER(16,4)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| LAST_DIRECT_UNIT_COST_LOCAL                                    | NUMBER(16,4)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CURRENCY_CODE                                                  | VARCHAR(3)        | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| DW_UPDATE_DTTM                                                 | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PDPSLUG                                                        | VARCHAR(60)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| IS_B2BELIGBLE                                                  | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| RESTRICTED_AVAILABILITY                                        | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| PB_FRESH_FLAG                                                  | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CVC_PUBLISHED_FLAG                                             | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CVC_CONTENT_APPROVED_FLAG                                      | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CVC_DO_NOT_PUBLISH_FLAG                                        | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CVC_BUYABLE_FLAG                                               | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CATALOG_CVC                                                    | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CATALOG_B2C                                                    | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CATALOG_B2B                                                    | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+| CATALOG_RHAPSODY                                               | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+       #+end_quote
+   - [X] Add the edldb.pdm.product table schema to the rxp-sql skill.  We can use part_number columns to join to other tables.
+   - [X] Get the merch_classification3 as MC3
+   - [X] For each cohort, plot side by side the box plots for the MC3s and the whole cohort
+   - [X] Create a make target called create-mc3-analysis
+   - [X] Create the python code.
+   - [X] Follow the same pattern as the other make targets, include a REDRAW=1 option
+   - [X] After approval update HOWTO.md and LOG.org
+
+** DONE Analyze the Purchase Brand distributions
+   :PROPERTIES:
+   :REFNUM:   1.13.
+   :END:
+   - [X] Use the EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS table.
+   - [X] Filter to DUR tasks with known cohort, non-refill status, and no handoff.
+   - [X] Exclude durations at or above the filtered population's approximate 95th percentile.
+   - [X] Join to edldb.pdm.product on PART_NUMBER and use PURCHASE_BRAND.
+   - [X] For each cohort, create categorical PURCHASE_BRAND boxplots plus a whole-cohort boxplot, with task-count and PN-count labels and visible median lines.
+   - [X] Add a create-purchase-brand-analysis Make target with REDRAW=1 support.
+   - [X] Create the Python analysis, cache, generated SQL, charts, and README.
+   - [X] Generate a Markdown table with the top 10 brands by median DUR duration per cohort, including task and PN counts plus average duration.
+   - [X] Update HOWTO.md and LOG.org.
+
+** DONE Create a table of valid DUR tasks by sequences
+   :PROPERTIES:
+   :REFNUM:   1.14.
+   :END:
+   - Create the table EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS
+   The fields are
+   - user_id
+   - task_id
+   - part_number
+   - parent_part_number: This should be in the edldb.pdm.product table
+   - mc3
+   - purchase_brand
+   - order_id
+   - prescription_id
+   - rx_usage_id
+   - process_start_time
+   - closed_at
+   - global_task_segn :: this is the ordering of the task in the original EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS table for each user by ascending process_start_time.
+   - valid_task_seqn :: what is the order of the task among valid taks for that user that is not a task with intersections (check the intersections table) and the task is a DUR task_type. The handoff_type is null and is_refill='false'
+   - previous_task_invalid :: was the preceeding task for this user invalid.
+   - We want to analyze contiguous sequence of valid tasks where the user works on the same cohort, or same MC3 or same parent_part_number.  In a contiguous sequence all the global_task_seqn are sequential with no gaps,they share the same cohort/mc3/brand and the time difference between their closed_at and process_start_time is less than 3600 seconds. The tasks should have valid_task_seqn numberş too.
+     - For a contiguous sequence of cohorts, the tasks  need to share the same cohort, the field is cohort_seqn, also create a cohort_batch_id so that I can identiry the sequence.
+     - For mc3, the field is m3_seqn, also a mc3_batch_id
+     - For parent_parent_number it is pp_seqn and pp_batch_id
+   - Create the SQL and the make target similar to the Tassk with REFNUM: 1.8
+   - [X] Add independent cohort, MC3, purchase-brand, and parent-part-number sequence identifiers.
+   - [X] Exclude intersecting, refill, handoff, and non-DUR tasks from the valid task output.
+   - [X] Add generated SQL, tests, and documentation.
+   - make sure we have make target to drop the table.
+** DONE Add prescriptions table EDLDB.BT_HCA_HCDM.RXP_PRESCRIPTIONS to rxp-skill
+   :PROPERTIES:
+   :REFNUM:   1.15.
+   :END:
+**** The schema is
+     :PROPERTIES:
+     :REFNUM:   1.15.0.1.
+     :END:
+   #+NAME: EDLDB.BT_HCA_HCDM.RXP_PRESCRIPTIONS Schema
+   | name                                                   | type              | kind   | null? | default | primary key | unique key | check | expression | comment | policy name | privacy domain | write default |
+   |--------------------------------------------------------+-------------------+--------+-------+---------+-------------+------------+-------+------------+---------+-------------+----------------+---------------|
+   | RX_ID                                                  | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | RX_CREATION_DATETIME                                   | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | EXPIRATION_DATETIME                                    | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PRESCRIBED_DATETIME                                    | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | RX_UNLIMITED                                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | DIRECTIONS                                             | VARCHAR(10000)    | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PRESCRIPTION_NOTE                                      | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PRODUCT_ID                                             | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PRODUCT_KEY                                            | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PRODUCT_PART_NUMBER                                    | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PRODUCT_NAME                                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | BRAND                                                  | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PARENT_COMPANY                                         | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | MERCH_CLASS1                                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | MERCH_CLASS2                                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | MERCH_CLASS3                                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PRODUCT_CATEGORY_LEVEL1                                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PRODUCT_CATEGORY_LEVEL2                                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PRODUCT_CATEGORY_LEVEL3                                | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | CUSTOMER_ID                                            | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | CLINIC_ID                                              | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | ORIGINATION                                            | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PRODUCT_IS_COMPOUND                                    | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | CLINIC_NAME                                            | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PARENT_CLINIC_ID                                       | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | CLINIC_STATE                                           | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | CLINIC_TYPE                                            | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PET_ID                                                 | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | VET_ID                                                 | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | VET_NAME                                               | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | FIRST_ORDER_ID                                         | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | FIRST_ORDERITEM_ID                                     | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | FIRST_USAGE_APPROVED_DATETIME                          | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | MIN_APPROVED_DATETIME                                  | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | MIN_CANCELED_DATETIME                                  | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | MIN_DENIED_DATETIME                                    | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | MIN_CLOSED_DATETIME                                    | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | MIN_AWAITING_CUSTOMER_DATETIME                         | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | MIN_PHARMACIST_REVIEW_DATETIME                         | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | MIN_VALIDATED_DATETIME                                 | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | MIN_VET_REVIEW_DATETIME                                | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | MAX_OUT_OF_REFILLS_DATETIME                            | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | MIN_DUR_DATETIME                                       | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | MIN_SYSTEM_CLOSED_DATETIME                             | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | RX_INACTIVE_DATETIME                                   | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | FIRST_RX_USAGE_STATUS                                  | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | RX_STATUS                                              | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | STATE_CHANGE_REASON                                    | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | REFILLS_AMOUNT                                         | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PRESCRIBED_AMOUNT                                      | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | REMAINING_AMOUNT                                       | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | UNITS_OF_MEASURE                                       | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | IS_VET_DIET_FLAG                                       | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | LEGACY_PRESCRIPTION_ID                                 | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | REPLICATION_SYNCED                                     | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | REPLICATION_DELETED_FLAG                               | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | IS_DELETED                                             | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PARENT_PRODUCT_PART_NUMBER                             | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | APPROVAL_CHANNEL                                       | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | UPDATED_DATETIME                                       | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | STRUCTURED_SIG                                         | VARIANT           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | DAYS_OF_SUPPLY                                         | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | CONSUMPTION_RATE                                       | NUMBER(38,15)     | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | INITIATION_CHANNEL                                     | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | INITIATION_REASON                                      | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | SWAP_PRODUCT_ORIGINAL_PRESCRIPTION                     | VARCHAR(255)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | SWAP_PRESCRIPTION_TYPE                                 | VARCHAR(50)       | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | SWAP_PRODUCT_FLAG                                      | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | IS_TELEMED                                             | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | IS_DUR_APPROVED                                        | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | UNMAPPED_USAGE                                         | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PAYMENT_ISSUE                                          | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | APPROVED_NUMERATOR                                     | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | APPROVED_DENOMINATOR                                   | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | CUSTOMER_CANCELED                                      | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | IS_PUT_ON_FILE                                         | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | CLINIC_CONTACT_PREFERENCE_AT_CREATION                  | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | CLINIC_CONTACT_PREFERENCE_AT_ACTION                    | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | CREATION_CLINIC_SOURCE                                 | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | RX_LIFECYCLE_STATE                                     | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PRESCRIPTION_SOURCE                                    | VARCHAR(100)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | ACTIONED_DATETIME                                      | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | SWAP_PRODUCT_ORIGINAL_PRESCRIPTION_STATE_CHANGE_REASON | VARCHAR(16777216) | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | SWAP_PRODUCT_ORIGINAL_PRESCRIPTION_CREATION_DATETIME   | TIMESTAMP_NTZ(9)  | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | IS_NEW_TO_RX_CATEGORY                                  | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | IS_NEW_TO_VET_DIET_CATEGORY                            | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | CHILD_AUTOSHIP                                         | BOOLEAN           | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | PRESCRIPTION_REQUEST_RANK                              | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   | CONSECUTIVE_PRESCRIPTION_FAILURE_COUNT                 | NUMBER(38,0)      | COLUMN | Y     | NULL    | N           | N          | NULL  | NULL       | NULL    | NULL        | NULL           | NULL          |
+   - [X] Add the complete prescription schema to the rxp-sql skill references.
+   - [X] Link the schema from the rxp-sql skill and prescription data-model guide.
+** DONE Add RX usage-actions table to rxp-sql skill
+   :PROPERTIES:
+   :REFNUM:   1.16.
+   :END:
+   - [X] Add the complete `EDLDB.BT_HCA_HCDM.RXP_RX_USAGE_ACTIONS` schema to the rxp-sql skill references.
+   - [X] Document the action-level grain and the `ACTION_ID`, `RX_USAGE_ID`, and `RX_ID` join keys.
+   - [X] Update the rxp-sql skill, data model, join map, HOWTO.md, and LOG.org.
+** DONE Add prescription attributes to EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS
+   :PROPERTIES:
+   :REFNUM:   1.17.
+   :END:
+   - [X] Add ORIGINATION, INITIATION_CHANNEL, INITIATION_REASON, and PET_ID from EDLDB.BT_HCA_HCDM.RXP_PRESCRIPTIONS.
+   - [X] Restrict the EDLDB.BT_HCA_HCDM.RXP_RX_USAGE_ACTIONS lookup to valid task RX_USAGE_ID values, group by RX_USAGE_ID, and choose one RX_ID deterministically.
+   - [X] Use left joins so missing usage or prescription mappings retain the valid task with null enrichment fields.
+   - [X] Add SQL-rendering tests and document the enrichment behavior.
+** DONE Analyze the DUR durations by cohort, initiation_channel, and initiation_reason using
+   :PROPERTIES:
+   :REFNUM:   1.18.
+   :END:
+   - [X] Use EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS.
+   - [X] Create four horizontal boxplot figures for initiation-channel DUR duration distributions, each with a Whole cohort reference boxplot.
+   - [X] Apply the global approximate 95th-percentile duration cutoff and normalize blank/null channel and reason values to <Missing>.
+   - [X] Append the same four cohort boxplots grouped by INITIATION_REASON, with blank/null reasons normalized to <Missing>.
+   - [X] Generate the Make target, task-level Parquet cache, generated SQL, PNGs, README, tests, and redraw support.
+** DONE Add PRESCRIPTION_SOURCE to MY_RXP_VALID_DUR_TASKS
+   :PROPERTIES:
+   :REFNUM:   1.19.
+   :END:
+   - [X] Add the PRESCRIPTION_SOURCE field from EDLDB.BT_HCA_HCDM.RXP_PRESCRIPTIONS to EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS.
+** DONE Analyze DUR duration by PRESCRIPTION_SOURCE
+   :PROPERTIES:
+   :REFNUM:   1.20.
+   :END:
+   - [X] Use EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS.
+   - [X] Create four horizontal boxplot figures by PRESCRIPTION_SOURCE, one per cohort, each including a Whole cohort reference boxplot, following REFNUM 1.18.
+   - [X] Add a create-prescription-source-analysis Make target with REDRAW=1 cache-only redraw support.
+   - [X] Add the task-level cache, generated SQL, PNGs, README, tests, and documentation.
+** DONE Add APPROVAL_CHANNEL to MY_RXP_VALID_DUR_TASKS
+   :PROPERTIES:
+   :REFNUM:   1.21.
+   :END:
+   - [X] Add the APPROVAL_CHANNEL field from EDLDB.BT_HCA_HCDM.RXP_PRESCRIPTIONS to EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS, following REFNUM 1.19.
+** DONE Analyze DUR duration by APPROVAL_CHANNEL
+   :PROPERTIES:
+   :REFNUM:   1.22.
+   :END:
+   - [X] Use EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS.
+   - [X] Create four horizontal boxplot figures by APPROVAL_CHANNEL, one per cohort, each including a Whole cohort reference boxplot, following REFNUM 1.20.
+   - [X] Add a create-approval-channel-analysis Make target with REDRAW=1 cache-only redraw support.
+   - [X] Add the task-level cache, generated SQL, PNGs, README, tests, and documentation.
+** DONE Add CHEWYBI.CUSTOMER_PETPROFILES schema to rxp-sql skill
+   :PROPERTIES:
+   :REFNUM:   1.23.
+   :END:
+   - [X] Add the complete DESCRIBE TABLE CHEWYBI.CUSTOMER_PETPROFILES schema reference.
+   - [X] Document PETPROFILE_ID = RXP_PRESCRIPTIONS.PET_ID and PETPROFILE_CUSTOMER_ID = RXP_PRESCRIPTIONS.CUSTOMER_ID as the approved user-confirmed joins.
+   - [X] Link the schema from the rxp-sql skill, prescription data model, and join map.
+
+** DONE Add PETTYPE to MY_RXP_VALID_DUR_TASKS
+   :PROPERTIES:
+   :REFNUM:   1.24.
+   :END:
+   - [X] Add PETPROFILE_PETTYPE_DESCRIPTION from CHEWYBI.CUSTOMER_PETPROFILES to EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS as PETTYPE, using the documented pet-profile join.
+   - [X] Deduplicate pet profiles by PETPROFILE_ID using the latest available profile timestamps before joining to prescriptions.
+** DONE Analyze DUR median times by PETTYPE
+   :PROPERTIES:
+   :REFNUM:   1.25.
+   :END:
+   - [X] Use EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS.
+   - [X] Create four horizontal DUR-duration boxplots by PETTYPE, one per cohort, each including a Whole cohort reference boxplot, following REFNUM 1.22.
+   - [X] Analyze only valid `TASK_TYPE = 'DUR'` tasks with imputed DUR duration strictly less than the global approximate 95th-percentile DUR-duration cutoff, and use a `<Missing>` category for null or blank PETTYPE values.
+   - [X] Add a Make target with REDRAW=1 cache-only redraw support, generated SQL, task-level cache, PNGs, README, tests, and documentation.
+** DONE Add NPET_CONDITIONS to MY_RXP_VALID_DUR_TASKS
+   :PROPERTIES:
+   :REFNUM:   1.26.
+   :END:
+   - [X] Add NPET_CONDITIONS from CHEWYBI.CUSTOMER_PETPROFILES.PETPROFILE_MED_CONDITION_LIST to EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS.
+   - [X] Set NPET_CONDITIONS to 0 for unmatched profiles, NULL, blank, or `none` values; otherwise count comma-separated condition entries.
+** DONE Analyze DUR duration by NPET_CONDITIONS
+   :PROPERTIES:
+   :REFNUM:   1.27.
+   :END:
+   - [X] Use EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS.
+   - [X] Create four horizontal DUR-duration boxplots by NPET_CONDITIONS, one per cohort, each including a Whole cohort reference boxplot, following REFNUM 1.25.
+   - [X] Use the imputed DUR duration and a strict global approximate 95th-percentile cutoff.
+   - [X] Add a Make target with REDRAW=1 cache-only redraw support, generated SQL, task-level cache, PNGs, README, tests, and documentation.
+** DONE Analyze DUR median times by MC3 and PETTYPE
+   :PROPERTIES:
+   :REFNUM:   1.28.
+   :END:
+   - [X] Create a heatmap where the rows are the MC3 categories and the columns are the PETTYPE values. Cells contain the number of valid DUR tasks as n and the median duration, with an All PETTYPEs overall column showing the row total and median.
+   - [X] Add a create-mc3-pettype-analysis target with REDRAW=1 cache-only redraw support, generated SQL, aggregate cache, the all-cohort PNG plus one PNG per cohort, README, tests, and documentation.
+** DONE Add correction fields to EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS
+   :PROPERTIES:
+   :REFNUM:   1.29.
+   :END:
+   - [X] Add `CORRECTION_FIELD_NAMES` as an ordered array of distinct changed field names for each valid DUR task.
+   - [X] Add `NCORRECTION_FIELDS` as the number of distinct correction field names, using zero when no matching correction is found.
+   - [X] Add `CORRECTION_ACTION_NAMES` and `CORRECTION_ACTION_IDS` from the matched source correction records.
+   - [X] Match supported fields through `ORDER_ID`, `ORDER_ITEM_ID`, and `RX_ID` without an action-name equality constraint.
+   - [X] Restrict matches to non-system users, the task date window, and timestamps between `STARTED_AT` and `TRANSITION_ENDED_AT`; remove the user-history predicate.
+   - [X] Parameterize the inclusive `START_DATE` and exclusive `END_DATE` through the generator and Make target.
+** DONE Add prior approved-prescription counts to valid DUR tasks
+   :PROPERTIES:
+   :REFNUM:   1.30.
+   :END:
+   - [X] Use `EDLDB.BT_HCA_HCDM.RXP_RX_USAGE_ACTIONS` to identify distinct approved `(PET_ID, RX_ID)` pairs.
+   - [X] For each valid DUR task, count distinct prescriptions approved strictly before `PROCESS_START_TIME` for the task's `PET_ID`.
+   - [X] Exclude the current DUR task's `RX_ID` from the prior-prescription counts.
+   - [X] Add total prior approved prescription count, prior approved vet-diet prescription count, and prior approved non-vet-diet prescription count to `MY_RXP_VALID_DUR_TASKS`.
+   - [X] Classify a prescription as vet diet when any approved action row has `IS_VET_DIET_FLAG = TRUE`.
+   - [X] Add generated SQL, focused tests, documentation, and rebuild the valid-DUR table.
+   - [X] Include the generated SQL as an Org-Babel SQL block:
+   #+begin_src sql
+-- Count distinct prescriptions approved before each valid DUR task.
+-- Approval time uses STATE_CHANGED_DATETIME, falling back to
+-- ACTION_CREATION_DATETIME when the state-change timestamp is unavailable.
+WITH valid_tasks AS (
+    SELECT
+        TASK_ID,
+        PET_ID,
+        RX_USAGE_ID,
+        PROCESS_START_TIME
+    FROM EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS
+), current_task_rx_ids AS (
+    SELECT
+        valid_tasks.TASK_ID,
+        valid_tasks.PET_ID,
+        valid_tasks.PROCESS_START_TIME,
+        MIN(actions.RX_ID) AS CURRENT_RX_ID
+    FROM valid_tasks
+    LEFT JOIN EDLDB.BT_HCA_HCDM.RXP_RX_USAGE_ACTIONS AS actions
+        ON actions.RX_USAGE_ID = valid_tasks.RX_USAGE_ID
+    GROUP BY
+        valid_tasks.TASK_ID,
+        valid_tasks.PET_ID,
+        valid_tasks.PROCESS_START_TIME
+), approved_rx_by_pet AS (
+    SELECT
+        PET_ID,
+        RX_ID,
+        MIN(
+            COALESCE(STATE_CHANGED_DATETIME, ACTION_CREATION_DATETIME)
+        ) AS APPROVED_AT,
+        MAX(IFF(COALESCE(IS_VET_DIET_FLAG, FALSE), 1, 0)) AS IS_VET_DIET_RX
+    FROM EDLDB.BT_HCA_HCDM.RXP_RX_USAGE_ACTIONS
+    WHERE PET_ID IS NOT NULL
+      AND RX_ID IS NOT NULL
+      AND UPPER(TO_STATE) = 'APPROVED'
+      AND COALESCE(STATE_CHANGED_DATETIME, ACTION_CREATION_DATETIME) IS NOT NULL
+    GROUP BY PET_ID, RX_ID
+)
+SELECT
+    current_task.TASK_ID,
+    current_task.PET_ID,
+    current_task.PROCESS_START_TIME,
+    COUNT(DISTINCT approved_rx.RX_ID) AS N_PRIOR_APPROVED_RX_IDS,
+    COUNT(
+        DISTINCT IFF(
+            approved_rx.IS_VET_DIET_RX = 1,
+            approved_rx.RX_ID,
+            NULL
+        )
+    ) AS N_PRIOR_APPROVED_VET_DIET_RX_IDS,
+    COUNT(
+        DISTINCT IFF(
+            approved_rx.IS_VET_DIET_RX = 0,
+            approved_rx.RX_ID,
+            NULL
+        )
+    ) AS N_PRIOR_APPROVED_NON_VET_DIET_RX_IDS
+FROM current_task_rx_ids AS current_task
+LEFT JOIN approved_rx_by_pet AS approved_rx
+    ON approved_rx.PET_ID = TO_VARCHAR(current_task.PET_ID)
+   AND approved_rx.APPROVED_AT < current_task.PROCESS_START_TIME
+   AND (
+        current_task.CURRENT_RX_ID IS NULL
+        OR approved_rx.RX_ID <> current_task.CURRENT_RX_ID
+   )
+GROUP BY
+    current_task.TASK_ID,
+    current_task.PET_ID,
+    current_task.PROCESS_START_TIME
+ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
+   #+end_src
+
+** DONE Populate task prescription IDs from RX usage actions
+   :PROPERTIES:
+   :REFNUM:   1.31.
+   :END:
+   - [X] Create the transient `MY_RXP_RX_USAGE_TO_RX` mapping CTAS from `EDLDB.BT_HCA_HCDM.RXP_RX_USAGE_ACTIONS`, grouped to one `RX_ID` per `RX_USAGE_ID`.
+   - [X] Run the mapping CTAS before creating `MY_RXP_TASKS`.
+   - [X] Prefer the mapped `RX_ID` for `MY_RXP_TASKS.PRESCRIPTION_ID`, with the lifecycle value as a fallback.
+   - [X] Rebuild `MY_RXP_VALID_DUR_TASKS` so valid DUR rows inherit the corrected prescription IDs.
+** DONE Analyze DUR duration by prior approved prescription count
+   :PROPERTIES:
+   :REFNUM:   1.32.
+   :END:
+   - [X] Use `N_PRIOR_APPROVED_RX_IDS` from `EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS`.
+   - [X] Create four horizontal DUR-duration boxplots by prior approved prescription count, one per cohort, each including a `Whole cohort` reference boxplot.
+   - [X] Use the imputed DUR duration and a strict global approximate 95th-percentile cutoff, with null counts represented as `0`.
+   - [X] Add the `create-prior-approved-rx-analysis` Make target with `REDRAW=1` cache-only redraw support, generated SQL, task-level cache, PNGs, README, tests, and documentation.
+** DONE Analyze DUR duration by prior approved non-vet-diet prescription count
+   :PROPERTIES:
+   :REFNUM:   1.33.
+   :END:
+   - [X] Use `N_PRIOR_APPROVED_NON_VET_DIET_RX_IDS` from `EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS`.
+   - [X] Bucket counts as `0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, and `10+`.
+   - [X] Create four horizontal DUR-duration boxplots by bucket, one per cohort, each including a `Whole cohort` reference boxplot.
+   - [X] Add the `create-prior-approved-non-vet-diet-rx-analysis` Make target with `REDRAW=1` cache-only redraw support, generated SQL, task-level cache, PNGs, README, tests, and documentation.
+** DONE Add MC3-by-pet sequence fields to valid DUR tasks
+   :PROPERTIES:
+   :REFNUM:   1.34.
+   :END:
+   - [X] Add `MC3_PET_SEQN` and `MC3_PET_BATCH_ID` to `MY_RXP_VALID_DUR_TASKS`.
+   - [X] Start a new sequence when the same user's valid task changes MC3 or PETTYPE, while retaining the existing adjacency and one-hour gap rules.
+   - [X] Recreate the valid DUR table and verify the new fields.
+** DONE Add cohort-by-pet sequence fields to valid DUR tasks
+   :PROPERTIES:
+   :REFNUM:   1.35.
+   :END:
+   - [X] Add `COHORT_PET_SEQN` and `COHORT_PET_BATCH_ID` to `MY_RXP_VALID_DUR_TASKS`.
+   - [X] Start a new sequence when the same user's valid task changes cohort or `PET_ID`, while retaining the existing adjacency and one-hour gap rules.
+   - [X] Recreate the valid DUR table and verify the new fields.
+
+** DONE Analysis of Sequences  MC3-COH-PETTYPE_BATCH_ID
+   :PROPERTIES:
+   :REFNUM:   1.36.
+   :END:
+   - [X] Use `MC3_COH_PETTYPE_BATCH_ID` for batch membership and `MC3_COH_PETTYPE_SEQN` for ordering, retaining only batches with more than one eligible task.
+   - [X] Apply one global `APPROX_PERCENTILE(..., 0.95)` duration cutoff strictly before forming adjacent pairs.
+   - [X] Record forward and reverse pair arrays, sequence positions, correction flags, and the four correction statuses.
+   - [X] Exclude only the direction whose denominator is zero and bucket positions above 7 as `(8,7)` and `(7,8)`.
+   - [X] Add parameterized SQL generation, cached pair data, pooled pair boxplots, a summary table, README, tests, and the `REDRAW=1` Make target.
+
+** DONE Build a random effects model where the cells are MC3-COH-PETTYPE
+   :PROPERTIES:
+   :REFNUM:   1.37.
+   :END:
+   - [X] Pull fresh data from =EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_VALID_DUR_TASKS=.
+   - [X] Define fixed-effect cells as MC3 + COH + PETTYPE.
+   - [X] Use positive imputed DUR duration and retain rows strictly below one global approximate 95th percentile.
+   - [X] Apply one global Box-Cox transformation to retained duration.
+   - [X] Estimate crossed normally distributed random intercepts for user, process date, and parent part number with REML.
+   - [X] Define =SAME_PRECEDING= as 1 only when =MC3_COH_PETTYPE_BATCH_LEN > 1= and =MC3_COH_PETTYPE_SEQN > 1=.
+   - [X] Define =SAME_FOLLOWING= as 1 only when =MC3_COH_PETTYPE_BATCH_LEN > 1= and =MC3_COH_PETTYPE_SEQN < MC3_COH_PETTYPE_BATCH_LEN=.
+   - [X] Define =HAS_CORRECTION= as 1 when =NCORRECTION_FIELDS > 0= and 0 otherwise.
+   - [X] Fit cell, weekday, approval-channel, prescription-source, =SAME_PRECEDING=, =SAME_FOLLOWING=, and =HAS_CORRECTION= fixed effects.
+   - [X] Add one self-contained Python model module, one SQL template, one Make target, and =REDRAW=1= support.
+   - [X] Export fixed-effect confidence intervals and p-values, user/date/parent-part BLUPs, variance-component confidence intervals, random-intercept and conditional-residual Q-Q plots, a conditional predicted-versus-Box-Cox-outcome plot, Markdown tables, and a self-contained Markdown report with all model formulas.
+
+* DONE Generate a progress report in markdown
+  :PROPERTIES:
+  :REFNUM:   2.
+  :END:
+  - [X] Create a new directory called progress_report under repo main.
+  - [X] Create a markdown file called progress.md
+  - [X] Create a section with today's date
+  - [X] Create a section called Appendix
+  - [X] Under the Appendix create the following headings
+    - [X] Model Details
+    - [X] Factors Affecting Successful DURs
+  - Under the model details heading copy the content of  mc3_coh_pettype_final_model.md.  Make sure the links work in the content after we move the content
+
+** DONE Create a markdown for Santhosh Query Analysis
+   :PROPERTIES:
+   :REFNUM:   2.1.
+   :END:
+   - [X] There is a query in src/ignore/santhosh.sql.
+   - [X] The query takes the average of two populations.
+   - [X] I would like to compare the populations Same Cohort and Different Cohort. Do a hypothesis test  to determine if the population means are significantly different.
+   - [X] Create a file called santosh_analysis.md that contains
+     - [X] The analysis results. Confidence intervals and the anything else
+     - [X] The query used.
+     - [X] A graph that shows the distribution of the 2 populations.
 
 
-** TODO [#B] Create Final Report
-*** TODO [#B] Write Abstract
-*** TODO [#B] Write Summary
-*** TODO [#B] Write Method Summary
-*** TODO [#B] Write Appendix
-**** TODO [#B] Detailed Description of Method
-**** TODO [#B] DUR Model Description
+
+* Scrap
+  :PROPERTIES:
+  :REFNUM:   3.
+  :END:
+# ** BACKLOG Build the pet profile table
+#    :PROPERTIES:
+#    :END:
+#    Create one row per pet with:
+#    - Whether the pet has allergies
+#    - Number of prescriptions in the pharmacy
+#    - Whether the pet has a vet diet
+
+# ** BACKLOG Build the task-change table
+#    :PROPERTIES:
+#    :END:
+#    For each DUR task, record whether data changed, excluding update-time fields, and keep a count of the fields that changed.
+
+# ** BACKLOG Identify the preceding related task
+#    :PROPERTIES:
+#    :END:
+#    For each task, identify the previous task from the same cohort or product, as applicable.
+
+# ** BACKLOG Add reviewer role to the task table
+#    :PROPERTIES:
+#    :END:
+#    Include whether the person who completed the task was a pharmacist or a pharmacy technician.
+
+# ** BACKLOG Add Eastern Time fields and remote-work status
+#    :PROPERTIES:
+#    :END:
+#    Add the task date and hour in Eastern Time, and determine whether the person completing the task was working remotely.
+
+# ** BACKLOG Analyze DUR duration by cohort
+#    :PROPERTIES:
+#    :END:
+#    Create a cohort-level DUR duration breakdown and an overlapping distribution plot to compare cohorts.
+
+# ** BACKLOG Analyze average DUR time by reviewer and cohort
+#    :PROPERTIES:
+#    :END:
+#    Calculate average DUR times by user/reviewer, broken down by cohort, and graph the distributions by cohort.
+
+# ** BACKLOG Determine whether calls occurred during DUR tasks
+#    :PROPERTIES:
+#    :END:
+#    Join the call table to DUR tasks by time to identify whether the assigned user had an inbound or outbound call during each DUR task.
+
+# ** BACKLOG Analyze task duration by pet characteristics
+#    :PROPERTIES:
+#    :END:
+#    Create a graph analyzing the effect of the pet's number of allergies and whether the pet has previous prescriptions on task duration.
+
+# ** BACKLOG Break down DUR tasks by reviewer type
+#    :PROPERTIES:
+#    :END:
+#    Compare DUR tasks completed by pharmacists versus pharmacy technicians.
+
+# ** BACKLOG Build a task-duration predictive model
+#    :PROPERTIES:
+#    :END:
+#    Use features from the task, pet, change, reviewer, and call-related tables to predict task duration.
+
+# ** BACKLOG Test the effect of the previous task's similarity
+#    :PROPERTIES:
+#    :END:
+#    In the predictive model, evaluate whether the previous task being a similar type—particularly the same cohort—affects task duration.
+# ** BACKLOG
+#    :PROPERTIES:
+#    :END:

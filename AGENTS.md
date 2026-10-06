@@ -1,12 +1,16 @@
 ## Agent Instructions
 Keep changes small, boring, and reversible. Prefer existing package patterns over new abstractions
 ## Development Loop
+- Log what is done in LOG.org
+- TODO.org contains the tasks that need to get done.
+- Once a task is done, stop so that the user can check the work.
 - Read before editing. Use rg/sed for fast context and avoid broad rewrites.
 - Run make setup when dependencies or hooks are missing. Do not use global Python tools for repo commands; the project sandbox is .venv.
 - Keep generated output out of Git. dist/, build/, caches, .sandbox/, .uv/, .venv, and .env are ignored.
 ## Commits And Branches
 - Work on short-lived feature branches, not trunk.
 - Use Conventional Commits: feat: for minor, fix:/perf: for patch or hotfix, and ! or BREAKING CHANGE: for major.
+- After a task is done ask for approval to commit and make a commit.
 ## Repo Structure
 - Any data we download should be put under the data directory
 - Any charts/plots should be under the outputs/charts directory. Export data used to markdown tables for further analysis if required.
