@@ -6,7 +6,7 @@ REDRAW ?= 0
 CAUSAL_DIAGRAM_SOURCE ?= src/mermaid/DUR.mmd
 CAUSAL_DIAGRAM_OUTPUT ?= outputs/charts/DUR_detailed.png
 
-.PHONY: setup generate-task-table generate-task-intersection-table generate-task-sequence-table drop-task-table generate-valid-dur-task-table drop-valid-dur-task-table create-causal-diagram create-task-based-distributions create-task-time-bucket-distribution create-task-intersection-duration-distributions create-part-number-analysis create-mc3-analysis create-purchase-brand-analysis create-initiation-channel-analysis create-prescription-source-analysis create-approval-channel-analysis create-pettype-analysis create-npet-conditions-analysis create-ncorrection-fields-analysis create-prior-approved-rx-analysis create-prior-approved-non-vet-diet-rx-analysis create-correction-field-analysis create-mc3-pettype-analysis create-mc3-coh-pettype-final-model create-santhosh-analysis user-performance-analysis test
+.PHONY: setup generate-task-table generate-task-intersection-table generate-task-sequence-table drop-task-table generate-valid-dur-task-table drop-valid-dur-task-table create-causal-diagram create-task-based-distributions create-task-time-bucket-distribution create-task-intersection-duration-distributions create-part-number-analysis create-mc3-analysis create-purchase-brand-analysis create-initiation-channel-analysis create-prescription-source-analysis create-approval-channel-analysis create-pettype-analysis create-npet-conditions-analysis create-ncorrection-fields-analysis create-prior-approved-rx-analysis create-prior-approved-non-vet-diet-rx-analysis create-correction-field-analysis create-mc3-pettype-analysis create-mc3-coh-pettype-final-model create-santhosh-analysis create-santhosh-analysis-user user-performance-analysis test
 
 setup:
 	uv sync
@@ -86,6 +86,9 @@ create-mc3-coh-pettype-final-model:
 
 create-santhosh-analysis:
 	uv run python -m src.python.santhosh_analysis $(if $(filter 1 true yes,$(REDRAW)),--redraw-only,)
+
+create-santhosh-analysis-user:
+	uv run python -m src.python.santhosh_analysis_user $(if $(filter 1 true yes,$(REDRAW)),--redraw-only,)
 
 user-performance-analysis:
 	uv run python -m src.python.create_user_performance_analysis $(if $(filter 1 true yes,$(REDRAW)),--redraw-only,)

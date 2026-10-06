@@ -827,6 +827,29 @@ Redraw the four charts and report without querying Snowflake with:
 make create-santhosh-analysis REDRAW=1
 ```
 
+## Analyze paired user-level differences
+
+Aggregate the same task-level extract to user means within each cohort and
+allocation pattern, retain only users with both patterns, and run paired
+within-user comparisons:
+
+```bash
+make create-santhosh-analysis-user
+```
+
+The user-level cache is stored at `outputs/data/santhosh-analysis-user.parquet`.
+Four user-level density charts are written to
+`outputs/charts/santhosh-analysis-user/`, and the paired results are documented
+in `outputs/reports/md/santosh_analysis_user.md`. The charts use a base-10
+logarithmic x-axis; the report includes the user-level means and paired
+confidence intervals and p-values for Cohorts 1–4.
+
+Redraw from the user-level cache without querying Snowflake with:
+
+```bash
+make create-santhosh-analysis-user REDRAW=1
+```
+
 ## Run tests
 
 Run the repository test suite with:
@@ -864,6 +887,7 @@ The current targets are:
 | `create-correction-field-analysis` | Query Snowflake and render four cohort correction-field-name duration boxplot charts. |
 | `create-mc3-coh-pettype-final-model` | Fit the final fixed-effects model with crossed user, date, and parent-part-number random intercepts. |
 | `create-santhosh-analysis` | Compare same-cohort and different-cohort DUR work-time distributions with a Welch two-sample test. |
+| `create-santhosh-analysis-user` | Compare same-cohort and different-cohort user-level means with paired tests. |
 | `user-performance-analysis` | Render mean and median user-performance scatter matrices by cohort. |
 | `test` | Run the test suite. |
 
