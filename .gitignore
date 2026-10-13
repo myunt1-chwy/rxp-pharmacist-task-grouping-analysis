@@ -1,4 +1,6 @@
 __pycache__/
+build/
+outputs/reports/pdf/progress_report_latex.pdf
 *.py[cod]
 .env
 *.parquet

@@ -1,5 +1,23 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-13 Convert the progress report to LaTeX
+
+** Summary
+
+- Added a Pandoc-generated LaTeX document under =src/latex/= for
+  =progress_report/progress.md=, including its equations, tables, links, and
+  diagnostic plots.
+- Added =make create-progress-report= to refresh the LaTeX source and build a
+  landscape PDF under =outputs/reports/pdf/=.
+- Kept LaTeX build files and the new generated PDF out of Git.
+
+** Validation
+
+- Ran =make create-progress-report= successfully; the PDF has 13 pages.
+- Checked the LaTeX log for errors and overfull boxes and inspected rendered
+  pages with the sequence tables, fixed-effect table, and diagnostic plots.
+- Ran =git diff --check=.
+
 * 2026-10-01 Consolidate the final mixed-effects model
 
 ** Summary

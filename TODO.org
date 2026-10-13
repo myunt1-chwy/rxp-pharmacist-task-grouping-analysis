@@ -813,6 +813,11 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
     - [X] Factors Affecting Successful DURs
   - Under the model details heading copy the content of  mc3_coh_pettype_final_model.md.  Make sure the links work in the content after we move the content
 
+** DONE Convert the progress report to LaTeX and add a Make target
+   - [X] Generate =src/latex/progress_report.tex= from =progress_report/progress.md=.
+   - [X] Add =make create-progress-report= to build the PDF.
+   - [X] Verify the generated PDF renders its tables, equations, and plots.
+
 ** DONE Create a markdown for Santhosh Query Analysis
    :PROPERTIES:
    :REFNUM:   2.1.
