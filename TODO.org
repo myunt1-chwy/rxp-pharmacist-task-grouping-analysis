@@ -873,6 +873,12 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
    - [X] Make the PDF target depend on the input files.
    - [X] Rebuild and verify that report text is unchanged.
 
+** DONE Insert charts requested in DUR factors appendix
+   - [X] Replace both =xxxTODO Codex= image markers with the requested charts.
+   - [X] Use the all-cohorts median scatter chart for the second figure.
+   - [X] Add the appendix file and both images to the PDF target dependencies.
+   - [X] Rebuild and inspect the chart page.
+
 ** DONE Repair LaTeX report build
    - [X] Remove the accidental pasted block inside the sequence table.
    - [X] Restore the interrupted Cohort 2 sentence.

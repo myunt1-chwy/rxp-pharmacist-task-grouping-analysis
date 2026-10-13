@@ -9,7 +9,11 @@ TASK_GROUPING_ANALYSIS_LATEX := src/latex/task_grouping_analysis.latex
 TASK_GROUPING_ANALYSIS_APPENDIX := \
 	src/latex/appendix/motivating_example.tex \
 	src/latex/appendix/cohort_definitions.tex \
+	src/latex/appendix/dur_factors.tex \
 	src/latex/appendix/modeling_dur_processing_time.tex
+TASK_GROUPING_ANALYSIS_CHARTS := \
+	outputs/charts/user-performance-analysis/user-median-dur-duration-distributions.png \
+	outputs/charts/user-performance-analysis/user-performance-median-all-cohorts-scatter-matrix.png
 TASK_GROUPING_ANALYSIS_PDF := outputs/reports/pdf/task_grouping_analysis.pdf
 
 .PHONY: setup generate-task-table generate-task-intersection-table generate-task-sequence-table drop-task-table generate-valid-dur-task-table drop-valid-dur-task-table create-causal-diagram create-task-based-distributions create-task-time-bucket-distribution create-task-intersection-duration-distributions create-part-number-analysis create-mc3-analysis create-purchase-brand-analysis create-initiation-channel-analysis create-prescription-source-analysis create-approval-channel-analysis create-pettype-analysis create-npet-conditions-analysis create-ncorrection-fields-analysis create-prior-approved-rx-analysis create-prior-approved-non-vet-diet-rx-analysis create-correction-field-analysis create-mc3-pettype-analysis create-mc3-coh-pettype-final-model create-santhosh-analysis create-santhosh-analysis-one-sided create-santhosh-analysis-user create-santhosh-analysis-user-one-sided estimate-differences-reml user-performance-analysis create-task-grouping-analysis test
@@ -110,7 +114,7 @@ user-performance-analysis:
 
 create-task-grouping-analysis: $(TASK_GROUPING_ANALYSIS_PDF)
 
-$(TASK_GROUPING_ANALYSIS_PDF): $(TASK_GROUPING_ANALYSIS_LATEX) $(TASK_GROUPING_ANALYSIS_APPENDIX) src/latex/rxp_report.sty
+$(TASK_GROUPING_ANALYSIS_PDF): $(TASK_GROUPING_ANALYSIS_LATEX) $(TASK_GROUPING_ANALYSIS_APPENDIX) $(TASK_GROUPING_ANALYSIS_CHARTS) src/latex/rxp_report.sty
 	mkdir -p build/task-grouping-analysis "$(dir $@)"
 	TEXINPUTS=src/latex: latexmk -xelatex -interaction=nonstopmode -halt-on-error -file-line-error -outdir=build/task-grouping-analysis "$(TASK_GROUPING_ANALYSIS_LATEX)"
 	cp build/task-grouping-analysis/task_grouping_analysis.pdf "$@"

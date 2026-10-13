@@ -1,5 +1,21 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-13 Insert requested DUR factor charts
+
+** Summary
+
+- Replaced both =xxxTODO Codex= markers in =dur_factors.tex= with boxed,
+  half-width charts.
+- Added the appendix file and both charts to the PDF target dependencies.
+- After review, corrected the second figure to the available all-cohorts
+  median scatter matrix, which addresses the cross-cohort comparison.
+
+** Validation
+
+- =make create-task-grouping-analysis= produced a nine-page portrait PDF.
+- Inspected the page with both charts and found no clipping or LaTeX warnings.
+- Confirmed edits to =dur_factors.tex= trigger a Make rebuild.
+
 * 2026-10-13 Split Appendix subsections into LaTeX inputs
 
 ** Summary
