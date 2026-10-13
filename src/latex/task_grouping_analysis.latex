@@ -67,6 +67,7 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \usepackage{rxp_report}
+\usepackage{etoc}
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
@@ -83,6 +84,9 @@
 \section{Estimating Effect of Grouping Similar Tasks on DUR Processing Time}
 \section{Next Steps}\label{next-steps}
 \section{Appendix}\label{appendix}
+\etocsettocdepth{subsubsection}
+\etocsettocstyle{\noindent\textcolor{reportnavy}{\textbf{Appendix contents}}\par\smallskip}{\par}
+\localtableofcontents
 \input{appendix/cohort_definitions}
 \input{appendix/motivating_example}
 \input{appendix/dur_factors}
