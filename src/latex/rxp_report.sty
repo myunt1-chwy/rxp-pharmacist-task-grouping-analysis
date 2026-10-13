@@ -1,0 +1,33 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{rxp_report}[2026/10/13 Reusable analysis report formatting]
+
+% Use the article class with its 10pt option for the default text size.
+\RequirePackage[default,lf]{carlito}
+\RequirePackage{xcolor}
+\RequirePackage{titlesec}
+\RequirePackage{geometry}
+\RequirePackage{longtable}
+\RequirePackage{graphicx}
+\RequirePackage{etoolbox}
+\RequirePackage{lscape}
+\RequirePackage[left]{lineno}
+
+\geometry{margin=0.7in}
+\definecolor{reportnavy}{HTML}{003366}
+\titleformat*{\section}{\Large\bfseries\color{reportnavy}}
+\titleformat*{\subsection}{\large\bfseries\color{reportnavy}}
+\titleformat*{\subsubsection}{\normalsize\bfseries\color{reportnavy}}
+\titleformat{\paragraph}[block]{\normalsize\bfseries\color{reportnavy}}{\theparagraph}{1em}{}
+\titleformat{\subparagraph}[block]{\normalsize\bfseries\color{reportnavy}}{\thesubparagraph}{1em}{}
+\titlespacing*{\paragraph}{0pt}{1.5ex}{0.5ex}
+\titlespacing*{\subparagraph}{0pt}{1ex}{0.5ex}
+
+\setlength{\emergencystretch}{6em}
+\setlength{\tabcolsep}{3pt}
+\AtBeginEnvironment{longtable}{\fontsize{8}{10}\selectfont}
+\AtBeginDocument{%
+  \linenumbers
+  \ifcsname pandocbounded\endcsname
+    \renewcommand{\pandocbounded}[1]{\fbox{\resizebox{0.5\linewidth}{!}{#1}}}%
+  \fi
+}

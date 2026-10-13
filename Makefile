@@ -107,12 +107,12 @@ user-performance-analysis:
 
 create-task-grouping-analysis: $(TASK_GROUPING_ANALYSIS_PDF)
 
-$(TASK_GROUPING_ANALYSIS_LATEX): $(TASK_GROUPING_ANALYSIS_MD) src/latex/task_grouping_analysis.lua src/latex/task_grouping_analysis_header.tex
-	pandoc "$<" --from=gfm+tex_math_dollars --to=latex --standalone --lua-filter=src/latex/task_grouping_analysis.lua --include-in-header=src/latex/task_grouping_analysis_header.tex -V geometry:margin=0.7in -o "$@"
+$(TASK_GROUPING_ANALYSIS_LATEX): $(TASK_GROUPING_ANALYSIS_MD) src/latex/task_grouping_analysis.lua src/latex/task_grouping_analysis_header.tex src/latex/rxp_report.sty
+	pandoc "$<" --from=gfm+tex_math_dollars --to=latex --standalone --number-sections --lua-filter=src/latex/task_grouping_analysis.lua --include-in-header=src/latex/task_grouping_analysis_header.tex -V fontsize:10pt -o "$@"
 
 $(TASK_GROUPING_ANALYSIS_PDF): $(TASK_GROUPING_ANALYSIS_LATEX)
 	mkdir -p build/task-grouping-analysis "$(dir $@)"
-	latexmk -xelatex -interaction=nonstopmode -halt-on-error -file-line-error -outdir=build/task-grouping-analysis "$(TASK_GROUPING_ANALYSIS_LATEX)"
+	TEXINPUTS=src/latex: latexmk -xelatex -interaction=nonstopmode -halt-on-error -file-line-error -outdir=build/task-grouping-analysis "$(TASK_GROUPING_ANALYSIS_LATEX)"
 	cp build/task-grouping-analysis/task_grouping_analysis.pdf "$@"
 
 test:

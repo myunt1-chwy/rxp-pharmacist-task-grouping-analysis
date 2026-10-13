@@ -2,11 +2,11 @@
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
 \documentclass[
+  10pt,
 ]{article}
 \usepackage{xcolor}
-\usepackage[margin=0.7in]{geometry}
 \usepackage{amsmath,amssymb}
-\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\setcounter{secnumdepth}{5}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
@@ -66,27 +66,7 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-% Rotate wide tables while keeping the PDF pages portrait.
-\usepackage[default,lf]{carlito}
-\usepackage{titlesec}
-\definecolor{sectiongray}{HTML}{666666}
-\titleformat*{\section}{\Large\bfseries\color{sectiongray}}
-\titleformat*{\subsection}{\large\bfseries\color{sectiongray}}
-\titleformat*{\subsubsection}{\normalsize\bfseries\color{sectiongray}}
-\titleformat{\paragraph}[block]{\normalsize\bfseries\color{sectiongray}}{}{0pt}{}
-\titleformat{\subparagraph}[block]{\normalsize\bfseries\color{sectiongray}}{}{0pt}{}
-\titlespacing*{\paragraph}{0pt}{1.5ex}{0.5ex}
-\titlespacing*{\subparagraph}{0pt}{1ex}{0.5ex}
-\usepackage{lscape}
-\setlength{\emergencystretch}{6em}
-\usepackage{etoolbox}
-\setlength{\tabcolsep}{3pt}
-\AtBeginEnvironment{longtable}{\scriptsize}
-\usepackage[left]{lineno}
-\AtBeginDocument{%
-  \linenumbers
-  \renewcommand{\pandocbounded}[1]{\fbox{\resizebox{0.5\linewidth}{!}{#1}}}%
-}
+\usepackage{rxp_report}
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}

@@ -1,5 +1,43 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-13 Number report section headings
+
+** Summary
+
+- Enabled Pandoc's hierarchical section numbering for the report.
+- Updated the reusable style so paragraph and subparagraph headings display
+  their numbers too.
+
+** Validation
+
+- Rebuilt the PDF and inspected numbered headings on the title and appendix
+  pages.
+
+* 2026-10-13 Extract reusable LaTeX formatting
+
+** Summary
+
+- Moved the font, navy headings, margins, table size, line numbers, and framed
+  figures into =src/latex/rxp_report.sty=.
+- Kept the report-specific header as a one-line package import and the 10 pt
+  document-class option in the Make target.
+- Added the style file to the Make dependencies.
+
+** Validation
+
+- Rebuilt and inspected the portrait PDF.
+
+* 2026-10-13 Update report typography
+
+** Summary
+
+- Set the LaTeX document to 10 pt and all longtable text to 8 pt.
+- Changed the visible report title and section headings to navy blue.
+
+** Validation
+
+- Rebuilt and inspected the portrait PDF.
+
 * 2026-10-13 Align report support paths with task grouping analysis
 
 ** Summary

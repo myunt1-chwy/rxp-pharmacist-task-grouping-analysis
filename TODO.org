@@ -837,6 +837,22 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
    - [X] Move the Markdown source to =task_grouping_analysis/=.
    - [X] Update the Make target dependencies and rebuild the PDF.
 
+** DONE Update report typography
+   - [X] Use 10 pt as the document's default font size.
+   - [X] Set table text to 8 pt.
+   - [X] Color the report title and section headings navy blue.
+   - [X] Rebuild and inspect the PDF.
+
+** DONE Extract reusable LaTeX formatting
+   - [X] Move report styling into =src/latex/rxp_report.sty=.
+   - [X] Load the style from the report header and track it as a Make dependency.
+   - [X] Rebuild and inspect the PDF.
+
+** DONE Number report section headings
+   - [X] Enable hierarchical section numbering in the Pandoc build.
+   - [X] Show numbers on the deeper block-style headings.
+   - [X] Rebuild and inspect the PDF.
+
 ** DONE Create a markdown for Santhosh Query Analysis
    :PROPERTIES:
    :REFNUM:   2.1.
