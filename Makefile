@@ -5,11 +5,11 @@ REDRAW_ONLY ?= 0
 REDRAW ?= 0
 CAUSAL_DIAGRAM_SOURCE ?= src/mermaid/DUR.mmd
 CAUSAL_DIAGRAM_OUTPUT ?= outputs/charts/DUR_detailed.png
-PROGRESS_REPORT_MD := progress_report/progress.md
-PROGRESS_REPORT_TEX := src/latex/progress_report.tex
-PROGRESS_REPORT_PDF := outputs/reports/pdf/progress_report_latex.pdf
+TASK_GROUPING_ANALYSIS_MD := task_grouping_analysis/progress.md
+TASK_GROUPING_ANALYSIS_LATEX := src/latex/task_grouping_analysis.latex
+TASK_GROUPING_ANALYSIS_PDF := outputs/reports/pdf/task_grouping_analysis.pdf
 
-.PHONY: setup generate-task-table generate-task-intersection-table generate-task-sequence-table drop-task-table generate-valid-dur-task-table drop-valid-dur-task-table create-causal-diagram create-task-based-distributions create-task-time-bucket-distribution create-task-intersection-duration-distributions create-part-number-analysis create-mc3-analysis create-purchase-brand-analysis create-initiation-channel-analysis create-prescription-source-analysis create-approval-channel-analysis create-pettype-analysis create-npet-conditions-analysis create-ncorrection-fields-analysis create-prior-approved-rx-analysis create-prior-approved-non-vet-diet-rx-analysis create-correction-field-analysis create-mc3-pettype-analysis create-mc3-coh-pettype-final-model create-santhosh-analysis create-santhosh-analysis-one-sided create-santhosh-analysis-user create-santhosh-analysis-user-one-sided estimate-differences-reml user-performance-analysis create-progress-report test
+.PHONY: setup generate-task-table generate-task-intersection-table generate-task-sequence-table drop-task-table generate-valid-dur-task-table drop-valid-dur-task-table create-causal-diagram create-task-based-distributions create-task-time-bucket-distribution create-task-intersection-duration-distributions create-part-number-analysis create-mc3-analysis create-purchase-brand-analysis create-initiation-channel-analysis create-prescription-source-analysis create-approval-channel-analysis create-pettype-analysis create-npet-conditions-analysis create-ncorrection-fields-analysis create-prior-approved-rx-analysis create-prior-approved-non-vet-diet-rx-analysis create-correction-field-analysis create-mc3-pettype-analysis create-mc3-coh-pettype-final-model create-santhosh-analysis create-santhosh-analysis-one-sided create-santhosh-analysis-user create-santhosh-analysis-user-one-sided estimate-differences-reml user-performance-analysis create-task-grouping-analysis test
 
 setup:
 	uv sync
@@ -105,15 +105,15 @@ estimate-differences-reml:
 user-performance-analysis:
 	uv run python -m src.python.create_user_performance_analysis $(if $(filter 1 true yes,$(REDRAW)),--redraw-only,)
 
-create-progress-report: $(PROGRESS_REPORT_PDF)
+create-task-grouping-analysis: $(TASK_GROUPING_ANALYSIS_PDF)
 
-$(PROGRESS_REPORT_TEX): $(PROGRESS_REPORT_MD) src/latex/progress_report.lua src/latex/progress_report_header.tex
-	pandoc "$<" --from=gfm+tex_math_dollars --to=latex --standalone --lua-filter=src/latex/progress_report.lua --include-in-header=src/latex/progress_report_header.tex -V geometry:landscape -V geometry:margin=0.7in -o "$@"
+$(TASK_GROUPING_ANALYSIS_LATEX): $(TASK_GROUPING_ANALYSIS_MD) src/latex/task_grouping_analysis.lua src/latex/task_grouping_analysis_header.tex
+	pandoc "$<" --from=gfm+tex_math_dollars --to=latex --standalone --lua-filter=src/latex/task_grouping_analysis.lua --include-in-header=src/latex/task_grouping_analysis_header.tex -V geometry:margin=0.7in -o "$@"
 
-$(PROGRESS_REPORT_PDF): $(PROGRESS_REPORT_TEX)
-	mkdir -p build/progress-report "$(dir $@)"
-	latexmk -xelatex -interaction=nonstopmode -halt-on-error -file-line-error -outdir=build/progress-report "$(PROGRESS_REPORT_TEX)"
-	cp build/progress-report/progress_report.pdf "$@"
+$(TASK_GROUPING_ANALYSIS_PDF): $(TASK_GROUPING_ANALYSIS_LATEX)
+	mkdir -p build/task-grouping-analysis "$(dir $@)"
+	latexmk -xelatex -interaction=nonstopmode -halt-on-error -file-line-error -outdir=build/task-grouping-analysis "$(TASK_GROUPING_ANALYSIS_LATEX)"
+	cp build/task-grouping-analysis/task_grouping_analysis.pdf "$@"
 
 test:
 	uv run pytest

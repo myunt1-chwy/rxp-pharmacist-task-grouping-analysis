@@ -804,7 +804,7 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
   :PROPERTIES:
   :REFNUM:   2.
   :END:
-  - [X] Create a new directory called progress_report under repo main.
+  - [X] Keep the report Markdown under =task_grouping_analysis/=.
   - [X] Create a markdown file called progress.md
   - [X] Create a section with today's date
   - [X] Create a section called Appendix
@@ -814,9 +814,28 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
   - Under the model details heading copy the content of  mc3_coh_pettype_final_model.md.  Make sure the links work in the content after we move the content
 
 ** DONE Convert the progress report to LaTeX and add a Make target
-   - [X] Generate =src/latex/progress_report.tex= from =progress_report/progress.md=.
-   - [X] Add =make create-progress-report= to build the PDF.
+   - [X] Generate =src/latex/task_grouping_analysis.latex= from =task_grouping_analysis/progress.md=.
+   - [X] Add =make create-task-grouping-analysis= to build the PDF.
    - [X] Verify the generated PDF renders its tables, equations, and plots.
+
+** DONE Set the LaTeX report to portrait
+   - [X] Build portrait PDF pages and rotate only the wide tables.
+   - [X] Verify the regenerated report's layout and page dimensions.
+
+** DONE Number the LaTeX report lines and frame its figures
+   - [X] Add line numbers to the left margin.
+   - [X] Box the figures and reduce them to half the text width.
+   - [X] Rebuild and inspect the portrait PDF.
+
+** DONE Rename and restyle the task grouping analysis document
+   - [X] Name the source =task_grouping_analysis.latex= and update the Make target.
+   - [X] Use a Calibri-like font and gray section headings.
+   - [X] Rebuild and inspect the renamed PDF.
+
+** DONE Align report support paths with task grouping analysis
+   - [X] Rename the LaTeX header and Lua filter to =task_grouping_analysis=.
+   - [X] Move the Markdown source to =task_grouping_analysis/=.
+   - [X] Update the Make target dependencies and rebuild the PDF.
 
 ** DONE Create a markdown for Santhosh Query Analysis
    :PROPERTIES:

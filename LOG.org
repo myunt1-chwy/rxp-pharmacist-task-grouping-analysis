@@ -1,5 +1,71 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-13 Align report support paths with task grouping analysis
+
+** Summary
+
+- Moved the Markdown source to =task_grouping_analysis/progress.md=.
+- Renamed the LaTeX header and Pandoc Lua filter to use the
+  =task_grouping_analysis= prefix and updated the Make dependencies.
+- Left editor autosave and lock files in the old =progress_report/= directory.
+
+** Validation
+
+- Ran =make create-task-grouping-analysis= using the renamed source files.
+- Confirmed that the 10-page portrait PDF remains current.
+
+* 2026-10-13 Rename and restyle the task grouping analysis report
+
+** Summary
+
+- Renamed the generated LaTeX source to =src/latex/task_grouping_analysis.latex=,
+  the Make target to =create-task-grouping-analysis=, and the generated PDF to
+  =outputs/reports/pdf/task_grouping_analysis.pdf=.
+- Used Carlito for report text as a close substitute for the reference PDF's
+  Calibri, which is not installed locally, and colored all section headings
+  medium gray.
+- Rendered the deepest Markdown headings as block headings so their gray style
+  and position remain consistent before tables and figures.
+- Moved the superseded generated PDF into the ignored build directory.
+
+** Validation
+
+- Ran =make create-task-grouping-analysis= successfully.
+- Confirmed that the new PDF embeds Carlito and inspected portrait text and
+  figure pages with gray headings.
+- Confirmed no LaTeX errors or overfull boxes in the final build.
+
+* 2026-10-13 Number report lines and frame figures
+
+** Summary
+
+- Added continuous line numbers in the left margin of the LaTeX report.
+- Framed all five embedded diagnostic figures and reduced each to half the
+  text width.
+
+** Validation
+
+- Ran =make create-progress-report=; the PDF has 10 portrait pages.
+- Inspected the line numbers, rotated table, and figure pages after rendering.
+- Checked the LaTeX log for errors and overfull boxes.
+
+* 2026-10-13 Set the LaTeX report to portrait
+
+** Summary
+
+- Changed the report build to portrait letter pages.
+- Rotated the two sequence tables together and the fixed-effects table while
+  leaving the remaining content upright.
+- Shortened the comparison-table headings in the PDF so the table fits on a
+  portrait page; the Markdown source remains unchanged.
+
+** Validation
+
+- Ran =make create-progress-report=; the PDF has 12 portrait pages.
+- Checked the LaTeX log for errors and overfull boxes and inspected the
+  rendered table and chart pages.
+- Ran =git diff --check=.
+
 * 2026-10-13 Convert the progress report to LaTeX
 
 ** Summary

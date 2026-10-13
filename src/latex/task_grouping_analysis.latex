@@ -4,7 +4,7 @@
 \documentclass[
 ]{article}
 \usepackage{xcolor}
-\usepackage[landscape,margin=0.7in]{geometry}
+\usepackage[margin=0.7in]{geometry}
 \usepackage{amsmath,amssymb}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
 \usepackage{iftex}
@@ -66,9 +66,27 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-% Keep wide Markdown tables legible on landscape pages.
+% Rotate wide tables while keeping the PDF pages portrait.
+\usepackage[default,lf]{carlito}
+\usepackage{titlesec}
+\definecolor{sectiongray}{HTML}{666666}
+\titleformat*{\section}{\Large\bfseries\color{sectiongray}}
+\titleformat*{\subsection}{\large\bfseries\color{sectiongray}}
+\titleformat*{\subsubsection}{\normalsize\bfseries\color{sectiongray}}
+\titleformat{\paragraph}[block]{\normalsize\bfseries\color{sectiongray}}{}{0pt}{}
+\titleformat{\subparagraph}[block]{\normalsize\bfseries\color{sectiongray}}{}{0pt}{}
+\titlespacing*{\paragraph}{0pt}{1.5ex}{0.5ex}
+\titlespacing*{\subparagraph}{0pt}{1ex}{0.5ex}
+\usepackage{lscape}
+\setlength{\emergencystretch}{6em}
 \usepackage{etoolbox}
-\AtBeginEnvironment{longtable}{\scriptsize\setlength{\tabcolsep}{3pt}}
+\setlength{\tabcolsep}{3pt}
+\AtBeginEnvironment{longtable}{\scriptsize}
+\usepackage[left]{lineno}
+\AtBeginDocument{%
+  \linenumbers
+  \renewcommand{\pandocbounded}[1]{\fbox{\resizebox{0.5\linewidth}{!}{#1}}}%
+}
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
@@ -104,6 +122,8 @@ A model was built to predict DUR durations for the following reasons:
 \end{itemize}
 
 Consider two task sequences from the same user:
+
+\begin{landscape}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}lrrlrllll@{}}
@@ -181,6 +201,8 @@ Parasiticide & 12 & 158998 & Cat & 29 & 2026-07-15 02:20:36.000 +0000 &
 \end{longtable}
 }
 
+\end{landscape}
+
 The second sequence demonstrates substantial inherent variability in DUR
 times. Using a model, we would like to quantify this variability.
 
@@ -199,12 +221,13 @@ remains.
 
 The predicted effect at several baseline DUR durations is:
 
+\begingroup\setlength{\tabcolsep}{5pt}
+
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}rrrrrr@{}}
 \toprule\noalign{}
-Duration without same preceding task & Duration with same preceding task
-& -1 residual SD bound & +1 residual SD bound & Difference & Percentage
-change \\
+Without same preceding & With same preceding & -1 residual SD & +1
+residual SD & Difference & Change (\%) \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
@@ -214,6 +237,8 @@ change \\
 150.00 s & 139.96 s & 58.53 s & 357.84 s & -10.04 s & -6.69\% \\
 \end{longtable}
 }
+
+\endgroup
 
 The model predicts that users and products differ in processing speed,
 while day of the week has no statistically significant effect.
@@ -326,7 +351,8 @@ The weekday fixed effects are not statistically significant, whereas
 some approval-channel and prescription-source effects are.
 Customer-originated prescriptions take longer.
 
-Purpose and analysis sample
+\subparagraph{Purpose and analysis
+sample}\label{purpose-and-analysis-sample}
 
 This is the final model. It estimates how same-cell sequence position
 relates to DUR duration while controlling for correction status,
@@ -356,7 +382,7 @@ bound is strict. MC3, COH, PETTYPE, parent part number, approval
 channel, and prescription source blanks are represented by
 \texttt{\textless{}Missing\textgreater{}}.
 
-Derived indicators
+\subparagraph{Derived indicators}\label{derived-indicators}
 
 For sequence number \(S_i\), batch length \(L_i\), and correction count
 \(N_i\), the three binary fixed effects are
@@ -372,7 +398,7 @@ C_i=\mathbf{1}(N_i>0).
 Thus \(P_i\) is \texttt{SAME\_PRECEDING}, \(F_i\) is
 \texttt{SAME\_FOLLOWING}, and \(C_i\) is \texttt{HAS\_CORRECTION}.
 
-Outcome transformation
+\subparagraph{Outcome transformation}\label{outcome-transformation}
 
 The retained durations receive one global Box-Cox transformation:
 
@@ -389,7 +415,7 @@ The maximum-likelihood transformation estimate is
 standard deviations, residuals, RMSE, and diagnostics are therefore on
 the Box-Cox scale.
 
-Complete model formula
+\subparagraph{Complete model formula}\label{complete-model-formula}
 
 Index task, fixed-effect cell, user, date, and parent part by
 \(i, c, u, d, p\). The model is
@@ -437,7 +463,8 @@ The conditional fitted value and residual are
 \qquad e_i=Z_i-\widehat{Z}_i.
 \]
 
-Inference and fit statistics
+\subparagraph{Inference and fit
+statistics}\label{inference-and-fit-statistics}
 
 For fixed effect \(k\), the report uses
 
@@ -461,7 +488,7 @@ R_c^2=1-\frac{\sum_i e_i^2}{\sum_i(Z_i-\bar Z)^2},\qquad
 RMSE_c=\sqrt{\frac1n\sum_i e_i^2}.
 \]
 
-Sample and fit
+\subparagraph{Sample and fit}\label{sample-and-fit}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}lr@{}}
@@ -487,7 +514,9 @@ Converged & True \\
 \end{longtable}
 }
 
-Fixed effects
+\subparagraph{Fixed effects}\label{fixed-effects}
+
+\begin{landscape}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}lrrrrrc@{}}
@@ -555,7 +584,9 @@ PRESCRIPTION\_SOURCE{[}VERBAL vs PRACTICE\_HUB{]} & -0.002803 & 0.011736
 \end{longtable}
 }
 
-Variance components
+\end{landscape}
+
+\subparagraph{Variance components}\label{variance-components}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}lrr@{}}
@@ -572,7 +603,7 @@ Residual & 0.603803 & {[}0.603351, 0.604255{]} \\
 \end{longtable}
 }
 
-Diagnostics
+\subparagraph{Diagnostics}\label{diagnostics}
 
 \pandocbounded{\includegraphics[keepaspectratio,alt={User Q--Q plot}]{outputs/charts/mc3-coh-pettype-final-model/user_random_intercepts_qq.png}}
 
@@ -584,7 +615,7 @@ Diagnostics
 
 \pandocbounded{\includegraphics[keepaspectratio,alt={Predicted versus outcome}]{outputs/charts/mc3-coh-pettype-final-model/predicted_vs_boxcox_actual.png}}
 
-Artifacts
+\subparagraph{Artifacts}\label{artifacts}
 
 \begin{itemize}
 \tightlist

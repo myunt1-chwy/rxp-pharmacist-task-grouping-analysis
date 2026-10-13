@@ -1,0 +1,21 @@
+% Rotate wide tables while keeping the PDF pages portrait.
+\usepackage[default,lf]{carlito}
+\usepackage{titlesec}
+\definecolor{sectiongray}{HTML}{666666}
+\titleformat*{\section}{\Large\bfseries\color{sectiongray}}
+\titleformat*{\subsection}{\large\bfseries\color{sectiongray}}
+\titleformat*{\subsubsection}{\normalsize\bfseries\color{sectiongray}}
+\titleformat{\paragraph}[block]{\normalsize\bfseries\color{sectiongray}}{}{0pt}{}
+\titleformat{\subparagraph}[block]{\normalsize\bfseries\color{sectiongray}}{}{0pt}{}
+\titlespacing*{\paragraph}{0pt}{1.5ex}{0.5ex}
+\titlespacing*{\subparagraph}{0pt}{1ex}{0.5ex}
+\usepackage{lscape}
+\setlength{\emergencystretch}{6em}
+\usepackage{etoolbox}
+\setlength{\tabcolsep}{3pt}
+\AtBeginEnvironment{longtable}{\scriptsize}
+\usepackage[left]{lineno}
+\AtBeginDocument{%
+  \linenumbers
+  \renewcommand{\pandocbounded}[1]{\fbox{\resizebox{0.5\linewidth}{!}{#1}}}%
+}

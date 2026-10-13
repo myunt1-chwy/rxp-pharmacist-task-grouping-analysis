@@ -1,6 +1,6 @@
 __pycache__/
 build/
-outputs/reports/pdf/progress_report_latex.pdf
+outputs/reports/pdf/task_grouping_analysis.pdf
 *.py[cod]
 .env
 *.parquet
