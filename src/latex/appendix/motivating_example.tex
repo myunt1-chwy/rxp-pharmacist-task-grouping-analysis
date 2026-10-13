@@ -1,12 +1,9 @@
 \subsection{Motivating Example for Building a Detailed Model}
 In this section, two task sequences from the same user are examined.
 
-Both sequences have MC3 \texttt{Parasiticide} and approval channel
-\texttt{PH}. All start times have UTC offset \texttt{+0000} and
-\texttt{.000} milliseconds; blank updated fields mean no fields were
-updated.
+Both sequences have Parasiticide as merchandizing category level 3 (MC3)  and  the approval channel for the prescription is Practice Hub. Updated fields column contains the the data the pharmacist altered during the DUR
 
-Sequence A: pet \texttt{Dog}, initiation channel \texttt{AUTOSHIP}.
+In the first sequence, all the prescriptions are for dogs and the cohort is 1.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}rrrll@{}}
@@ -32,8 +29,9 @@ fields \\
 13 & 146387 & 54 & 2026-04-30 06:49:19 & \\
 \end{longtable}
 }
+At first glance, it can be seen that if the pharmacist updates prescription information, highly likely, the DUR process takes longer. The 13 DUR long session takes place within 7 minutes and the DUR durations vary between 6 and 97 seconds suggesting that there is significant unaccounted variation in time measurements. It is hard to discern any pattern by inspection that suggests any benefit of grouping tasks together.
 
-Sequence B: pet \texttt{Cat}, initiation channel \texttt{OMS}.
+In the second sequence, the prescriptions are for cats. Note that for the same MC3 and cohort (cohort 1 in this case), pet and even part number (158995) we can expect significant variation. In this case, it can be seen that the duration varies between 3 and 50 seconds for the same part number and pet type for the same pharmacist in a 4 minute time span.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}rrrll@{}}
@@ -58,6 +56,3 @@ fields \\
 12 & 158998 & 29 & 2026-07-15 02:20:36 & \\
 \end{longtable}
 }
-
-The second sequence demonstrates substantial inherent variability in DUR
-times.
