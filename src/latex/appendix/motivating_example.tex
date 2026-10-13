@@ -1,0 +1,63 @@
+\subsection{Motivating Example for Building a Detailed Model}
+In this section, two task sequences from the same user are examined.
+
+Both sequences have MC3 \texttt{Parasiticide} and approval channel
+\texttt{PH}. All start times have UTC offset \texttt{+0000} and
+\texttt{.000} milliseconds; blank updated fields mean no fields were
+updated.
+
+Sequence A: pet \texttt{Dog}, initiation channel \texttt{AUTOSHIP}.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}rrrll@{}}
+\toprule\noalign{}
+Order & Part number & Duration (s) & Start time (UTC) & Updated
+fields \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & 146066 & 40 & 2026-04-30 06:42:54 & \\
+2 & 152702 & 27 & 2026-04-30 06:43:36 & directions \\
+3 & 146391 & 40 & 2026-04-30 06:44:06 & \\
+4 & 151583 & 7 & 2026-04-30 06:44:48 & \\
+5 & 146138 & 7 & 2026-04-30 06:44:56 & \\
+6 & 146142 & 43 & 2026-04-30 06:45:05 & directions \\
+7 & 146142 & 35 & 2026-04-30 06:45:49 & directions \\
+8 & 146064 & 39 & 2026-04-30 06:46:26 & directions \\
+9 & 146167 & 12 & 2026-04-30 06:47:07 & \\
+10 & 146322 & 9 & 2026-04-30 06:47:21 & directions \\
+11 & 146167 & 97 & 2026-04-30 06:47:32 & directions \\
+12 & 146050 & 6 & 2026-04-30 06:49:11 & \\
+13 & 146387 & 54 & 2026-04-30 06:49:19 & \\
+\end{longtable}
+}
+
+Sequence B: pet \texttt{Cat}, initiation channel \texttt{OMS}.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}rrrll@{}}
+\toprule\noalign{}
+Order & Part number & Duration (s) & Start time (UTC) & Updated
+fields \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & 158995 & 11 & 2026-07-15 02:17:23 & \\
+2 & 158995 & 35 & 2026-07-15 02:17:36 & \\
+3 & 158995 & 3 & 2026-07-15 02:18:13 & \\
+4 & 158995 & 13 & 2026-07-15 02:18:17 & \\
+5 & 158995 & 13 & 2026-07-15 02:18:31 & \\
+6 & 158995 & 6 & 2026-07-15 02:18:46 & \\
+7 & 158995 & 16 & 2026-07-15 02:18:53 & \\
+8 & 158995 & 13 & 2026-07-15 02:19:11 & \\
+9 & 158995 & 6 & 2026-07-15 02:19:25 & \\
+10 & 158995 & 50 & 2026-07-15 02:19:32 & \\
+11 & 158998 & 11 & 2026-07-15 02:20:23 & \\
+12 & 158998 & 29 & 2026-07-15 02:20:36 & \\
+\end{longtable}
+}
+
+The second sequence demonstrates substantial inherent variability in DUR
+times.

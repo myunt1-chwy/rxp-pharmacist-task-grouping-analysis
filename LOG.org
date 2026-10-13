@@ -1,5 +1,85 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-13 Split Appendix subsections into LaTeX inputs
+
+** Summary
+
+- Moved each of the three Appendix subsections into its own file under
+  =src/latex/appendix= and included them from the main report.
+- Added all three files as dependencies of the PDF Make target.
+- Preserved the existing LaTeX content without using Markdown generation.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded; the PDF text is unchanged
+  from the pre-split build.
+- Confirmed Make rebuilds when an Appendix input changes and inspected the
+  rendered first page.
+
+* 2026-10-13 Repair LaTeX report build
+
+** Summary
+
+- Removed an accidentally pasted block nested in row 12 of the later sequence
+  table and restored the row's original cells.
+- Restored the interrupted sentence in the Cohort 2 paragraph.
+- Preserved the other LaTeX edits; no Markdown regeneration was used.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded and produced an eight-page
+  portrait PDF in =outputs/reports/pdf=.
+- Inspected rendered pages and confirmed the LaTeX log has no warnings or
+  overfull boxes.
+- Ran =git diff --check=.
+
+* 2026-10-13 Make LaTeX the report source of truth
+
+** Summary
+
+- Removed Markdown-to-LaTeX generation from the report Make target.
+- The PDF now depends directly on the existing LaTeX document and shared style.
+- Left the LaTeX document and Markdown file untouched.
+
+** Validation
+
+- Dry-ran =make create-task-grouping-analysis= and confirmed it invokes only
+  the LaTeX compiler and PDF copy steps when a rebuild is needed.
+- Did not rebuild the PDF or edit the LaTeX document while the user was
+  making changes to it.
+
+* 2026-10-13 Reduce bullet-list indentation
+
+** Summary
+
+- Set bulleted-list left margins to 1.5 em per level, with a 0.4 em gap
+  between bullet and text, in the reusable report style.
+
+** Validation
+
+- Rebuilt the portrait PDF and inspected top-level and nested lists.
+
+* 2026-10-13 Reduce empty space in the task grouping report
+
+** Summary
+
+- Moved constant sequence fields and timestamp suffixes into notes so the two
+  sequence tables fit upright without dropping row data.
+- Shortened repeated fixed-effect term prefixes with an explicit legend; the
+  full seven-column table now fits upright.
+- Tightened margins, lists, paragraphs, headings, and display-math gaps in the
+  reusable style. Kept 10 pt body text, 8 pt tables, left line numbers, and
+  half-width boxed figures.
+- Kept table headings with at least the first several rows using =needspace=.
+
+** Validation
+
+- Ran =make create-task-grouping-analysis=: 7 portrait pages instead of 10.
+- Compared 25 sequence rows and 27 fixed-effect rows against the committed
+  Markdown; all row values were preserved.
+- Inspected all PDF pages, confirmed no LaTeX warnings or overfull boxes, and
+  ran =git diff --check=.
+
 * 2026-10-13 Number report section headings
 
 ** Summary

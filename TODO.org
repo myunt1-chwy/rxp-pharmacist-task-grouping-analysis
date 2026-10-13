@@ -853,6 +853,31 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
    - [X] Show numbers on the deeper block-style headings.
    - [X] Rebuild and inspect the PDF.
 
+** DONE Reduce empty space in the task grouping report
+   - [X] Reformat repeated fields in the two sequence tables and fixed-effects table without dropping values.
+   - [X] Tighten reusable margins and vertical spacing while keeping 10 pt body, 8 pt tables, and half-width figures.
+   - [X] Keep table headings with their tables and rebuild the portrait PDF.
+   - [X] Verify all table rows and inspect the seven-page result.
+
+** DONE Reduce bullet-list indentation
+   - [X] Reduce indentation for nested and top-level bulleted lists in the reusable style.
+   - [X] Rebuild and inspect the report PDF.
+
+** DONE Make LaTeX the report source of truth
+   - [X] Remove Markdown-to-LaTeX generation from =create-task-grouping-analysis=.
+   - [X] Keep the PDF target dependent on the handwritten LaTeX and shared style.
+   - [X] Verify the target without rewriting the LaTeX document.
+
+** DONE Split Appendix subsections into separate LaTeX files
+   - [X] Move each Appendix subsection into a dedicated input file.
+   - [X] Make the PDF target depend on the input files.
+   - [X] Rebuild and verify that report text is unchanged.
+
+** DONE Repair LaTeX report build
+   - [X] Remove the accidental pasted block inside the sequence table.
+   - [X] Restore the interrupted Cohort 2 sentence.
+   - [X] Build and inspect the portrait PDF without regenerating LaTeX from Markdown.
+
 ** DONE Create a markdown for Santhosh Query Analysis
    :PROPERTIES:
    :REFNUM:   2.1.
