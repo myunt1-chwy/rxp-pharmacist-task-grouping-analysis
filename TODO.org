@@ -879,19 +879,152 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
    - [X] Add the appendix file and both images to the PDF target dependencies.
    - [X] Rebuild and inspect the chart page.
 
+** DONE Place DUR factor charts side by side
+   - [X] Align both boxed charts in half-width columns.
+   - [X] Fix the second image reference and rebuild the PDF.
+   - [X] Inspect the rendered chart page.
+
+** DONE Add captions and references to DUR factor charts
+   - [X] Give each chart a numbered caption and label.
+   - [X] Reference each chart from the surrounding text.
+   - [X] Rebuild and inspect the PDF with resolved references.
+
+** DONE Make DUR factor figure frames the same size
+   - [X] Use equal-width, equal-height frames without distorting the images.
+   - [X] Rebuild and inspect the rendered figures and captions.
+
+** DONE Place motivating example tables side by side
+   - [X] Put both sequence tables in adjacent minipages at 8 pt.
+   - [X] Add numbered captions and in-text references.
+   - [X] Verify all 25 rows and inspect the rebuilt PDF.
+
+** DONE Put motivating example table captions below tables
+   - [X] Move both captions under their tables and align them.
+   - [X] Rebuild and inspect the PDF with resolved references.
+
+** DONE Make future chart PNG backgrounds transparent
+   - [X] Update the chart-export preference and shared Altair background.
+   - [X] Verify a newly rendered PNG has transparent pixels.
+
+** DONE Add PETTYPE chart statistics tables
+   - [X] Remove category pipe/task-count annotations.
+   - [X] Add counts, medians, averages, and standard deviations below each chart.
+   - [X] Redraw transparent PNGs from cached data and inspect the result.
+
+** DONE Add correction-field chart statistics tables
+   - [X] Remove category task-count annotations and add the four summary columns.
+   - [X] Redraw all four cohort PNGs with transparent backgrounds.
+   - [X] Run focused tests and inspect the output.
+
+** DONE Add correction-field-count chart statistics tables
+   - [X] Remove category task-count annotations and add the four summary columns.
+   - [X] Redraw all four cohort PNGs with transparent backgrounds.
+   - [X] Run focused tests and verify the exported PNGs.
+
+** DONE Insert correction charts in Alterations/Corrections
+   - [X] Add 2-by-2 grids for correction-field counts and names.
+   - [X] Add captions, labels, references, and PDF chart dependencies.
+   - [X] Rebuild and inspect both figure pages.
+
+** DONE Add appendix-only table of contents
+   - [X] List appendix subsections and nested headings beneath Appendix.
+   - [X] Rebuild and inspect the PDF with resolved page numbers.
+
+** DONE Add references at the end of the report
+   - [X] List the identifiable sources already credited in the report.
+   - [X] Rebuild and inspect the final PDF page.
+
+** DONE Show Mehmet Yunt as report author
+   - [X] Add a visible byline and PDF author metadata.
+   - [X] Rebuild and inspect the first page.
+
+** DONE Add compact report title and date
+   - [X] Show Task Grouping Analysis above the author.
+   - [X] Show the build date below the author and set PDF title metadata.
+   - [X] Rebuild and inspect the first page.
+
+** DONE Insert detailed DUR causal graph
+   - [X] Replace the Causal Graph TODO with the existing diagram.
+   - [X] Add a caption, label, reference, and PDF chart dependency.
+   - [X] Rebuild and inspect the affected pages.
+
+** DONE Insert prescription-source and approval-channel charts
+   - [X] Replace both remaining DUR-factors TODOs with cohort chart grids.
+   - [X] Add captions, labels, references, and PDF chart dependencies.
+   - [X] Rebuild and inspect the figure pages with resolved references.
+
+** DONE Add cohort user one-sided comparison to appendix
+   - [X] Convert the statistical narrative and tables to a separate LaTeX file.
+   - [X] Include four cohort density plots in a 2-by-2 grid and reproduce the SQL.
+   - [X] Add PDF build dependencies and inspect the rendered pages.
+
+** DONE Add confidence intervals to cohort user estimates
+   - [X] Calculate 95% two-sided intervals from the matched-user data.
+   - [X] Add intervals to the LaTeX summary and paired-comparison tables.
+   - [X] Rebuild the PDF and inspect the affected pages.
+
+** DONE Add a labeled confounding reference
+   - [X] Add the Confounding page to the LaTeX References list.
+   - [X] Give it a stable label for cross-references.
+
+** DONE Add a labeled analysis repository reference
+   - [X] Add the GitHub repository URL to the LaTeX References list.
+   - [X] Give it a stable label for cross-references.
+
+** DONE Rename LaTeX entry file to main.tex
+   - [X] Rename the entry file without changing its contents.
+   - [X] Update the PDF Make target and rebuild the report.
+
+** DONE Track reproducing results in the PDF target
+   - [X] Add the existing appendix input to the Make dependencies.
+   - [X] Verify the report target still builds.
+
+** DONE Rename statistics comparison analysis artifacts
+   - [X] Rename task-level and user-level modules, reports, caches, figures, and SQL files.
+   - [X] Update Make targets, imports, documentation, tests, and LaTeX references.
+   - [X] Run all renamed targets, the test suite, and the PDF build.
+
+** DONE Regenerate transparent user-level cohort density plots
+   - [X] Verify the chart generator's transparent background configuration.
+   - [X] Add a regression test and regenerate all four cohort PNGs from cached data.
+   - [X] Rebuild the PDF and inspect the 2-by-2 plot grid.
+
+** DONE Redraw prescription-source and approval-channel figures with summary tables
+   - [X] Add task count, median, average, and standard deviation beneath each chart.
+   - [X] Regenerate all eight PNGs with transparent backgrounds using the redraw targets.
+   - [X] Test the chart specifications and inspect the rebuilt PDF pages.
+
+** DONE Insert PETTYPE cohort charts in DUR factors appendix
+   - [X] Replace the Pet Type TODO with a boxed 2-by-2 chart grid.
+   - [X] Add captions, labels, and references for all four cohorts.
+   - [X] Rebuild and inspect the PDF page.
+
+** DONE Keep PETTYPE figures inside Pet Type subsection
+   - [X] Prevent the four-chart grid from floating past later headings.
+   - [X] Keep the heading and grid together and inspect the PDF page.
+
+** DONE Insert cohort and part-number figures in DUR factors appendix
+   - [X] Replace both Cohort and Part Number TODOs with the available charts.
+   - [X] Add captions, labels, references, and PDF target dependencies.
+   - [X] Rebuild and inspect the PDF without separating the Pet Type grid.
+
+** DONE Fit cohort and part-number figures on the preceding PDF page
+   - [X] Reduce and align the two figures below Pharmacist Performance.
+   - [X] Rebuild and inspect page 2 with both captions and references.
+
 ** DONE Repair LaTeX report build
    - [X] Remove the accidental pasted block inside the sequence table.
    - [X] Restore the interrupted Cohort 2 sentence.
    - [X] Build and inspect the portrait PDF without regenerating LaTeX from Markdown.
 
-** DONE Create a markdown for Santhosh Query Analysis
+** DONE Create a markdown for Task-Level Statistics Comparison
    :PROPERTIES:
    :REFNUM:   2.1.
    :END:
-   - [X] There is a query in src/ignore/santhosh.sql.
+   - [X] There is a query in src/ignore/stats_comparison.sql.
    - [X] The query takes the average of two populations.
    - [X] I would like to compare the populations Same Cohort and Different Cohort. Do a hypothesis test  to determine if the population means are significantly different.
-   - [X] Create a file called santosh_analysis.md that contains
+   - [X] Create a file called stats_comparison.md that contains
      - [X] The analysis results. Confidence intervals and the anything else
      - [X] The query used.
      - [X] A graph that shows the distribution of the 2 populations.

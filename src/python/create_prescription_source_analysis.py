@@ -104,6 +104,8 @@ def boxplot_chart(frame: pd.DataFrame, cohort: str):
         cohort,
         grouping_column="initiation_channel",
         grouping_title="Prescription source",
+        show_task_count_labels=False,
+        show_statistics_table=True,
     )
 
 
@@ -114,7 +116,7 @@ def write_markdown(chart_files: list[tuple[str, str]]) -> Path:
         "Valid DUR tasks are selected from `MY_RXP_VALID_DUR_TASKS` for Cohorts 1–4.",
         "Durations at or above the global approximate 95th percentile are excluded.",
         "Null or blank `PRESCRIPTION_SOURCE` values are shown as `<Missing>`.",
-        "Each chart contains a horizontal boxplot for every prescription source plus a final `Whole cohort` reference boxplot. Labels show filtered task counts, and dark-red lines show medians.",
+        "Each chart contains a horizontal boxplot for every prescription source plus a final `Whole cohort` reference boxplot. Dark-red lines show medians. The table below each chart reports task count, median, average, and standard deviation.",
         "Cached task-level data is stored at `outputs/data/prescription-source-analysis.parquet` for redraw-only runs.",
         "",
     ]

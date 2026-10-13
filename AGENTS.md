@@ -19,4 +19,4 @@ Keep changes small, boring, and reversible. Prefer existing package patterns ove
 - Any Word reports should be under  outputs/reports/xlsx
 - Any Mardown reports should be under outputs/reports/md
 ## Preferences
-- For charts; use the altair package in python and generate the outputs as png by default.
+- For charts, use Altair in Python and export PNGs with transparent backgrounds by default.

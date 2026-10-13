@@ -12,38 +12,44 @@ A model was built to predict DUR durations for the following reasons:
 
 Consider two task sequences from the same user:
 
-| MC3          | SEQUENCE ORDER | PART_NUMBER | PET | DURATION | START TIME            | UPDATED FIELDS | APPROVAL CHANNEL | INITIATION CHANNEL |
-| --- | ---: | ---: | --- | ---: | --- | --- | --- | --- |
-| Parasiticide |            1 | 146066      | Dog     |                                          40 | 2026-04-30 06:42:54.000 +0000 |                                             | PH               | AUTOSHIP           |
-| Parasiticide |            2 | 152702      | Dog     |                                          27 | 2026-04-30 06:43:36.000 +0000 | directions                                  | PH               | AUTOSHIP           |
-| Parasiticide |            3 | 146391      | Dog     |                                          40 | 2026-04-30 06:44:06.000 +0000 |                                             | PH               | AUTOSHIP           |
-| Parasiticide |            4 | 151583      | Dog     |                                           7 | 2026-04-30 06:44:48.000 +0000 |                                             | PH               | AUTOSHIP           |
-| Parasiticide |            5 | 146138      | Dog     |                                           7 | 2026-04-30 06:44:56.000 +0000 |                                             | PH               | AUTOSHIP           |
-| Parasiticide |            6 | 146142      | Dog     |                                          43 | 2026-04-30 06:45:05.000 +0000 | directions                                  | PH               | AUTOSHIP           |
-| Parasiticide |            7 | 146142      | Dog     |                                          35 | 2026-04-30 06:45:49.000 +0000 | directions                                  | PH               | AUTOSHIP           |
-| Parasiticide |            8 | 146064      | Dog     |                                          39 | 2026-04-30 06:46:26.000 +0000 | directions                                  | PH               | AUTOSHIP           |
-| Parasiticide |            9 | 146167      | Dog     |                                          12 | 2026-04-30 06:47:07.000 +0000 |                                             | PH               | AUTOSHIP           |
-| Parasiticide |           10 | 146322      | Dog     |                                           9 | 2026-04-30 06:47:21.000 +0000 | directions                                  | PH               | AUTOSHIP           |
-| Parasiticide |           11 | 146167      | Dog     |                                          97 | 2026-04-30 06:47:32.000 +0000 | directions                                  | PH               | AUTOSHIP           |
-| Parasiticide |           12 | 146050      | Dog     |                                           6 | 2026-04-30 06:49:11.000 +0000 |                                             | PH               | AUTOSHIP           |
-| Parasiticide |           13 | 146387      | Dog     |                                          54 | 2026-04-30 06:49:19.000 +0000 |                                             | PH               | AUTOSHIP           |
+Both sequences have MC3 `Parasiticide` and approval channel `PH`.
+All start times have UTC offset `+0000` and `.000` milliseconds; blank
+updated fields mean no fields were updated.
 
-and
+Sequence A: pet `Dog`, initiation channel `AUTOSHIP`.
 
-| MC3          | SEQUENCE ORDER | PART_NUMBER | PET | DURATION | START TIME            | UPDATED FIELDS | APPROVAL CHANNEL | INITIATION CHANNEL |
-| --- | ---: | ---: | --- | ---: | --- | --- | --- | --- |
-| Parasiticide |            1 | 158995      | Cat     |                                          11 | 2026-07-15 02:17:23.000 +0000 |                      | PH               | OMS                |
-| Parasiticide |            2 | 158995      | Cat     |                                          35 | 2026-07-15 02:17:36.000 +0000 |                      | PH               | OMS                |
-| Parasiticide |            3 | 158995      | Cat     |                                           3 | 2026-07-15 02:18:13.000 +0000 |                      | PH               | OMS                |
-| Parasiticide |            4 | 158995      | Cat     |                                          13 | 2026-07-15 02:18:17.000 +0000 |                      | PH               | OMS                |
-| Parasiticide |            5 | 158995      | Cat     |                                          13 | 2026-07-15 02:18:31.000 +0000 |                      | PH               | OMS                |
-| Parasiticide |            6 | 158995      | Cat     |                                           6 | 2026-07-15 02:18:46.000 +0000 |                      | PH               | OMS                |
-| Parasiticide |            7 | 158995      | Cat     |                                          16 | 2026-07-15 02:18:53.000 +0000 |                      | PH               | OMS                |
-| Parasiticide |            8 | 158995      | Cat     |                                          13 | 2026-07-15 02:19:11.000 +0000 |                      | PH               | OMS                |
-| Parasiticide |            9 | 158995      | Cat     |                                           6 | 2026-07-15 02:19:25.000 +0000 |                     | PH               | OMS                |
-| Parasiticide |           10 | 158995      | Cat     |                                          50 | 2026-07-15 02:19:32.000 +0000 |                      | PH               | OMS                |
-| Parasiticide |           11 | 158998      | Cat     |                                          11 | 2026-07-15 02:20:23.000 +0000 |                      | PH               | OMS                |
-| Parasiticide |           12 | 158998      | Cat     |                                          29 | 2026-07-15 02:20:36.000 +0000 |                      | PH               | OMS                |
+| Order | Part number | Duration (s) | Start time (UTC) | Updated fields |
+| ---: | ---: | ---: | --- | --- |
+| 1 | 146066 | 40 | 2026-04-30 06:42:54 | |
+| 2 | 152702 | 27 | 2026-04-30 06:43:36 | directions |
+| 3 | 146391 | 40 | 2026-04-30 06:44:06 | |
+| 4 | 151583 | 7 | 2026-04-30 06:44:48 | |
+| 5 | 146138 | 7 | 2026-04-30 06:44:56 | |
+| 6 | 146142 | 43 | 2026-04-30 06:45:05 | directions |
+| 7 | 146142 | 35 | 2026-04-30 06:45:49 | directions |
+| 8 | 146064 | 39 | 2026-04-30 06:46:26 | directions |
+| 9 | 146167 | 12 | 2026-04-30 06:47:07 | |
+| 10 | 146322 | 9 | 2026-04-30 06:47:21 | directions |
+| 11 | 146167 | 97 | 2026-04-30 06:47:32 | directions |
+| 12 | 146050 | 6 | 2026-04-30 06:49:11 | |
+| 13 | 146387 | 54 | 2026-04-30 06:49:19 | |
+
+Sequence B: pet `Cat`, initiation channel `OMS`.
+
+| Order | Part number | Duration (s) | Start time (UTC) | Updated fields |
+| ---: | ---: | ---: | --- | --- |
+| 1 | 158995 | 11 | 2026-07-15 02:17:23 | |
+| 2 | 158995 | 35 | 2026-07-15 02:17:36 | |
+| 3 | 158995 | 3 | 2026-07-15 02:18:13 | |
+| 4 | 158995 | 13 | 2026-07-15 02:18:17 | |
+| 5 | 158995 | 13 | 2026-07-15 02:18:31 | |
+| 6 | 158995 | 6 | 2026-07-15 02:18:46 | |
+| 7 | 158995 | 16 | 2026-07-15 02:18:53 | |
+| 8 | 158995 | 13 | 2026-07-15 02:19:11 | |
+| 9 | 158995 | 6 | 2026-07-15 02:19:25 | |
+| 10 | 158995 | 50 | 2026-07-15 02:19:32 | |
+| 11 | 158998 | 11 | 2026-07-15 02:20:23 | |
+| 12 | 158998 | 29 | 2026-07-15 02:20:36 | |
 
 The second sequence demonstrates substantial inherent variability in
 DUR times. Using a model, we would like to quantify this variability.
@@ -274,6 +280,9 @@ $$
 
 ###### Fixed effects
 
+In the term column, `AC` denotes approval-channel effects relative to `PH`;
+`PS` denotes prescription-source effects relative to `PRACTICE_HUB`.
+
 | Term | Estimate | SE | z | p-value | 95% CI | Significant |
 |---|---:|---:|---:|---:|---:|:---:|
 | SAME_PRECEDING | -0.046157 | 0.000835 | -55.2813 | <1e-300 | [-0.047793, -0.044520] | Yes |
@@ -285,24 +294,24 @@ $$
 | WEEKDAY_THU | 0.008138 | 0.019652 | 0.4141 | 0.678785 | [-0.030379, 0.046655] | No |
 | WEEKDAY_FRI | 0.006015 | 0.019651 | 0.3061 | 0.75952 | [-0.032499, 0.044530] | No |
 | WEEKDAY_SAT | 0.002131 | 0.019666 | 0.1084 | 0.913702 | [-0.036413, 0.040675] | No |
-| APPROVAL_CHANNEL[CLINIC_EMAIL vs PH] | 0.235910 | 0.045211 | 5.2180 | 1.80853e-07 | [0.147299, 0.324522] | Yes |
-| APPROVAL_CHANNEL[CUSTOMER_MAIL vs PH] | 0.472534 | 0.013061 | 36.1785 | 1.32431e-286 | [0.446934, 0.498133] | Yes |
-| APPROVAL_CHANNEL[DIGITAL vs PH] | 0.146802 | 0.040724 | 3.6048 | 0.000312369 | [0.066985, 0.226619] | Yes |
-| APPROVAL_CHANNEL[FAX vs PH] | 0.208015 | 0.011227 | 18.5276 | 1.23668e-76 | [0.186010, 0.230020] | Yes |
-| APPROVAL_CHANNEL[PARTNER vs PH] | -0.034275 | 0.007967 | -4.3018 | 1.69381e-05 | [-0.049891, -0.018659] | Yes |
-| APPROVAL_CHANNEL[RHAPSODY vs PH] | 0.075320 | 0.052573 | 1.4327 | 0.15195 | [-0.027721, 0.178362] | No |
-| APPROVAL_CHANNEL[VERBAL vs PH] | -0.017687 | 0.010665 | -1.6585 | 0.097222 | [-0.038589, 0.003215] | No |
-| APPROVAL_CHANNEL[VET vs PH] | 0.003570 | 0.105720 | 0.0338 | 0.973059 | [-0.203638, 0.210779] | No |
-| PRESCRIPTION_SOURCE[CLINIC_EMAIL vs PRACTICE_HUB] | -0.003227 | 0.011181 | -0.2886 | 0.772878 | [-0.025141, 0.018687] | No |
-| PRESCRIPTION_SOURCE[CS_FIRST_CONTACT vs PRACTICE_HUB] | -0.086051 | 0.203897 | -0.4220 | 0.673003 | [-0.485682, 0.313580] | No |
-| PRESCRIPTION_SOURCE[CUSTOMER_MAIL vs PRACTICE_HUB] | 0.044423 | 0.012813 | 3.4672 | 0.000525987 | [0.019311, 0.069536] | Yes |
-| PRESCRIPTION_SOURCE[CVC vs PRACTICE_HUB] | 0.023167 | 0.052511 | 0.4412 | 0.659085 | [-0.079753, 0.126087] | No |
-| PRESCRIPTION_SOURCE[DIGITAL vs PRACTICE_HUB] | 0.020414 | 0.040106 | 0.5090 | 0.610753 | [-0.058192, 0.099020] | No |
-| PRESCRIPTION_SOURCE[FAX vs PRACTICE_HUB] | -0.004739 | 0.011224 | -0.4222 | 0.67286 | [-0.026738, 0.017260] | No |
-| PRESCRIPTION_SOURCE[PARTNER_API vs PRACTICE_HUB] | 0.018961 | 0.007944 | 2.3869 | 0.0169906 | [0.003392, 0.034530] | Yes |
-| PRESCRIPTION_SOURCE[RHAPSODY vs PRACTICE_HUB] | -0.029700 | 0.062733 | -0.4734 | 0.6359 | [-0.152655, 0.093254] | No |
-| PRESCRIPTION_SOURCE[TELEMEDICINE vs PRACTICE_HUB] | 0.185396 | 0.052942 | 3.5018 | 0.000462051 | [0.081631, 0.289161] | Yes |
-| PRESCRIPTION_SOURCE[VERBAL vs PRACTICE_HUB] | -0.002803 | 0.011736 | -0.2388 | 0.81126 | [-0.025805, 0.020200] | No |
+| AC: CLINIC_EMAIL | 0.235910 | 0.045211 | 5.2180 | 1.80853e-07 | [0.147299, 0.324522] | Yes |
+| AC: CUSTOMER_MAIL | 0.472534 | 0.013061 | 36.1785 | 1.32431e-286 | [0.446934, 0.498133] | Yes |
+| AC: DIGITAL | 0.146802 | 0.040724 | 3.6048 | 0.000312369 | [0.066985, 0.226619] | Yes |
+| AC: FAX | 0.208015 | 0.011227 | 18.5276 | 1.23668e-76 | [0.186010, 0.230020] | Yes |
+| AC: PARTNER | -0.034275 | 0.007967 | -4.3018 | 1.69381e-05 | [-0.049891, -0.018659] | Yes |
+| AC: RHAPSODY | 0.075320 | 0.052573 | 1.4327 | 0.15195 | [-0.027721, 0.178362] | No |
+| AC: VERBAL | -0.017687 | 0.010665 | -1.6585 | 0.097222 | [-0.038589, 0.003215] | No |
+| AC: VET | 0.003570 | 0.105720 | 0.0338 | 0.973059 | [-0.203638, 0.210779] | No |
+| PS: CLINIC_EMAIL | -0.003227 | 0.011181 | -0.2886 | 0.772878 | [-0.025141, 0.018687] | No |
+| PS: CS_FIRST_CONTACT | -0.086051 | 0.203897 | -0.4220 | 0.673003 | [-0.485682, 0.313580] | No |
+| PS: CUSTOMER_MAIL | 0.044423 | 0.012813 | 3.4672 | 0.000525987 | [0.019311, 0.069536] | Yes |
+| PS: CVC | 0.023167 | 0.052511 | 0.4412 | 0.659085 | [-0.079753, 0.126087] | No |
+| PS: DIGITAL | 0.020414 | 0.040106 | 0.5090 | 0.610753 | [-0.058192, 0.099020] | No |
+| PS: FAX | -0.004739 | 0.011224 | -0.4222 | 0.67286 | [-0.026738, 0.017260] | No |
+| PS: PARTNER_API | 0.018961 | 0.007944 | 2.3869 | 0.0169906 | [0.003392, 0.034530] | Yes |
+| PS: RHAPSODY | -0.029700 | 0.062733 | -0.4734 | 0.6359 | [-0.152655, 0.093254] | No |
+| PS: TELEMEDICINE | 0.185396 | 0.052942 | 3.5018 | 0.000462051 | [0.081631, 0.289161] | Yes |
+| PS: VERBAL | -0.002803 | 0.011736 | -0.2388 | 0.81126 | [-0.025805, 0.020200] | No |
 
 ###### Variance components
 

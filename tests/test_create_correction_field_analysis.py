@@ -77,10 +77,11 @@ def test_normalize_frame_maps_missing_field_names() -> None:
     ]
 
 
-def test_boxplot_chart_contains_three_layers_and_whole_cohort() -> None:
+def test_boxplot_chart_has_statistics_table_and_plain_category_labels() -> None:
     specification = analysis.boxplot_chart(sample_frame(), "Cohort 1").to_dict()
 
-    label_specification, boxplot_specification = specification["hconcat"]
+    plot, table = specification["vconcat"]
+    label_specification, boxplot_specification = plot["hconcat"]
     assert len(boxplot_specification["layer"]) == 3
     whiskers, boxes, medians = boxplot_specification["layer"]
     assert whiskers["mark"]["type"] == "rule"
@@ -90,6 +91,8 @@ def test_boxplot_chart_contains_three_layers_and_whole_cohort() -> None:
     assert boxes["encoding"]["x2"]["field"] == "q3"
     assert medians["mark"]["color"] == "#8b0000"
     assert label_specification["encoding"]["text"]["field"] == "category_label"
+    assert specification["config"]["background"] == "transparent"
+    assert specification["config"]["view"]["fill"] == "transparent"
     assert boxplot_specification["title"]["text"] == (
         "DUR duration boxplots by correction field name — Cohort 1"
     )
@@ -97,6 +100,20 @@ def test_boxplot_chart_contains_three_layers_and_whole_cohort() -> None:
     summary_values = next(iter(specification["datasets"].values()))
     categories = {value["plot_category"] for value in summary_values}
     assert categories == {"directions", "notes", "Whole cohort"}
+    assert all(value["category_label"] == value["plot_category"] for value in summary_values)
+    whole_cohort = next(
+        value for value in summary_values if value["plot_category"] == "Whole cohort"
+    )
+    assert whole_cohort["task_count"] == 2
+    assert whole_cohort["median"] == 15
+    assert whole_cohort["average"] == 15
+    assert [column["title"]["text"] for column in table["hconcat"]] == [
+        "Correction field name",
+        "Tasks",
+        "Median (s)",
+        "Average (s)",
+        "Std. dev. (s)",
+    ]
 
 
 def test_boxplot_categories_are_ordered_by_task_count_descending() -> None:

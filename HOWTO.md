@@ -804,18 +804,18 @@ make create-mc3-coh-pettype-final-model REDRAW=1
 
 ## Analyze same-cohort versus different-cohort work time
 
-Run the Santhosh query analysis and compare task work time for consecutive DUR
+Run the statistics comparison and compare task work time for consecutive DUR
 tasks whose previous task has the same or a different cohort:
 
 ```bash
-make create-santhosh-analysis
+make create-stats-comparison
 ```
 
-The task-level query is stored at `src/sql/santhosh_analysis.sql`, the cached
-extract is stored at `outputs/data/santhosh-analysis.parquet`, and the
+The task-level query is stored at `src/sql/stats_comparison.sql`, the cached
+extract is stored at `outputs/data/stats-comparison.parquet`, and the
 four cohort distribution charts are written to
-`outputs/charts/santhosh-analysis/`. The report at
-`outputs/reports/md/santosh_analysis.md` contains separate descriptive
+`outputs/charts/stats-comparison/`. The report at
+`outputs/reports/md/stats_comparison.md` contains separate descriptive
 statistics and Welch two-sample tests with confidence intervals for Cohorts 1–4,
 limits DUR work time to five minutes, uses a base-10 logarithmic x-axis with
 density lines for Same Cohort and Different Cohort, and includes the query,
@@ -824,18 +824,18 @@ limitations, and all four charts.
 Redraw the four charts and report without querying Snowflake with:
 
 ```bash
-make create-santhosh-analysis REDRAW=1
+make create-stats-comparison REDRAW=1
 ```
 
 Generate a separate one-sided report for the directional hypothesis that Same
 Cohort work time is less than Different Cohort work time:
 
 ```bash
-make create-santhosh-analysis-one-sided
+make create-stats-comparison-one-sided
 ```
 
 The one-sided report is written to
-`outputs/reports/md/santosh_analysis_one_sided.md`. It reports one-sided
+`outputs/reports/md/stats_comparison_one_sided.md`. It reports one-sided
 p-values and 95% upper bounds for the contrast **Same Cohort − Different
 Cohort**, while preserving the two-sided report above.
 
@@ -846,30 +846,30 @@ allocation pattern, retain only users with both patterns, and run paired
 within-user comparisons:
 
 ```bash
-make create-santhosh-analysis-user
+make create-stats-comparison-user
 ```
 
-The user-level cache is stored at `outputs/data/santhosh-analysis-user.parquet`.
+The user-level cache is stored at `outputs/data/stats-comparison-user.parquet`.
 Four user-level density charts are written to
-`outputs/charts/santhosh-analysis-user/`, and the paired results are documented
-in `outputs/reports/md/santosh_analysis_user.md`. The charts use a base-10
+`outputs/charts/stats-comparison-user/`, and the paired results are documented
+in `outputs/reports/md/stats_comparison_user.md`. The charts use a base-10
 logarithmic x-axis; the report includes the user-level means and paired
 confidence intervals and p-values for Cohorts 1–4.
 
 Redraw from the user-level cache without querying Snowflake with:
 
 ```bash
-make create-santhosh-analysis-user REDRAW=1
+make create-stats-comparison-user REDRAW=1
 ```
 
 Generate the separate one-sided paired user report with:
 
 ```bash
-make create-santhosh-analysis-user-one-sided
+make create-stats-comparison-user-one-sided
 ```
 
 The one-sided paired report is written to
-`outputs/reports/md/santosh_analysis_user_one_sided.md` and tests whether the
+`outputs/reports/md/stats_comparison_user_one_sided.md` and tests whether the
 within-user difference **Same Cohort − Different Cohort** is less than zero.
 
 ## Estimate paired differences with REML
@@ -931,10 +931,10 @@ The current targets are:
 | `create-prior-approved-non-vet-diet-rx-analysis` | Query Snowflake and render four cohort bucketed N_PRIOR_APPROVED_NON_VET_DIET_RX_IDS duration boxplot charts. |
 | `create-correction-field-analysis` | Query Snowflake and render four cohort correction-field-name duration boxplot charts. |
 | `create-mc3-coh-pettype-final-model` | Fit the final fixed-effects model with crossed user, date, and parent-part-number random intercepts. |
-| `create-santhosh-analysis` | Compare same-cohort and different-cohort DUR work-time distributions with a Welch two-sample test. |
-| `create-santhosh-analysis-one-sided` | Run the directional task-level test that Same Cohort work time is less than Different Cohort work time. |
-| `create-santhosh-analysis-user` | Compare same-cohort and different-cohort user-level means with paired tests. |
-| `create-santhosh-analysis-user-one-sided` | Run the directional paired user-level test that Same Cohort work time is less than Different Cohort work time. |
+| `create-stats-comparison` | Compare same-cohort and different-cohort DUR work-time distributions with a Welch two-sample test. |
+| `create-stats-comparison-one-sided` | Run the directional task-level test that Same Cohort work time is less than Different Cohort work time. |
+| `create-stats-comparison-user` | Compare same-cohort and different-cohort user-level means with paired tests. |
+| `create-stats-comparison-user-one-sided` | Run the directional paired user-level test that Same Cohort work time is less than Different Cohort work time. |
 | `estimate-differences-reml` | Estimate precision-weighted paired user differences and between-user heterogeneity with REML. |
 | `user-performance-analysis` | Render mean and median user-performance scatter matrices by cohort. |
 | `test` | Run the test suite. |

@@ -18,27 +18,26 @@ function Header(header)
   return header
 end
 
--- Keep the two related sequence tables on one rotated page.
+-- Rotate only tables that remain too wide for portrait pages.
 function Pandoc(doc)
   local blocks = pandoc.List()
   local index = 1
   while index <= #doc.blocks do
     local block = doc.blocks[index]
-    if block.t == "Table" and #block.colspecs >= 9
-        and doc.blocks[index + 1]
-        and pandoc.utils.stringify(doc.blocks[index + 1]) == "and"
-        and doc.blocks[index + 2]
-        and doc.blocks[index + 2].t == "Table" then
-      blocks:insert(pandoc.RawBlock("latex", "\\begin{landscape}"))
+    if block.t == "Header" and doc.blocks[index + 1]
+        and doc.blocks[index + 1].t == "Table" then
+      blocks:insert(pandoc.RawBlock("latex", "\\Needspace{8\\baselineskip}"))
       blocks:insert(block)
-      blocks:insert(doc.blocks[index + 1])
-      blocks:insert(doc.blocks[index + 2])
-      blocks:insert(pandoc.RawBlock("latex", "\\end{landscape}"))
-      index = index + 3
-    elseif block.t == "Table" and #block.colspecs >= 7 then
+      index = index + 1
+    elseif block.t == "Table" and #block.colspecs >= 8 then
       blocks:insert(pandoc.RawBlock("latex", "\\begin{landscape}"))
       blocks:insert(block)
       blocks:insert(pandoc.RawBlock("latex", "\\end{landscape}"))
+      index = index + 1
+    elseif block.t == "Table" and #block.colspecs == 7 then
+      blocks:insert(pandoc.RawBlock("latex", "\\begingroup\\setlength{\\tabcolsep}{4pt}"))
+      blocks:insert(block)
+      blocks:insert(pandoc.RawBlock("latex", "\\endgroup"))
       index = index + 1
     elseif block.t == "Table" and #block.colspecs == 6 then
       local headings = {

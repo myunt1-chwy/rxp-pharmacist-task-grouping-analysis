@@ -3,7 +3,7 @@
 Valid DUR tasks are selected from `MY_RXP_VALID_DUR_TASKS` for Cohorts 1–4.
 Durations at or above the global approximate 95th percentile are excluded.
 `NCORRECTION_FIELDS` is grouped as the number of distinct correction fields matched to each task, with missing values represented as `0`.
-Each chart contains a horizontal boxplot for every correction-field count plus a final `Whole cohort` reference boxplot. Labels show filtered task counts, and dark-red lines show medians.
+Each transparent-background chart contains a horizontal boxplot for every correction-field count plus a final `Whole cohort` reference boxplot. A table below gives filtered task counts, medians, averages, and standard deviations in seconds; dark-red lines show medians.
 Cached task-level data is stored at `outputs/data/ncorrection-fields-analysis.parquet` for redraw-only runs.
 
 ## Cohort 1

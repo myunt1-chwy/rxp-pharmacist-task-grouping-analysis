@@ -1,5 +1,418 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-13 Track reproducing results in the PDF target
+
+** Summary
+
+- Added =src/latex/appendix/reproducing_results.tex= to the Make target's
+  appendix dependencies, matching the existing input in =main.tex=.
+
+** Validation
+
+- =make create-task-grouping-analysis= rebuilt the 17-page PDF successfully.
+- The LaTeX log has no warnings or overfull boxes.
+
+* 2026-10-13 Rename LaTeX entry file to main.tex
+
+** Summary
+
+- Renamed the report entry file to =src/latex/main.tex= and updated the Make
+  target's source and intermediate PDF path. The published PDF path is unchanged.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded and produced the 17-page PDF.
+- The new LaTeX log has no warnings or overfull boxes.
+
+* 2026-10-13 Add labeled analysis repository reference
+
+** Summary
+
+- Added the analysis repository URL to the LaTeX References list with the
+  stable label =ref:analysis-repository=.
+
+** Validation
+
+- Rebuilt the PDF successfully; the LaTeX log has no warnings or overfull boxes.
+
+* 2026-10-13 Add labeled confounding reference
+
+** Summary
+
+- Added the Confounding Wikipedia page to the LaTeX References list with the
+  stable label =ref:confounding= for cross-references in the appendix.
+
+** Validation
+
+- Rebuilt the PDF successfully; the LaTeX log has no warnings or overfull boxes.
+
+* 2026-10-13 Add confidence intervals to cohort user comparison
+
+** Summary
+
+- Added 95% two-sided Student t confidence intervals for each matched-user
+  allocation-pattern mean and each paired mean difference in the appendix.
+- Retained the existing 95% one-sided upper bounds and test results.
+
+** Validation
+
+- Rebuilt the PDF and inspected both affected pages; the tables fit without
+  clipping, and the LaTeX log has no warnings or overfull boxes.
+
+* 2026-10-13 Rename statistics comparison analysis artifacts
+
+** Summary
+
+- Renamed the task-level and user-level Python modules, tests, SQL sources,
+  cached data, four Markdown reports, eight figures, and four Make targets
+  under the =stats-comparison= naming convention.
+- Updated imports, documentation, chart paths, and LaTeX figure references.
+- Preserved the existing chart content and analysis results.
+
+** Validation
+
+- All four renamed Make targets completed with =REDRAW=1=.
+- The full test suite passed (130 tests).
+- Rebuilt the PDF and inspected its four-figure grid; the LaTeX log has no
+  warnings or overfull boxes.
+
+* 2026-10-13 Regenerate transparent user-level cohort density plots
+
+** Summary
+
+- Confirmed the user-level chart generator already uses the shared transparent
+  background setting; its four PNGs were older than that styling change.
+- Added a regression assertion for transparent chart and view backgrounds.
+- Regenerated all four PNGs from cached user-level data with the one-sided
+  redraw target and refreshed the PDF that embeds them.
+
+** Validation
+
+- The focused test file passed (7 tests).
+- Checked that each PNG has an alpha channel and a fully transparent corner.
+- Inspected the rebuilt PDF's 2-by-2 grid; the beige background is gone.
+
+* 2026-10-13 Add cohort user one-sided comparison to appendix
+
+** Summary
+
+- Converted the existing user-level one-sided analysis into a separate LaTeX
+  appendix subsection with a 2-by-2 grid of the four cohort density plots.
+- Preserved the cohort summary statistics, paired-test results, methodology,
+  limitations, and SQL query in the report.
+- Added the new source file and four plot dependencies to the PDF Make target.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded and produced a 16-page PDF.
+- Inspected pages 15 and 16; figures, tables, SQL, and References fit without
+  splits or clipping. The LaTeX log has no warnings or overfull boxes.
+- =git diff --check= passed.
+
+* 2026-10-13 Redraw prescription-source and approval-channel figures
+
+** Summary
+
+- Updated both chart generators to use transparent backgrounds and add
+  per-category task count, median, average, and standard-deviation tables.
+- Removed task-count text from boxplot category labels and regenerated all
+  eight cohort PNGs from cached Parquet data with =REDRAW=1=.
+
+** Validation
+
+- Focused tests passed (10 tests); the full suite passed (130 tests).
+- Confirmed all eight PNGs have alpha channels.
+- Rebuilt the 14-page PDF and visually inspected pages 7 and 8; the charts
+  have white page backgrounds and their tables fit within the figure boxes.
+
+* 2026-10-13 Insert prescription-source and approval-channel charts
+
+** Summary
+
+- Replaced both remaining DUR-factors TODOs with 2-by-2 boxed grids for
+  prescription source and approval channel across Cohorts 1--4.
+- Added numbered captions, labels, in-text references, and all eight chart
+  dependencies to the PDF Make target.
+- Restored the existing model section's link to the DUR-factors subsection.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded and produced a 14-page PDF.
+- Inspected PDF pages 7 and 8; both grids and captions fit.
+- Confirmed no remaining TODOs in =dur_factors.tex=, LaTeX warnings, or
+  overfull boxes.
+
+* 2026-10-13 Insert detailed DUR causal graph
+
+** Summary
+
+- Replaced the Causal Graph TODO with the existing detailed DUR diagram.
+- Added a boxed, full-width figure with a numbered caption and in-text reference.
+- Added the PNG to the PDF Make dependencies and kept the following subsection
+  heading with its text.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded.
+- Inspected PDF pages 2 and 3; the graph and subsequent figures fit.
+- Confirmed no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add compact report title and date
+
+** Summary
+
+- Added a small navy Task Grouping Analysis title above the author byline.
+- Added the build date directly below the author and set the PDF title metadata.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded; the PDF remains 13 pages.
+- Inspected page 1 and verified title, author, date, and PDF metadata.
+- Confirmed no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Show Mehmet Yunt as report author
+
+** Summary
+
+- Added a visible author byline before the report sections.
+- Set the PDF author metadata to Mehmet Yunt.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded; the PDF remains 13 pages.
+- Inspected page 1 and confirmed the byline displays above Executive Summary.
+- Verified the PDF Author metadata and found no LaTeX warnings.
+
+* 2026-10-13 Add references at the end of the report
+
+** Summary
+
+- Added a numbered References section after the Appendix.
+- Listed the existing linked internal analysis and the JD Wright
+  conversation credited in the cohort-definitions subsection.
+- Did not add unsupported publication details.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded and produced a 13-page PDF.
+- Inspected the final page; the heading and both entries render cleanly.
+- Confirmed no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add appendix-only table of contents
+
+** Summary
+
+- Added a local contents list beneath the Appendix heading with subsection
+  and subsubsection entries and page numbers.
+- Kept the front-matter sections out of this appendix list.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded and produced a 12-page PDF.
+- Inspected the rendered first page and confirmed the appendix entries and
+  page numbers appear beneath the heading.
+- Confirmed no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add correction figures to Alterations/Corrections
+
+** Summary
+
+- Replaced both TODOs with 2-by-2 boxed grids for correction-field counts
+  and correction-field names, using the eight existing cohort charts.
+- Added numbered captions, labels, in-text references, and PDF Make
+  dependencies for each chart.
+- Used the existing =correction-field-analysis= directory for the second grid.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded with resolved references.
+- Inspected PDF pages 4 and 5; both four-chart grids and captions fit.
+- Confirmed no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add correction-field-count chart summary tables
+
+** Summary
+
+- Applied the PETTYPE-style bottom statistics table to all four
+  correction-field-count cohort charts.
+- Removed task-count annotations from plot labels and redrew the transparent
+  PNGs from cached data; updated the chart README and focused tests.
+
+** Validation
+
+- =.venv/bin/pytest tests/test_create_correction_field_analysis.py tests/test_create_ncorrection_fields_analysis.py= passed (11 tests).
+- =make create-ncorrection-fields-analysis REDRAW=1= generated all four PNGs.
+- Confirmed each PNG has an alpha channel.
+
+* 2026-10-13 Add correction-field summary tables and transparent backgrounds
+
+** Summary
+
+- Enabled the shared PETTYPE-style statistics table for each correction-field
+  cohort chart, with task count, median, average, and standard deviation.
+- Removed task-count annotations from category labels and redrew all four PNGs
+  from cached data with transparent chart and view backgrounds.
+- Updated the chart README and its focused tests.
+
+** Validation
+
+- =.venv/bin/pytest tests/test_create_correction_field_analysis.py= passed.
+- =make create-correction-field-analysis REDRAW=1= generated all four PNGs.
+- Confirmed each PNG has an alpha channel and inspected Cohort 1.
+
+* 2026-10-13 Fit cohort and part-number figures on the preceding page
+
+** Summary
+
+- Removed the page break before Cohort and Part Number.
+- Reduced its two boxed figures to half-width, equal-height panels so both
+  appear below Pharmacist Performance on page 2.
+- Kept Pet Type on the following page.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded; the PDF is nine pages.
+- Inspected page 2 and confirmed Figures 3 and 4 and their captions fit.
+- Confirmed no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add cohort and part-number figures to DUR factors
+
+** Summary
+
+- Replaced both Cohort and Part Number TODOs with the existing task-level
+  cohort and part-number-level mean duration boxplots.
+- Added numbered captions, in-text references, and both PNG dependencies to
+  the PDF Make target.
+- Kept the Pet Type heading and its chart grid together on the following page.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded with resolved references.
+- Inspected PDF pages 3 and 4; there are no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Keep PETTYPE figures with their subsection
+
+** Summary
+
+- Placed the Pet Type heading, text, and four-chart grid together on one page.
+- Made the grid non-floating so later subsection headings cannot precede it.
+- Corrected the undefined Pet Type heading command.
+
+** Validation
+
+- Rebuilt the nine-page PDF and inspected page 3.
+- Confirmed Figures 3--6 follow Pet Type and precede Alterations, with no
+  LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add PETTYPE cohort figures to DUR factors
+
+** Summary
+
+- Replaced the Pet Type TODO with a boxed 2-by-2 grid of cohort charts.
+- Added one numbered caption and label per chart, in-text references, and all
+  four PNG dependencies to the PDF Make target.
+- Preserved the surrounding DUR factors text and other appendix edits.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded.
+- Inspected the rendered grid on PDF page 3; all four captions and figures fit.
+- Confirmed the four references resolve with no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add PETTYPE chart statistics tables
+
+** Summary
+
+- Redrew the four PETTYPE boxplots with transparent backgrounds and plain
+  category labels, without the pipe/task-count annotations.
+- Added a bottom table for each chart with task count, median, average, and
+  sample standard deviation by PETTYPE and for the whole cohort.
+- Kept the shared boxplot renderer's existing behavior for other analyses.
+
+** Validation
+
+- =make create-pettype-analysis REDRAW=1= regenerated all four charts from cache.
+- Focused PETTYPE and initiation-channel tests passed; inspected a rendered
+  chart and verified the PNGs contain alpha channels.
+
+* 2026-10-13 Default new chart PNGs to transparent backgrounds
+
+** Summary
+
+- Updated the plotting preference and shared Altair background color to
+  transparent. Existing PNGs were left unchanged.
+
+** Validation
+
+- Rendered a sample chart and confirmed its PNG contains transparent pixels.
+
+* 2026-10-13 Put table captions below motivating example tables
+
+** Summary
+
+- Moved both numbered table captions below their side-by-side tables.
+- Added spacing under the shorter table so the captions align.
+- Preserved the current narrative text and table data.
+
+** Validation
+
+- Rebuilt the PDF and inspected the first page for caption placement.
+- Confirmed the table references still resolve and there are no LaTeX warnings.
+
+* 2026-10-13 Place motivating example tables side by side
+
+** Summary
+
+- Converted the two short sequence tables from =longtable= to 8 pt =tabular=
+  inside adjacent minipages.
+- Added numbered table captions, labels, and references in the narrative.
+- Kept all 25 data rows and the surrounding analysis text.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded with no LaTeX warnings.
+- Compared all 25 table rows with the committed version; values are unchanged.
+- Inspected the rendered first page for legibility and clipping.
+
+* 2026-10-13 Equalize DUR factor figure frames
+
+** Summary
+
+- Gave both side-by-side charts equal-width, equal-height boxed frames.
+- Kept each source image's aspect ratio and the existing captions and references.
+
+** Validation
+
+- Rebuilt the PDF and inspected the chart page; frames and captions align.
+- Confirmed there are no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add captions and references to DUR factor charts
+
+** Summary
+
+- Added numbered captions and stable labels to both side-by-side charts.
+- Referenced Figures 1 and 2 from the surrounding text.
+- Loaded the reusable caption package with its minipage anchor warning disabled.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded with resolved references.
+- Inspected the rendered chart page; no clipping or LaTeX warnings remain.
+
+* 2026-10-13 Place DUR factor charts side by side
+
+** Summary
+
+- Arranged the two boxed charts in top-aligned, half-width minipages.
+- Preserved the surrounding explanatory text.
+- Corrected the second image reference to the existing all-cohorts scatter
+  chart and removed a stray character after the image command.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded.
+- Inspected the rendered chart page for alignment and clipping.
+
 * 2026-10-13 Insert requested DUR factor charts
 
 ** Summary

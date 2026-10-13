@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from scipy import optimize, stats
 
-from . import santhosh_analysis as task_analysis
+from . import stats_comparison as task_analysis
 from .generate_task_table import REQUIRED_SETTINGS, parse_dotenv
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]

@@ -1,19 +1,21 @@
-\subsection{Motivating Example for Building a Detailed Model}
+\subsection{Example Sequences of Similar DUR Tasks}
 In this section, two task sequences from the same user are examined.
 
-Both sequences have Parasiticide as merchandizing category level 3 (MC3)  and  the approval channel for the prescription is Practice Hub. Updated fields column contains the the data the pharmacist altered during the DUR
+Both sequences consider prescriptions with Parasiticide as merchandizing category level 3 (MC3)  and with  approval channel as Practice Hub. All prescriptions belong to cohort 1. The ppdated fields column contains the the data the pharmacist altered during the DUR.
 
-In the first sequence, all the prescriptions are for dogs and the cohort is 1.
+In the first sequence, all the prescriptions are for dogs. (Table~\ref{tab:motivating-dogs}). If the pharmacist updates prescription information, the DUR process highly likely takes longer. The 13 DUR long task sequence takes place within 7 minutes and the DUR durations vary between 6 and 97 seconds suggesting that there is significant variation. It is hard to discern any pattern that suggests any benefit of grouping tasks together.
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}rrrll@{}}
-\toprule\noalign{}
-Order & Part number & Duration (s) & Start time (UTC) & Updated
-fields \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
+In the second sequence, the prescriptions are for cats (Table~\ref{tab:motivating-cats}). Note that for the same MC3 and cohort (cohort 1 in this case), pet and even part number (158995) we can expect significant variation. In this case, it can be seen that the duration varies between 3 and 50 seconds for the same part number and pet type and  the same pharmacist in a 4 minute time span.
+
+\begin{center}
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+{\fontsize{8}{10}\selectfont\setlength{\tabcolsep}{2pt}
+\begin{tabular}{@{}rrrll@{}}
+\toprule
+Order & Part no. & DUR (s) & Start (UTC) & Updated \\
+\midrule
 1 & 146066 & 40 & 2026-04-30 06:42:54 & \\
 2 & 152702 & 27 & 2026-04-30 06:43:36 & directions \\
 3 & 146391 & 40 & 2026-04-30 06:44:06 & \\
@@ -27,21 +29,18 @@ fields \\
 11 & 146167 & 97 & 2026-04-30 06:47:32 & directions \\
 12 & 146050 & 6 & 2026-04-30 06:49:11 & \\
 13 & 146387 & 54 & 2026-04-30 06:49:19 & \\
-\end{longtable}
-}
-At first glance, it can be seen that if the pharmacist updates prescription information, highly likely, the DUR process takes longer. The 13 DUR long session takes place within 7 minutes and the DUR durations vary between 6 and 97 seconds suggesting that there is significant unaccounted variation in time measurements. It is hard to discern any pattern by inspection that suggests any benefit of grouping tasks together.
-
-In the second sequence, the prescriptions are for cats. Note that for the same MC3 and cohort (cohort 1 in this case), pet and even part number (158995) we can expect significant variation. In this case, it can be seen that the duration varies between 3 and 50 seconds for the same part number and pet type for the same pharmacist in a 4 minute time span.
-
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}rrrll@{}}
-\toprule\noalign{}
-Order & Part number & Duration (s) & Start time (UTC) & Updated
-fields \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
+\bottomrule
+\end{tabular}}
+\captionof{table}{Sequence A: dog prescriptions in cohort 1.}\label{tab:motivating-dogs}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+{\fontsize{8}{10}\selectfont\setlength{\tabcolsep}{2pt}
+\begin{tabular}{@{}rrrll@{}}
+\toprule
+Order & Part no. & DUR (s) & Start (UTC) & Updated \\
+\midrule
 1 & 158995 & 11 & 2026-07-15 02:17:23 & \\
 2 & 158995 & 35 & 2026-07-15 02:17:36 & \\
 3 & 158995 & 3 & 2026-07-15 02:18:13 & \\
@@ -54,5 +53,9 @@ fields \\
 10 & 158995 & 50 & 2026-07-15 02:19:32 & \\
 11 & 158998 & 11 & 2026-07-15 02:20:23 & \\
 12 & 158998 & 29 & 2026-07-15 02:20:36 & \\
-\end{longtable}
-}
+\bottomrule
+\end{tabular}}
+\par\vspace{10pt}
+\captionof{table}{Sequence B: cat prescriptions in cohort 1.}\label{tab:motivating-cats}
+\end{minipage}
+\end{center}
