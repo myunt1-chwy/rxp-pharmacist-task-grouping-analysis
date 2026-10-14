@@ -1,5 +1,20 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-13 Repair random-effects model appendix
+
+** Summary
+
+- Removed accidentally duplicated model prose and tables embedded inside an
+  unfinished variance-components longtable.
+- Kept the revised section heading and introduction, then restored the intact
+  model details and results from the last committed version.
+
+** Validation
+
+- The PDF build changed from a LaTeX LR-mode error to a successful 15-page PDF.
+- Confirmed the variance-component values and diagnostics appear in the PDF;
+  the LaTeX log has no warnings or overfull boxes.
+
 * 2026-10-13 Track reproducing results in the PDF target
 
 ** Summary

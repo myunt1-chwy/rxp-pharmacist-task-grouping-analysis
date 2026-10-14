@@ -1,79 +1,18 @@
-\subsection{Modeling DUR Processing Time}\label{modeling-dur-processing-time}
+\subsection{Random Effects Model with Placebo}\label{random-effects_wth_placebo}
+In this section, a causal inference model is developed to estimate the
+effect of the previous task on the current task. This model allows to
+incorporate additional factors that can possibly confound the results.
 
-A model was built to predict DUR durations for the following reasons:
-
-\begin{itemize}
-\tightlist
-\item
-  The analysis
-  \href{https://chewyinc.atlassian.net/wiki/x/hYRyRQE}{Would Grouping
-  Similar Work Make Pharmacists Faster? What the data says} concludes
-  that the previous task has no effect. We would like to know whether
-  the result changes after controlling for factors other than MC3,
-  cohort, or part number. We also want to determine whether another
-  definition of similarity is more appropriate and quantify the
-  uncertainty in the estimate.
-\end{itemize}
-
-Consider two task sequences from the same user:
-
-Both sequences have MC3 \texttt{Parasiticide} and approval channel
-\texttt{PH}. All start times have UTC offset \texttt{+0000} and
-\texttt{.000} milliseconds; blank updated fields mean no fields were
-updated.
-
-Sequence A: pet \texttt{Dog}, initiation channel \texttt{AUTOSHIP}.
-
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}rrrll@{}}
-\toprule\noalign{}
-Order & Part number & Duration (s) & Start time (UTC) & Updated
-fields \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-1 & 146066 & 40 & 2026-04-30 06:42:54 & \\
-2 & 152702 & 27 & 2026-04-30 06:43:36 & directions \\
-3 & 146391 & 40 & 2026-04-30 06:44:06 & \\
-4 & 151583 & 7 & 2026-04-30 06:44:48 & \\
-5 & 146138 & 7 & 2026-04-30 06:44:56 & \\
-6 & 146142 & 43 & 2026-04-30 06:45:05 & directions \\
-7 & 146142 & 35 & 2026-04-30 06:45:49 & directions \\
-8 & 146064 & 39 & 2026-04-30 06:46:26 & directions \\
-9 & 146167 & 12 & 2026-04-30 06:47:07 & \\
-10 & 146322 & 9 & 2026-04-30 06:47:21 & directions \\
-11 & 146167 & 97 & 2026-04-30 06:47:32 & directions \\
-12 & 146050 & 6 & 2026-04-30 06:49:11 & \\
-13 & 146387 & 54 & 2026-04-30 06:49:19 & \\
-\end{longtable}
-}
-
-Sequence B: pet \texttt{Cat}, initiation channel \texttt{OMS}.
-
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}rrrll@{}}
-\toprule\noalign{}
-Order & Part number & Duration (s) & Start time (UTC) & Updated
-fields \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-1 & 158995 & 11 & 2026-07-15 02:17:23 & \\
-2 & 158995 & 35 & 2026-07-15 02:17:36 & \\
-3 & 158995 & 3 & 2026-07-15 02:18:13 & \\
-4 & 158995 & 13 & 2026-07-15 02:18:17 & \\
-5 & 158995 & 13 & 2026-07-15 02:18:31 & \\
-6 & 158995 & 6 & 2026-07-15 02:18:46 & \\
-7 & 158995 & 16 & 2026-07-15 02:18:53 & \\
-8 & 158995 & 13 & 2026-07-15 02:19:11 & \\
-9 & 158995 & 6 & 2026-07-15 02:19:25 & \\
-10 & 158995 & 50 & 2026-07-15 02:19:32 & \\
-11 & 158998 & 11 & 2026-07-15 02:20:23 & \\
-12 & 158998 & 29 & 2026-07-15 02:20:36 & \\
-\end{longtable}
-}
+The model treats scheduling a follow-up similar task as a
+treatment. DUR durations are compared for the same cohort,
+merchandizing hierarchy level 3 (MC3) and pet type where we model the
+variations induced by each pharmacist's performance, parent part
+number and the calendar date as normal distributions hence the name
+random effects model.  The day of the week, if corrections are made,
+prescription and approval channels are incorporated as fixed effects.
+Finally, a placebo treatment that looks at the future is incorporated
+to check that anticipation of a future job does not affect the current
+job.
 
 The model predicts a statistically significant effect when the preceding
 task is "similar" for a user. However, substantial unexplained variation
@@ -100,90 +39,7 @@ residual SD & Difference & Change (\%) \\
 
 \endgroup
 
-The model predicts that users and products differ in processing speed,
-while day of the week has no statistically significant effect.
-
-The model also predicts longer DUR times when prescription data are
-altered.
-
-How reliable are our estimates for hypothetical sequencing scenarios?
-
-\subsubsection{EDA on Factors Affecting
-DUR}\label{eda-on-factors-affecting-dur}
-
-See \hyperref[factors-affecting-successful-durs]{Factors Affecting DUR}
-in the Appendix.
-
-We assume that the following groups of factors affect DUR duration:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  The user
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Are some users inherently slower? Are they consistently slower or
-    faster across cohorts?
-  \end{itemize}
-\item
-  The prescription
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Medication
-  \item
-    Content (typos, missing information)
-  \item
-    Pet
-
-    \begin{itemize}
-    \tightlist
-    \item
-      Pet health history
-    \end{itemize}
-  \end{itemize}
-\item
-  Business process
-\item
-  Outside disturbances, such as inbound calls
-\item
-  The user\textquotesingle s task history
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Did they perform similar tasks previously?
-  \end{itemize}
-\item
-  Environment
-\item
-  Software platform
-\end{enumerate}
-
-A more detailed breakdown can be found
-\href{../../charts/DUR_detailed.png}{here}.
-
-For details, see \hyperref[model-details]{Model Details} in the
-Appendix.
-
-
-\paragraph{Model Details}\label{model-details}
-
-\subparagraph{Final MC3/COH/PETTYPE mixed-effects
-model}\label{final-mc3cohpettype-mixed-effects-model}
-
-The model is built to understand the factors affecting approved DUR task
-durations. It uses MC3, cohort, and pet type to define groups of similar
-DUR tasks.
-
-The model controls for weekday, approval channel, prescription source,
-parent part number, user (for example, pharmacist or pharmacy
-technician), and changes to prescription data, such as updated
-directions.
+\subsubsection{Description}
 
 There are two treatments based on whether the current task is adjacent
 to another task in the same MC3, cohort, and pet type equivalence class
@@ -200,15 +56,6 @@ adequately.
 The model estimates each user\textquotesingle s deviation from mean
 performance. It does the same for each parent part number and each
 calendar date.
-
-The model predicts that, for a given user, a task preceded by a task in
-the same cell has a shorter DUR duration. After controlling for MC3,
-cohort, pet type, and parent part number, the model finds no
-statistically significant association with \texttt{SAME\_FOLLOWING}.
-
-The weekday fixed effects are not statistically significant, whereas
-some approval-channel and prescription-source effects are.
-Customer-originated prescriptions take longer.
 
 \subparagraph{Purpose and analysis
 sample}\label{purpose-and-analysis-sample}

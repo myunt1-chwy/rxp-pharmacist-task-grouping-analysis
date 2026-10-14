@@ -1,7 +1,7 @@
 \subsection{Reproducing the Numerical Results}
-The code to reproduce all the results in \ref{ref:analysis-repository}. Follow the instructions in the HOWTO.md file to generate the figures, models and analyses.
-
-You will need to clone the repository to run the code and have access to a Snowflake role that has access to the following tables:
+The code to reproduce all the results is in \ref{ref:analysis-repository}. Follow the instructions in the HOWTO.md file to generate the figures, models and analyses.
+You will need to clone the repository to run the code. The code uses make and python.
+In addition you need to have access to a Snowflake role that has access to the following tables:
 \begin{verbatim}
  EDLDB.PET_HEALTH_ANALYTICS_SANDBOX.FCT__TASKS_LIFECYCLE
  EDLDB.BT_HCA_HCDM.RXP_RX_USAGE_ACTIONS
@@ -9,4 +9,8 @@ You will need to clone the repository to run the code and have access to a Snowf
  EDLDB.PDM.PRODUCT
  EDLDB.BT_HCA_HCDM.RXP_PRESCRIPTIONS
 \end{verbatim}
-You need to be able to use make and python.
+and the pet health analytics sandbox in the dev environment;
+\begin{verbatim}
+ EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX
+\end{verbatim}
+to generate transient tables.

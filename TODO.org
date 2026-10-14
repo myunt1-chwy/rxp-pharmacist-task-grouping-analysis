@@ -979,6 +979,11 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
    - [X] Add the existing appendix input to the Make dependencies.
    - [X] Verify the report target still builds.
 
+** DONE Repair random-effects model appendix
+   - [X] Remove duplicated content inside the unfinished longtable.
+   - [X] Preserve the new introduction and restore the model details.
+   - [X] Rebuild the PDF and verify the results and diagnostics appear.
+
 ** DONE Rename statistics comparison analysis artifacts
    - [X] Rename task-level and user-level modules, reports, caches, figures, and SQL files.
    - [X] Update Make targets, imports, documentation, tests, and LaTeX references.
