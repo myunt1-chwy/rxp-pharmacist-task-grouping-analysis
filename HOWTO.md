@@ -230,6 +230,18 @@ make create-causal-diagram \
   CAUSAL_DIAGRAM_OUTPUT=outputs/charts/another-diagram.png
 ```
 
+Render the DUR task-partition Sankey with the same Dockerized Mermaid CLI:
+
+```bash
+make create-dur-partition-sankey
+```
+
+The transparent PNG is written to `outputs/charts/DUR_partition_sankey.png`.
+To render the matching Sankey weighted by imputed processing time, run
+`make create-dur-processing-time-sankey`. Its transparent PNG is written to
+`outputs/charts/DUR_processing_time_sankey.png`; the exact flow totals are in
+`outputs/tables/DUR_processing_time_sankey.md`.
+
 ## Create task-based distribution charts
 
 Query `EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS` and generate four cohort summary charts:

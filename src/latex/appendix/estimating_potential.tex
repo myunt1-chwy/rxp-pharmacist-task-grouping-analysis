@@ -3,3 +3,32 @@
 %%% TeX-master: "../main"
 %%% End:
 \subsection{Estimating the Potential of Grouping Similar Tasks}
+Figures~\ref{fig:dur-partition-sankey} and
+\ref{fig:dur-processing-time-sankey} summarize DUR task counts and imputed
+processing time, respectively, from all tasks through the 3,433,218-task
+model sample and its \texttt{SAME\_PRECEDING} groups. The processing-time
+cutoff is 156.608019 seconds. ``Possible multitasking'' means a DUR
+overlaps another task for the same user; that other task need not be a DUR.
+``Singletasking'' means no such overlap was recorded. The 54,138 other
+exclusions are the difference between the non-overlapping, no-handoff
+population and valid DURs; their individual exclusion reasons have not
+been broken out. The 180,803 valid DURs at or above the cutoff account
+for 24,710.67 hours, nearly the same as the 24,758.52 hours among the
+3,433,218 valid DURs below it.
+
+The monetary scenario excludes these above-cutoff tasks because they are
+outside the fitted model sample. Their long recorded dwell may include
+multitasking or other delays; these totals do not establish the cause.
+
+\clearpage
+\begin{center}
+\includegraphics[width=\linewidth,height=0.45\textheight,keepaspectratio,alt={Sankey diagram of DUR task counts by handoff, possible multitasking or singletasking, validity, duration cutoff, and same-preceding indicator}]{outputs/charts/DUR_partition_sankey.png}
+\captionof{figure}{DUR task counts partitioned by handoff type, possible multitasking or singletasking, validity, the 156.608019-second cutoff, and \texttt{SAME\_PRECEDING}.}
+\label{fig:dur-partition-sankey}
+\end{center}
+
+\begin{center}
+\includegraphics[width=\linewidth,height=0.45\textheight,keepaspectratio,alt={Sankey diagram of DUR processing hours by handoff, possible multitasking or singletasking, validity, duration cutoff, and same-preceding indicator}]{outputs/charts/DUR_processing_time_sankey.png}
+\captionof{figure}{DUR processing time partitioned by the same stages. Flow widths use imputed processing seconds; node labels show hours rounded to two decimal places.}
+\label{fig:dur-processing-time-sankey}
+\end{center}

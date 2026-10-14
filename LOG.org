@@ -1,5 +1,75 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-14 Sum above-cutoff DUR dwell directly from lifecycle facts
+
+- Queried only =FCT__TASKS_LIFECYCLE= for DURs created from 2026-02-01
+  inclusive through 2026-08-01 exclusive, with null handoff and raw dwell
+  greater than 156.608019 seconds. No employee or validity join was used.
+- Found 200,468 rows and distinct user/task keys, totaling 99,126,769 raw
+  seconds (27,535.21 hours). Saved the SQL and one-row result table.
+- Clarified the appendix comparison between above- and below-cutoff valid
+  DUR processing hours during the pre-commit review, and described the
+  above-cutoff exclusion without attributing unmeasured multitasking.
+
+* 2026-10-14 Reproduce DUR duration totals from lifecycle facts
+
+- Reapplied the pharmacist employee, task-created date, DUR, and null-handoff
+  filters to =FCT__TASKS_LIFECYCLE=. All 11 duration buckets matched the
+  =MY_RXP_TASKS= counts and seconds exactly.
+- Reproduced 200,422 above-cutoff null-handoff DURs and 99,104,001 seconds
+  by cohort directly from the fact.
+- Applying non-refill, positive raw duration, and the existing overlap summary
+  reproduced the narrower valid tail by cohort: 180,803 distinct tasks and
+  88,958,419 raw seconds. A key-level cross-check found no missing, duration,
+  or cohort mismatches against the valid-DUR table.
+
+* 2026-10-14 Check null-handoff DUR processing-time distribution
+
+- Queried duration buckets in =MY_RXP_TASKS= for all DURs with null
+  =HANDOFF_TYPE= and in the valid-DUR table for the above-cutoff model tail.
+- Reproduced 180,803 valid above-cutoff tasks and 88,958,419 seconds
+  (24,710.67 hours). Their mean is 492.02 seconds and median 302 seconds;
+  all 180,803 task keys are distinct.
+- Broke the tail out by cohort. Cohorts 1 and 2 account for 162,489 tasks
+  and 22,480.98 hours. Saved the full distributions and read-only queries.
+- The duration measure is in-progress-to-closed dwell; the queries do not
+  establish that this entire interval was active pharmacist work.
+
+* 2026-10-14 Rename overlap groups in the DUR Sankey figures
+
+- Renamed the overlap branches to ``Possible multitasking'' and
+  ``Singletasking'' in both the count and processing-time diagrams.
+- Clarified in the appendix that possible multitasking is inferred from an
+  overlapping task for the same user, which need not be another DUR.
+- Regenerated both PNGs and rebuilt and inspected the portrait PDF; no test
+  suite was run.
+
+* 2026-10-14 Add a processing-time DUR Sankey
+
+- Added a second Mermaid Sankey using imputed processing seconds for the same
+  handoff, overlap, validity, cutoff, and =SAME_PRECEDING= partitions.
+- Summed the cached model sample by =SAME_PRECEDING=: 37,917,597 seconds for 1
+  and 51,213,074 seconds for 0. These reconcile to 89,130,671 seconds.
+- Saved the flow totals, added a transparent PNG target, and placed the
+  time-weighted figure beside the count figure in the appendix.
+- Confirmed all 11 flows reconcile, rebuilt and inspected the portrait PDF,
+  and checked the LaTeX log. No test suite was run.
+
+* 2026-10-14 Add a DUR partition Sankey diagram
+
+- Added a Mermaid Sankey that partitions 4,128,486 DURs by handoff type,
+  overlap, validity and the 156.608019-second cutoff, then divides the
+  3,433,218-task model sample by =SAME_PRECEDING=.
+- Added a Dockerized Make target and a transparent PNG, documented the
+  command, and placed the figure in the estimating-potential appendix.
+- Shortened the proportional flows and placed the figure on a portrait
+  appendix page. Rebuilt and inspected the PDF; no test suite was run.
+
+* 2026-10-14 Add a red draft notice above the report title
+
+- Added a red =DRAFT= line above the title on the first page.
+- Rebuilt the PDF and inspected page 1. No test suite was run.
+
 * 2026-10-14 Track the estimating-potential appendix in the PDF target
 
 - Added =src/latex/appendix/estimating_potential.tex= to the Makefile's

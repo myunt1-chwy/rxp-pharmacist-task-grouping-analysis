@@ -5,6 +5,10 @@ REDRAW_ONLY ?= 0
 REDRAW ?= 0
 CAUSAL_DIAGRAM_SOURCE ?= src/mermaid/DUR.mmd
 CAUSAL_DIAGRAM_OUTPUT ?= outputs/charts/DUR_detailed.png
+DUR_PARTITION_SANKEY_SOURCE ?= src/mermaid/DUR_partition_sankey.mmd
+DUR_PARTITION_SANKEY_OUTPUT ?= outputs/charts/DUR_partition_sankey.png
+DUR_PROCESSING_TIME_SANKEY_SOURCE ?= src/mermaid/DUR_processing_time_sankey.mmd
+DUR_PROCESSING_TIME_SANKEY_OUTPUT ?= outputs/charts/DUR_processing_time_sankey.png
 TASK_GROUPING_ANALYSIS_LATEX := src/latex/main.tex
 TASK_GROUPING_ANALYSIS_APPENDIX := \
 	src/latex/appendix/motivating_example.tex \
@@ -16,6 +20,8 @@ TASK_GROUPING_ANALYSIS_APPENDIX := \
 	src/latex/appendix/estimating_potential.tex
 TASK_GROUPING_ANALYSIS_CHARTS := \
 	outputs/charts/DUR_detailed.png \
+	outputs/charts/DUR_partition_sankey.png \
+	outputs/charts/DUR_processing_time_sankey.png \
 	outputs/charts/user-performance-analysis/user-median-dur-duration-distributions.png \
 	outputs/charts/user-performance-analysis/user-performance-median-all-cohorts-scatter-matrix.png \
 	outputs/charts/tasks-based-distributions/task-duration-by-cohort-boxplots.png \
@@ -46,7 +52,7 @@ TASK_GROUPING_ANALYSIS_CHARTS := \
 	outputs/charts/stats-comparison-user/stats-comparison-user-cohort-4.png
 TASK_GROUPING_ANALYSIS_PDF := outputs/reports/pdf/task_grouping_analysis.pdf
 
-.PHONY: setup generate-task-table generate-task-intersection-table generate-task-sequence-table drop-task-table generate-valid-dur-task-table drop-valid-dur-task-table create-causal-diagram create-task-based-distributions create-task-time-bucket-distribution create-task-intersection-duration-distributions create-part-number-analysis create-mc3-analysis create-purchase-brand-analysis create-initiation-channel-analysis create-prescription-source-analysis create-approval-channel-analysis create-pettype-analysis create-npet-conditions-analysis create-ncorrection-fields-analysis create-prior-approved-rx-analysis create-prior-approved-non-vet-diet-rx-analysis create-correction-field-analysis create-mc3-pettype-analysis create-mc3-coh-pettype-final-model create-cohort-user-date-model create-cohort-user-date-pettype-cell-model create-test-model create-test-model-exp create-test-model-final create-stats-comparison create-stats-comparison-one-sided create-stats-comparison-user create-stats-comparison-user-one-sided estimate-differences-reml user-performance-analysis create-task-grouping-analysis test
+.PHONY: setup generate-task-table generate-task-intersection-table generate-task-sequence-table drop-task-table generate-valid-dur-task-table drop-valid-dur-task-table create-causal-diagram create-dur-partition-sankey create-dur-processing-time-sankey create-task-based-distributions create-task-time-bucket-distribution create-task-intersection-duration-distributions create-part-number-analysis create-mc3-analysis create-purchase-brand-analysis create-initiation-channel-analysis create-prescription-source-analysis create-approval-channel-analysis create-pettype-analysis create-npet-conditions-analysis create-prior-approved-rx-analysis create-prior-approved-non-vet-diet-rx-analysis create-correction-field-analysis create-mc3-pettype-analysis create-mc3-coh-pettype-final-model create-cohort-user-date-model create-cohort-user-date-pettype-cell-model create-test-model create-test-model-exp create-test-model-final create-stats-comparison create-stats-comparison-one-sided create-stats-comparison-user create-stats-comparison-user-one-sided estimate-differences-reml user-performance-analysis create-task-grouping-analysis test
 
 setup:
 	uv sync
@@ -72,6 +78,14 @@ drop-valid-dur-task-table:
 create-causal-diagram:
 	mkdir -p "$(dir $(CAUSAL_DIAGRAM_OUTPUT))"
 	docker run --rm -v "$(CURDIR):/mermaid" minlag/mermaid-cli -i "/mermaid/$(CAUSAL_DIAGRAM_SOURCE)" -o "/mermaid/$(CAUSAL_DIAGRAM_OUTPUT)" -w 2400 -H 1600 -b transparent
+
+create-dur-partition-sankey:
+	mkdir -p "$(dir $(DUR_PARTITION_SANKEY_OUTPUT))"
+	docker run --rm -v "$(CURDIR):/mermaid" minlag/mermaid-cli -i "/mermaid/$(DUR_PARTITION_SANKEY_SOURCE)" -o "/mermaid/$(DUR_PARTITION_SANKEY_OUTPUT)" -w 2400 -H 1600 -b transparent
+
+create-dur-processing-time-sankey:
+	mkdir -p "$(dir $(DUR_PROCESSING_TIME_SANKEY_OUTPUT))"
+	docker run --rm -v "$(CURDIR):/mermaid" minlag/mermaid-cli -i "/mermaid/$(DUR_PROCESSING_TIME_SANKEY_SOURCE)" -o "/mermaid/$(DUR_PROCESSING_TIME_SANKEY_OUTPUT)" -w 2400 -H 1600 -b transparent
 
 create-task-based-distributions:
 	uv run python -m src.python.create_task_based_distributions $(if $(filter 1 true yes,$(REDRAW_ONLY)),--redraw-only,)

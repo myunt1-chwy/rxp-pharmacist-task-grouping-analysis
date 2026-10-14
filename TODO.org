@@ -1122,6 +1122,39 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
     - [X] Add the appendix file to the PDF dependencies.
     - [X] Rebuild the PDF and confirm the file is included.
 
+*** DONE Add a red DRAFT notice above the report title
+    - [X] Place the notice on the first page above the title.
+    - [X] Rebuild and inspect the PDF.
+
+*** DONE Add a Mermaid Sankey of DUR task partitions
+    - [X] Reconcile handoff, overlap, cutoff, and SAME_PRECEDING counts.
+    - [X] Add the Mermaid source, transparent PNG, and Make target.
+    - [X] Include the figure in the appendix and inspect the PDF.
+    - [X] Reduce band height and fit the figure on a portrait page.
+
+*** DONE Add a processing-time Sankey to the report
+    - [X] Reconcile imputed processing seconds across the same stages.
+    - [X] Render the transparent Mermaid figure and add its totals table.
+    - [X] Include the figure in the appendix and inspect the PDF.
+
+*** DONE Rename overlap groups in both DUR Sankey figures
+    - [X] Use possible multitasking and singletasking in both diagrams.
+    - [X] Update the figure explanation and regenerate the PDF.
+
+*** DONE Check the high-duration null-handoff DUR distribution and cohorts
+    - [X] Query duration buckets for all null-handoff and valid DURs.
+    - [X] Reconcile the 180,803-task tail and check task-key uniqueness.
+    - [X] Break the above-cutoff groups out by cohort and record the results.
+
+*** DONE Reproduce null-handoff DUR durations from the original lifecycle fact
+    - [X] Reapply the pharmacist role and task-created date filters.
+    - [X] Match all duration buckets and the above-cutoff cohort totals.
+    - [X] Recreate the valid above-cutoff totals with raw durations and overlap filters.
+
+*** DONE Sum above-cutoff null-handoff DURs directly in the lifecycle fact
+    - [X] Use only fact rows with the task-created window, DUR type, null handoff, and raw dwell above cutoff.
+    - [X] Record count, distinct keys, seconds, hours, and exact SQL.
+
 *** DONE Reconcile valid DURs with non-intersecting DURs in the reports
     - [X] Add the 54,138 excluded DURs and their imputed processing time.
     - [X] Update both report tables and the Markdown generator.
