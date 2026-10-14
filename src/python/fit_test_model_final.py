@@ -14,6 +14,7 @@ from . import fit_cohort_user_date_model as fixed_user
 from . import fit_mc3_coh_pettype_final_model as core
 from . import fit_test_model as base_model
 from . import fit_test_model_exp as exp_model
+from .model_counterfactual import CounterfactualTotals, same_preceding_totals
 
 ROOT = Path(__file__).resolve().parents[2]
 NAME = "test-model-final"
@@ -26,6 +27,15 @@ FIXED_TABLE_PATH = ROOT / "outputs" / "tables" / f"{STEM}_fixed_effects.md"
 USER_TABLE_PATH = ROOT / "outputs" / "tables" / f"{STEM}_user_effects.md"
 DATE_TABLE_PATH = ROOT / "outputs" / "tables" / f"{STEM}_date_effects.md"
 PARENT_TABLE_PATH = ROOT / "outputs" / "tables" / f"{STEM}_parent_effects.md"
+COUNTERFACTUAL_DAY_TABLE_PATH = ROOT / "outputs" / "tables" / f"{STEM}_counterfactual_user_day.md"
+COUNTERFACTUAL_COHORT_DAY_TABLE_PATH = ROOT / "outputs" / "tables" / f"{STEM}_counterfactual_user_day_cohort.md"
+COUNTERFACTUAL_COHORT_TABLE_PATH = ROOT / "outputs" / "tables" / f"{STEM}_counterfactual_cohort.md"
+DUR_POPULATION_TABLE_PATH = ROOT / "outputs" / "tables" / f"{STEM}_dur_population_totals.md"
+ALL_DUR_SQL_PATH = ROOT / "src" / "sql" / "total_dur_processing_time.sql"
+BELOW_P95_DUR_SQL_PATH = ROOT / "src" / "sql" / "total_dur_below_model_p95.sql"
+VALID_DUR_SQL_PATH = ROOT / "src" / "sql" / "total_valid_dur_processing_time.sql"
+VALID_DUR_P95_BREAKDOWN_SQL_PATH = ROOT / "src" / "sql" / "valid_dur_model_p95_breakdown.sql"
+HANDOFF_TYPE_SQL_PATH = ROOT / "src" / "sql" / "my_rxp_tasks_handoff_type.sql"
 REPORT_PATH = ROOT / "outputs" / "reports" / "md" / f"{NAME}.md"
 CHART_DIR = ROOT / "outputs" / "charts" / NAME
 USER_QQ_PATH = CHART_DIR / "user_random_intercepts_qq.png"
@@ -40,11 +50,84 @@ PREDICTION_PATH = CHART_DIR / "predicted_vs_log_actual.png"
 CELL_COLUMNS = base_model.CELL_COLUMNS
 RANDOM_COLUMNS = ("user_id", "d", "parent_part_number")
 CATEGORICAL_EFFECTS = base_model.CATEGORICAL_EFFECTS
+PHARMACIST_COST_PER_HOUR = 95.0
+USD = "$"
+ALL_DUR_TASKS = 4_128_486
+ALL_DUR_SECONDS = 212_095_618
+ALL_DUR_NULL_RAW_DURATIONS = 19_550
+ALL_DUR_FIRST_DATE = "2026-02-01"
+ALL_DUR_LAST_DATE = "2026-08-04"
+ALL_DUR_QUERY_DATE = "2026-10-14"
+BELOW_P95_DUR_TASKS = 3_905_692
+BELOW_P95_DUR_SECONDS = 104_384_954
+BELOW_P95_CUTOFF_SECONDS = 156.608019
+VALID_DUR_TASKS = 3_614_021
+VALID_DUR_SECONDS = 178_089_090
+VALID_DUR_AT_OR_ABOVE_P95_TASKS = 180_803
+VALID_DUR_AT_OR_ABOVE_P95_SECONDS = 88_958_419
+HANDOFF_TYPE_DUR_TOTALS = (
+    ("NULL", 4_000_758, 197_557_538),
+    ("PHARMACIST_FOLLOW_UP", 117_503, 13_334_300),
+    ("TECHNICIAN_FOLLOW_UP", 6_736, 820_191),
+    ("LEAD_FOLLOW_UP", 3_489, 383_589),
+)
+
+
+def write_counterfactual_tables(totals: CounterfactualTotals) -> None:
+    """Save the user-day and user-day-cohort aggregates as Markdown."""
+    start_date = totals.by_user_day["d"].min()
+    end_date = totals.by_user_day["d"].max()
+    for path, frame, columns in (
+        (
+            COUNTERFACTUAL_DAY_TABLE_PATH,
+            totals.by_user_day,
+            ("user_id", "d", "tasks", "adjusted_tasks", "original_seconds", "adjusted_seconds"),
+        ),
+        (
+            COUNTERFACTUAL_COHORT_DAY_TABLE_PATH,
+            totals.by_user_day_cohort,
+            ("user_id", "d", "coh", "tasks", "adjusted_tasks", "original_seconds", "adjusted_seconds"),
+        ),
+    ):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        lines = [
+            f"# {NAME} counterfactual: {' / '.join(columns[:3])}\n",
+            "| " + " | ".join(columns) + " |",
+            "| " + " | ".join("---:" if column in ("tasks", "adjusted_tasks", "original_seconds", "adjusted_seconds") else "---" for column in columns) + " |",
+        ]
+        for row in frame.loc[:, columns].itertuples(index=False, name=None):
+            values = [
+                f"{value:,.3f}" if column in ("original_seconds", "adjusted_seconds")
+                else f"{value:,}" if column in ("tasks", "adjusted_tasks")
+                else str(value)
+                for column, value in zip(columns, row, strict=True)
+            ]
+            lines.append("| " + " | ".join(values) + " |")
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    cohort_lines = [
+        f"# {NAME} counterfactual by cohort\n",
+        f"Retained process dates: {start_date} through {end_date}. "
+        f"Labor value assumes {USD}{PHARMACIST_COST_PER_HOUR:,.0f} per pharmacist hour.\n",
+        "| Cohort | Tasks | Adjusted tasks | Original seconds | Adjusted seconds | Difference seconds | Change | Labor value |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for row in totals.by_cohort.itertuples(index=False):
+        difference = row.original_seconds - row.adjusted_seconds
+        cohort_lines.append(
+            f"| {row.coh} | {row.tasks:,} | {row.adjusted_tasks:,} | "
+            f"{row.original_seconds:,.3f} | {row.adjusted_seconds:,.3f} | "
+            f"{difference:,.3f} | {-100 * difference / row.original_seconds:.2f}% | "
+            f"{USD}{difference / 3600 * PHARMACIST_COST_PER_HOUR:,.2f} |"
+        )
+    COUNTERFACTUAL_COHORT_TABLE_PATH.write_text(
+        "\n".join(cohort_lines) + "\n", encoding="utf-8"
+    )
 
 
 def write_report(
     design: core.FixedEffectDesign,
     result: core.FinalModelResult,
+    counterfactual: CounterfactualTotals | None = None,
 ) -> Path:
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     frame = design.frame
@@ -56,6 +139,124 @@ def write_report(
 
     def link(path: Path) -> str:
         return os.path.relpath(path, REPORT_PATH.parent)
+
+    handoff_type_rows = "\n".join(
+        f"| `{handoff_type}` | {tasks:,} | {seconds:,} | {seconds / 3600:,.2f} |"
+        for handoff_type, tasks, seconds in HANDOFF_TYPE_DUR_TOTALS
+    )
+
+    counterfactual_section = ""
+    if counterfactual is not None:
+        dur_population_table = f"""| DUR population | Number of DURs | Total processing time (seconds) | Hours |
+|---|---:|---:|---:|
+| Valid DURs below {BELOW_P95_CUTOFF_SECONDS:.6f} seconds | {VALID_DUR_TASKS - VALID_DUR_AT_OR_ABOVE_P95_TASKS:,} | {VALID_DUR_SECONDS - VALID_DUR_AT_OR_ABOVE_P95_SECONDS:,} | {(VALID_DUR_SECONDS - VALID_DUR_AT_OR_ABOVE_P95_SECONDS) / 3600:,.2f} |
+| Valid DURs at or above {BELOW_P95_CUTOFF_SECONDS:.6f} seconds | {VALID_DUR_AT_OR_ABOVE_P95_TASKS:,} | {VALID_DUR_AT_OR_ABOVE_P95_SECONDS:,} | {VALID_DUR_AT_OR_ABOVE_P95_SECONDS / 3600:,.2f} |
+| **All valid DURs** in `MY_RXP_VALID_DUR_TASKS` | **{VALID_DUR_TASKS:,}** | **{VALID_DUR_SECONDS:,}** | **{VALID_DUR_SECONDS / 3600:,.2f}** |
+| All DURs below {BELOW_P95_CUTOFF_SECONDS:.6f} seconds in `MY_RXP_TASKS` | {BELOW_P95_DUR_TASKS:,} | {BELOW_P95_DUR_SECONDS:,} | {BELOW_P95_DUR_SECONDS / 3600:,.2f} |
+| **All DURs** in `MY_RXP_TASKS` | **{ALL_DUR_TASKS:,}** | **{ALL_DUR_SECONDS:,}** | **{ALL_DUR_SECONDS / 3600:,.2f}** |"""
+        dur_population_explanation = f"""The first two rows partition the valid-DUR table at the model cutoff;
+the valid tasks below it are the {VALID_DUR_TASKS - VALID_DUR_AT_OR_ABOVE_P95_TASKS:,}-task model sample. The full-table
+below-cutoff row also includes {BELOW_P95_DUR_TASKS - (VALID_DUR_TASKS - VALID_DUR_AT_OR_ABOVE_P95_TASKS):,} other DUR tasks totaling
+{BELOW_P95_DUR_SECONDS - (VALID_DUR_SECONDS - VALID_DUR_AT_OR_ABOVE_P95_SECONDS):,} seconds that did not meet the valid-DUR criteria."""
+        DUR_POPULATION_TABLE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        DUR_POPULATION_TABLE_PATH.write_text(
+            f"# DUR population totals\n\n{dur_population_table}\n\n"
+            f"{dur_population_explanation}\n",
+            encoding="utf-8",
+        )
+        start_date = counterfactual.by_user_day["d"].min()
+        end_date = counterfactual.by_user_day["d"].max()
+        original = counterfactual.original_seconds
+        adjusted = counterfactual.adjusted_seconds
+        saved = original - adjusted
+        cohort_rows = []
+        for row in counterfactual.by_cohort.itertuples(index=False):
+            cohort_saved = row.original_seconds - row.adjusted_seconds
+            cohort_rows.append(
+                f"| {row.coh} | {row.tasks:,} | {row.adjusted_tasks:,} | "
+                f"{row.original_seconds:,.1f} | {row.adjusted_seconds:,.1f} | "
+                f"{cohort_saved:,.1f} | {-100 * cohort_saved / row.original_seconds:.2f}% | "
+                f"{USD}{cohort_saved / 3600 * PHARMACIST_COST_PER_HOUR:,.2f} |"
+            )
+        counterfactual_section = f"""## All-eligible same-preceding counterfactual
+
+{dur_population_table}
+
+These are imputed processing durations from the [all-DUR]({link(ALL_DUR_SQL_PATH)}),
+[below-cutoff]({link(BELOW_P95_DUR_SQL_PATH)}), and
+[valid-DUR]({link(VALID_DUR_SQL_PATH)}) read-only queries on {ALL_DUR_QUERY_DATE}.
+The cutoff comes from the model's eligible sample and is applied here to all
+DURs in `MY_RXP_TASKS` as well as to the valid-DUR breakdown.
+The [valid-DUR cutoff breakdown]({link(VALID_DUR_P95_BREAKDOWN_SQL_PATH)})
+shows why the totals differ. {dur_population_explanation}
+
+Within each user and process date, the earliest retained task by
+PROCESS_START_TIME is kept unchanged (TASK_ID resolves an exact timestamp tie).
+Other tasks with SAME_PRECEDING = 0 receive the fitted duration ratio
+exp(beta_P) = {counterfactual.duration_ratio:.6f}; tasks already marked 1 are
+unchanged. This is an arithmetic scenario using observed durations and a
+single fitted association, not a causal estimate or a prediction of how task
+ordering would change.
+
+| Quantity | Value |
+|---|---:|
+| First retained process date | {start_date} |
+| Last retained process date | {end_date} |
+| User-days / unchanged first tasks | {counterfactual.first_tasks:,} |
+| Additional tasks adjusted | {counterfactual.adjusted_tasks:,} |
+| Original total (seconds) | {original:,.1f} |
+| Adjusted total (seconds) | {adjusted:,.1f} |
+| Difference (hours) | {saved / 3600:,.1f} |
+| Change from original | {-100 * saved / original:.2f}% |
+| Pharmacist cost per hour | {USD}{PHARMACIST_COST_PER_HOUR:,.2f} |
+| Implied labor value | {USD}{saved / 3600 * PHARMACIST_COST_PER_HOUR:,.2f} |
+
+| Cohort | Tasks | Adjusted tasks | Original seconds | Adjusted seconds | Difference seconds | Change | Labor value |
+|---|---:|---:|---:|---:|---:|---:|---:|
+{chr(10).join(cohort_rows)}
+
+The [cohort totals]({link(COUNTERFACTUAL_COHORT_TABLE_PATH)}),
+[user-day totals]({link(COUNTERFACTUAL_DAY_TABLE_PATH)}), and
+[user-day-cohort totals]({link(COUNTERFACTUAL_COHORT_DAY_TABLE_PATH)})
+give the underlying aggregates.
+
+The implied labor value is
+({original:,.1f} - {adjusted:,.1f}) / 3,600 × {USD}{PHARMACIST_COST_PER_HOUR:,.2f}
+= {USD}{saved / 3600 * PHARMACIST_COST_PER_HOUR:,.2f}.
+Realizing cash savings would depend on staffing decisions.
+
+"""
+
+    all_dur_section = f"""## All DUR task processing time
+
+A read-only query of all TASK_TYPE = 'DUR' rows in
+EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS on
+{ALL_DUR_QUERY_DATE} returned {ALL_DUR_TASKS:,} tasks and
+{ALL_DUR_SECONDS:,} imputed processing seconds
+({ALL_DUR_SECONDS / 3600:,.2f} hours). Their process dates span
+{ALL_DUR_FIRST_DATE} through {ALL_DUR_LAST_DATE}.
+The imputed duration is COALESCE(DWELL_IN_PROGRESS_TO_CLOSED_SECONDS, 1);
+{ALL_DUR_NULL_RAW_DURATIONS:,} DUR rows have a null raw duration.
+This full-table total includes tasks outside the filtered model sample.
+
+### Handoff type distribution for all DUR tasks
+
+| Handoff type | DUR tasks | Processing time (seconds) | Hours |
+|---|---:|---:|---:|
+{handoff_type_rows}
+| **All DURs** | **{ALL_DUR_TASKS:,}** | **{ALL_DUR_SECONDS:,}** | **{ALL_DUR_SECONDS / 3600:,.2f}** |
+
+The `NULL` row includes tasks without a handoff type. No DUR row has a blank
+handoff type. These totals
+come from the [read-only handoff-type query]({link(HANDOFF_TYPE_SQL_PATH)}).
+The valid-DUR sample requires `HANDOFF_TYPE IS NULL`.
+
+To regenerate the aggregate, run the
+[read-only SQL]({link(ALL_DUR_SQL_PATH)}) from the repository root:
+
+    .venv/bin/python skills/rxp-sql/scripts/run_snowflake_query.py src/sql/total_dur_processing_time.sql
+
+"""
 
     n_tasks = len(frame)
     indicator_rows = []
@@ -146,7 +347,7 @@ $\exp(\widehat{{\beta}}_P)={np.exp(preceding['estimate']):.6f}$, or
 {percent_change:.2f}% (95% CI [{percent_ci_lower:.2f}%, {percent_ci_upper:.2f}%]).
 This is a conditional log-scale association, not a causal effect.
 
-## Variance components
+{all_dur_section}## Variance components
 
 | Component | SD (log scale) | Approximate 95% CI |
 |---|---:|---:|
@@ -207,6 +408,8 @@ parent part number; the dashed vertical line marks zero.
 - [User-effect data]({link(USER_DATA_PATH)})
 - [Date-effect data]({link(DATE_DATA_PATH)})
 - [Parent-part-number-effect data]({link(PARENT_DATA_PATH)})
+
+{counterfactual_section.rstrip()}
 """,
         encoding="utf-8",
     )
@@ -214,9 +417,23 @@ parent part number; the dashed vertical line marks zero.
 
 
 @click.command()
-def main() -> None:
+@click.option("--refresh-extract", is_flag=True, help="Refresh the cohort-only cache with process start times.")
+@click.option("--env-file", type=click.Path(path_type=Path, dir_okay=False), default=Path(".env"))
+def main(refresh_extract: bool, env_file: Path) -> None:
     """Fit test-model-final from the cohort-only raw task cache."""
     try:
+        if refresh_extract:
+            if not env_file.is_file():
+                raise ValueError(f"environment file not found: {env_file}")
+            settings = fixed_user.parse_dotenv(env_file)
+            missing = [key for key in fixed_user.REQUIRED_SETTINGS if key not in settings]
+            if missing:
+                raise ValueError("missing required settings: " + ", ".join(missing))
+            sql = fixed_user.render_sql()
+            fixed_user.SQL_PATH.parent.mkdir(parents=True, exist_ok=True)
+            fixed_user.SQL_PATH.write_text(sql.rstrip() + "\n", encoding="utf-8")
+            core.fetch_to_parquet(settings, sql, fixed_user.RAW_PATH)
+            click.echo(f"Refreshed cached raw data: {fixed_user.RAW_PATH}")
         if not fixed_user.RAW_PATH.is_file():
             raise ValueError(
                 f"raw data not found: {fixed_user.RAW_PATH}; "
@@ -228,6 +445,11 @@ def main() -> None:
                 "cohort-only raw data lacks PARENT_PART_NUMBER; "
                 "run make create-cohort-user-date-model to refresh it"
             )
+        if "process_start_time" not in {column.lower() for column in cached.columns}:
+            raise ValueError(
+                "cohort-only raw data lacks PROCESS_START_TIME; "
+                "run make create-test-model-final REFRESH_EXTRACT=1"
+            )
         raw = fixed_user.prepare_frame(cached)
         design = core.build_fixed_effect_design(
             exp_model.log_duration(raw),
@@ -236,6 +458,10 @@ def main() -> None:
         )
         result = core.fit_final_model(
             design, cell_columns=CELL_COLUMNS, random_columns=RANDOM_COLUMNS
+        )
+        preceding = result.fixed_effects.set_index("term").loc["SAME_PRECEDING"]
+        counterfactual = same_preceding_totals(
+            design.frame, log_coefficient=float(preceding["estimate"])
         )
         MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
         design.frame.to_parquet(MODEL_PATH, index=False)
@@ -268,6 +494,7 @@ def main() -> None:
             + "\n",
             encoding="utf-8",
         )
+        write_counterfactual_tables(counterfactual)
         base_model.write_diagnostics(
             result,
             chart_dir=CHART_DIR,
@@ -292,7 +519,7 @@ def main() -> None:
                 "\n![Parent part number Q–Q plot](parent_random_intercepts_qq.png)\n\n"
                 "![Parent part number intercept density](parent_random_intercepts_density.png)\n"
             )
-        write_report(design, result)
+        write_report(design, result, counterfactual)
     except (OSError, ValueError, np.linalg.LinAlgError) as error:
         raise click.ClickException(str(error)) from error
     click.echo(f"Created {NAME} report: {REPORT_PATH}")

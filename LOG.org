@@ -1,5 +1,147 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-14 Sum intersecting DUR processing time
+
+- Joined all DUR rows in =MY_RXP_TASKS= to the task-sequence table and used
+  =N_INTERSECTING_TASKS > 0=. Found 343,431 intersecting DURs totaling
+  17,333,579 imputed seconds (4,814.88 hours). The other 3,785,055 DURs
+  total 194,762,039 seconds (54,100.57 hours); no sequence records were
+  missing, and the groups reconcile to all 4,128,486 DURs.
+- Saved the read-only query in =src/sql/dur_processing_time_by_intersection.sql=
+  and the summary in =outputs/tables/dur_processing_time_by_intersection.md=.
+
+* 2026-10-14 Add DUR handoff-type distribution to the model report
+
+- Added the =MY_RXP_TASKS= DUR handoff-type counts and imputed processing
+  seconds/hours, including the null group, to the generated
+  =test-model-final= Markdown report. Updated the standalone table with hours.
+- Verified that the 4,000,758 missing handoff types are SQL nulls; there are
+  no blank handoff types among DUR tasks.
+
+* 2026-10-14 Check handoff types in MY_RXP_TASKS
+
+- Queried the read-only handoff-type distribution. Among 4,128,486 DUR
+  tasks, 127,728 have a populated =HANDOFF_TYPE=: 117,503 pharmacist,
+  6,736 technician, and 3,489 lead follow-ups. All of these have a
+  non-null =HANDOFF_REASON=; valid DUR tasks exclude them because they
+  require =HANDOFF_TYPE IS NULL=.
+- Saved the query in =src/sql/my_rxp_tasks_handoff_type.sql= and the DUR
+  summary in =outputs/tables/my_rxp_tasks_handoff_type.md=.
+
+* 2026-10-14 Sum valid DUR processing time by handoff reason
+
+- Joined =MY_RXP_VALID_DUR_TASKS= to =MY_RXP_TASKS= on user and task because
+  the valid-DUR table does not store =HANDOFF_REASON=.
+- Every valid task had a matching, unique source key and a missing handoff
+  reason. The single group contains 3,614,021 tasks and 178,089,090 imputed
+  seconds (49,469.19 hours).
+- Saved the read-only query in =src/sql/valid_dur_time_by_handoff_reason.sql=
+  and the result in
+  =outputs/tables/valid_dur_processing_time_by_handoff_reason.md=.
+
+* 2026-10-14 Put the DUR breakdown into the counterfactual table
+
+- Reordered the report and standalone comparison tables to show valid DURs
+  below the cutoff, valid DURs at or above it, their valid-DUR total, all
+  DURs below the cutoff, and the all-DUR total as the final row.
+
+* 2026-10-14 Explain the DUR population totals
+
+- Split =MY_RXP_VALID_DUR_TASKS= at the model cutoff. The 3,433,218 valid
+  tasks below it total 89,130,671 seconds; the 180,803 valid tasks at or
+  above it total 88,958,419 seconds.
+- The full-task-table below-cutoff aggregate therefore includes 472,474
+  additional DUR tasks and 15,254,283 additional seconds outside the valid
+  population. Saved the read-only breakdown query as
+  =src/sql/valid_dur_model_p95_breakdown.sql= and explained the different
+  scopes under the comparison table in the model report.
+
+* 2026-10-14 Compare DUR population totals in the counterfactual report
+
+- Queried =MY_RXP_VALID_DUR_TASKS= before the P95 filter: 3,614,021 tasks,
+  178,089,090 imputed seconds (49,469.19 hours), with process dates from
+  2026-02-01 through 2026-08-01. Saved the read-only query as
+  =src/sql/total_valid_dur_processing_time.sql=.
+- Added a three-row population table at the top of the counterfactual section
+  in =test-model-final=, comparing all DURs, all DURs below the model cutoff,
+  and all valid DURs. Saved the table in
+  =outputs/tables/test_model_final_dur_population_totals.md=.
+
+* 2026-10-14 Sum all DUR processing time below the model P95 cutoff
+
+- Applied the model's recorded approximate P95 cutoff, 156.608019 seconds,
+  to all positive imputed DUR durations in =MY_RXP_TASKS=; this cutoff was
+  estimated on the model's eligible sample, not on the full table.
+- A read-only query found 3,905,692 tasks and 104,384,954 imputed seconds
+  (28,995.82 hours), including 19,550 tasks with imputed durations.
+  Process dates span 2026-02-01 through 2026-08-04.
+- Saved the reproducible query as =src/sql/total_dur_below_model_p95.sql=.
+
+* 2026-10-14 Move the cost estimate to the end of the model report
+
+- Moved the same-preceding counterfactual to the final section of the
+  generated =test-model-final= report and stated the dollar calculation
+  explicitly from original and adjusted seconds.
+
+* 2026-10-14 Sum all DUR processing time in MY_RXP_TASKS
+
+- Queried all rows with =TASK_TYPE = 'DUR'= in
+  =EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS=, with no other filters.
+- Found 4,128,486 distinct DUR tasks and 212,095,618 imputed processing
+  seconds (58,915.45 hours). The raw duration sum is 212,076,068 seconds;
+  19,550 null raw durations receive one imputed second each.
+- Retained process dates range from 2026-02-01 through 2026-08-04.
+- Added the full-DUR total and scope to the generated =test-model-final=
+  report, with =src/sql/total_dur_processing_time.sql= and a command to
+  rerun the read-only aggregate. Regenerated the report from its cached
+  model data without another Snowflake extraction.
+- Added the same total and rerun command to the LaTeX model appendix.
+  Rebuilt the PDF, inspected the rendered page, and verified the build log
+  has no layout warnings for the new section.
+
+* 2026-10-14 Compute same-preceding duration counterfactual
+
+** Implementation
+
+- Added =PROCESS_START_TIME= to the cohort-only extract and refreshed its
+  cached data with 3,433,218 retained tasks.
+- Added a reusable log-duration counterfactual calculation. It preserves
+  the first retained task per user-day by process start time, breaks ties by
+  task ID, and applies the fitted =SAME_PRECEDING= duration ratio to later
+  tasks with the indicator equal to zero.
+- Added user-day, user-day/cohort, and cohort Markdown tables and a summary
+  to the =test-model-final= report. Added the first and last retained
+  process dates and priced the modeled time difference at $95 per hour.
+
+** Result and validation
+
+- The scenario adjusts 1,857,289 tasks across 20,655 user-days.
+- Original duration totals 89,130,671.0 seconds; adjusted duration totals
+  87,399,687.5 seconds, a reduction of 480.8 hours (1.94%).
+- Focused counterfactual and model tests passed. The report was regenerated
+  from the refreshed cache.
+
+* 2026-10-14 Rewrite DUR processing-time model appendix
+
+** Implementation
+
+- Replaced the prior Box-Cox MC3/cell model appendix with the
+  =test-model-final= log-duration model results.
+- Added the sample and sequence-indicator distributions, formula and term
+  definitions, numerical procedure, all 39 fixed coefficients, random-effect
+  statistics, and fit statistics including the global intercept.
+- Put the =SAME_FOLLOWING= percentage change at the start of the summary and
+  highlighted rows with significant coefficients in yellow.
+- Removed the Q--Q plots and their accompanying discussion from the appendix.
+- Added the user, parent-part-number, and date random-intercept densities
+  side by side with panel labels, a caption, and a figure reference.
+
+** Validation
+
+- Rebuilt =outputs/reports/pdf/task_grouping_analysis.pdf= with
+  =make create-task-grouping-analysis= and inspected the rendered pages.
+- The LaTeX build reported no overfull boxes; =git diff --check= passed.
+
 * 2026-10-14 Add parent part number random intercept to test-model-final
 
 - Extended the cohort-only SQL extract with =PARENT_PART_NUMBER=, refreshed it

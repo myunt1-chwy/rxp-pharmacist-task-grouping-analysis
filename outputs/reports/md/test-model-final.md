@@ -61,7 +61,7 @@ indicator values, and zero random intercepts.
 | Users | 340 |
 | Dates | 182 |
 | Parent part numbers | 885 |
-| Global approximate P95 cutoff (seconds) | 156.608019 |
+| Global approximate P95 cutoff (seconds) | 156.620823 |
 | Conditional R-squared (log scale) | 0.300786 |
 | Conditional RMSE (log seconds) | 0.767469 |
 | REML negative log-likelihood | 3966831.492274 |
@@ -115,6 +115,38 @@ The `SAME_PRECEDING` estimate corresponds to an adjusted duration ratio of
 $\exp(\widehat{\beta}_P)=0.965730$, or
 -3.43% (95% CI [-3.59%, -3.26%]).
 This is a conditional log-scale association, not a causal effect.
+
+## All DUR task processing time
+
+A read-only query of all TASK_TYPE = 'DUR' rows in
+EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS on
+2026-10-14 returned 4,128,486 tasks and
+212,095,618 imputed processing seconds
+(58,915.45 hours). Their process dates span
+2026-02-01 through 2026-08-04.
+The imputed duration is COALESCE(DWELL_IN_PROGRESS_TO_CLOSED_SECONDS, 1);
+19,550 DUR rows have a null raw duration.
+This full-table total includes tasks outside the filtered model sample.
+
+### Handoff type distribution for all DUR tasks
+
+| Handoff type | DUR tasks | Processing time (seconds) | Hours |
+|---|---:|---:|---:|
+| `NULL` | 4,000,758 | 197,557,538 | 54,877.09 |
+| `PHARMACIST_FOLLOW_UP` | 117,503 | 13,334,300 | 3,703.97 |
+| `TECHNICIAN_FOLLOW_UP` | 6,736 | 820,191 | 227.83 |
+| `LEAD_FOLLOW_UP` | 3,489 | 383,589 | 106.55 |
+| **All DURs** | **4,128,486** | **212,095,618** | **58,915.45** |
+
+The `NULL` row includes tasks without a handoff type. No DUR row has a blank
+handoff type. These totals
+come from the [read-only handoff-type query](../../../src/sql/my_rxp_tasks_handoff_type.sql).
+The valid-DUR sample requires `HANDOFF_TYPE IS NULL`.
+
+To regenerate the aggregate, run the
+[read-only SQL](../../../src/sql/total_dur_processing_time.sql) from the repository root:
+
+    .venv/bin/python skills/rxp-sql/scripts/run_snowflake_query.py src/sql/total_dur_processing_time.sql
 
 ## Variance components
 
@@ -177,3 +209,63 @@ parent part number; the dashed vertical line marks zero.
 - [User-effect data](../../../data/test_model_final_user_effects.parquet)
 - [Date-effect data](../../../data/test_model_final_date_effects.parquet)
 - [Parent-part-number-effect data](../../../data/test_model_final_parent_effects.parquet)
+
+## All-eligible same-preceding counterfactual
+
+| DUR population | Number of DURs | Total processing time (seconds) | Hours |
+|---|---:|---:|---:|
+| Valid DURs below 156.608019 seconds | 3,433,218 | 89,130,671 | 24,758.52 |
+| Valid DURs at or above 156.608019 seconds | 180,803 | 88,958,419 | 24,710.67 |
+| **All valid DURs** in `MY_RXP_VALID_DUR_TASKS` | **3,614,021** | **178,089,090** | **49,469.19** |
+| All DURs below 156.608019 seconds in `MY_RXP_TASKS` | 3,905,692 | 104,384,954 | 28,995.82 |
+| **All DURs** in `MY_RXP_TASKS` | **4,128,486** | **212,095,618** | **58,915.45** |
+
+These are imputed processing durations from the [all-DUR](../../../src/sql/total_dur_processing_time.sql),
+[below-cutoff](../../../src/sql/total_dur_below_model_p95.sql), and
+[valid-DUR](../../../src/sql/total_valid_dur_processing_time.sql) read-only queries on 2026-10-14.
+The cutoff comes from the model's eligible sample and is applied here to all
+DURs in `MY_RXP_TASKS` as well as to the valid-DUR breakdown.
+The [valid-DUR cutoff breakdown](../../../src/sql/valid_dur_model_p95_breakdown.sql)
+shows why the totals differ. The first two rows partition the valid-DUR table at the model cutoff;
+the valid tasks below it are the 3,433,218-task model sample. The full-table
+below-cutoff row also includes 472,474 other DUR tasks totaling
+15,254,283 seconds that did not meet the valid-DUR criteria.
+
+Within each user and process date, the earliest retained task by
+PROCESS_START_TIME is kept unchanged (TASK_ID resolves an exact timestamp tie).
+Other tasks with SAME_PRECEDING = 0 receive the fitted duration ratio
+exp(beta_P) = 0.965730; tasks already marked 1 are
+unchanged. This is an arithmetic scenario using observed durations and a
+single fitted association, not a causal estimate or a prediction of how task
+ordering would change.
+
+| Quantity | Value |
+|---|---:|
+| First retained process date | 2026-02-01 |
+| Last retained process date | 2026-08-01 |
+| User-days / unchanged first tasks | 20,655 |
+| Additional tasks adjusted | 1,857,289 |
+| Original total (seconds) | 89,130,671.0 |
+| Adjusted total (seconds) | 87,399,687.5 |
+| Difference (hours) | 480.8 |
+| Change from original | -1.94% |
+| Pharmacist cost per hour | $95.00 |
+| Implied labor value | $45,678.73 |
+
+| Cohort | Tasks | Adjusted tasks | Original seconds | Adjusted seconds | Difference seconds | Change | Labor value |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Cohort 1 | 1,904,176 | 871,413 | 43,800,431.0 | 43,095,005.5 | 705,425.5 | -1.61% | $18,615.40 |
+| Cohort 2 | 1,331,432 | 803,137 | 37,428,756.0 | 36,653,839.5 | 774,916.5 | -2.07% | $20,449.19 |
+| Cohort 3 | 159,018 | 146,321 | 6,121,581.0 | 5,928,435.8 | 193,145.2 | -3.16% | $5,096.89 |
+| Cohort 4 | 17,615 | 16,560 | 868,270.0 | 840,245.0 | 28,025.0 | -3.23% | $739.55 |
+| Unknown | 20,977 | 19,858 | 911,633.0 | 882,161.6 | 29,471.4 | -3.23% | $777.72 |
+
+The [cohort totals](../../tables/test_model_final_counterfactual_cohort.md),
+[user-day totals](../../tables/test_model_final_counterfactual_user_day.md), and
+[user-day-cohort totals](../../tables/test_model_final_counterfactual_user_day_cohort.md)
+give the underlying aggregates.
+
+The implied labor value is
+(89,130,671.0 - 87,399,687.5) / 3,600 × $95.00
+= $45,678.73.
+Realizing cash savings would depend on staffing decisions.

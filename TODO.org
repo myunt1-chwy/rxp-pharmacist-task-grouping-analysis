@@ -1026,6 +1026,61 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
     - [X] Preserve the new introduction and restore the model details.
     - [X] Rebuild the PDF and verify the results and diagnostics appear.
 
+*** DONE Rewrite DUR processing-time model appendix from test-model-final
+    - [X] Describe the sample, cohort-only sequence indicators, and their distributions.
+    - [X] Add the model formula, term definitions, numerical procedure, and fitted statistics.
+    - [X] Highlight significant fixed coefficients and rebuild the PDF.
+    - [X] Show labeled user, parent-part-number, and date intercept densities.
+
+*** DONE Compute same-preceding counterfactual from test-model-final
+    - [X] Retain process start time in the cohort-only model extract.
+    - [X] Keep the first retained task of each user-day unchanged.
+    - [X] Aggregate observed and adjusted durations by user-day, cohort, and overall.
+    - [X] Add the calculation to the model report and reusable model code.
+    - [X] Report retained process dates and implied labor value at $95 per hour.
+
+*** DONE Document the full DUR workload in test-model-final
+    - [X] Add the all-DUR count and imputed processing-time total to the report.
+    - [X] Provide the read-only SQL and rerun command.
+    - [X] Add the same result to the LaTeX appendix and check the PDF.
+
+*** DONE Move the cost estimate to the end of the model report
+    - [X] Place the counterfactual and cost calculation after the model results.
+
+*** DONE Sum all DUR durations below the model P95 cutoff
+    - [X] Query all positive imputed DUR durations below 156.608019 seconds.
+    - [X] Save the reproducible read-only SQL and record the result.
+
+*** DONE Compare DUR populations at the start of the counterfactual section
+    - [X] Aggregate the pre-P95 valid-DUR table.
+    - [X] Add all-DUR, below-cutoff, and valid-DUR counts and processing totals.
+    - [X] Save the comparison table under outputs/tables.
+
+*** DONE Explain the difference between valid-DUR and full-table cutoff totals
+    - [X] Split valid DUR tasks and durations at the model cutoff.
+    - [X] Clarify the different populations beneath the report table.
+
+*** DONE End the DUR breakdown table with all DUR tasks
+    - [X] Put the valid-DUR cutoff breakdown into the table.
+    - [X] Retain the full-table below-cutoff comparison and end with all DURs.
+
+*** DONE Aggregate valid DUR processing time by handoff reason
+    - [X] Join handoff reason from the source task table.
+    - [X] Save the grouped result and verify the join grain.
+
+*** DONE Check handoff-type coverage in MY_RXP_TASKS
+    - [X] Query populated handoff types and counts by task type.
+    - [X] Save the DUR breakdown and explain the valid-DUR exclusion.
+
+*** DONE Add the DUR handoff-type distribution to the model report
+    - [X] Include null handoff types, task counts, seconds, and hours.
+    - [X] Regenerate the Markdown report from the model code.
+
+*** DONE Sum intersecting DUR processing time
+    - [X] Identify DURs with a positive intersecting-task count.
+    - [X] Reconcile the count and duration totals to all DURs.
+    - [X] Save the read-only query and Markdown summary table.
+
 *** DONE Rename statistics comparison analysis artifacts
     - [X] Rename task-level and user-level modules, reports, caches, figures, and SQL files.
     - [X] Update Make targets, imports, documentation, tests, and LaTeX references.

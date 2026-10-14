@@ -136,7 +136,7 @@ create-test-model-exp:
 	uv run python -m src.python.fit_test_model_exp
 
 create-test-model-final:
-	uv run python -m src.python.fit_test_model_final
+	uv run python -m src.python.fit_test_model_final $(if $(filter 1 true yes,$(REFRESH_EXTRACT)),--refresh-extract,)
 
 create-stats-comparison:
 	uv run python -m src.python.stats_comparison $(if $(filter 1 true yes,$(REDRAW)),--redraw-only,)
