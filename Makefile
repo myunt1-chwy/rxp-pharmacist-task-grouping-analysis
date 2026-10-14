@@ -45,7 +45,7 @@ TASK_GROUPING_ANALYSIS_CHARTS := \
 	outputs/charts/stats-comparison-user/stats-comparison-user-cohort-4.png
 TASK_GROUPING_ANALYSIS_PDF := outputs/reports/pdf/task_grouping_analysis.pdf
 
-.PHONY: setup generate-task-table generate-task-intersection-table generate-task-sequence-table drop-task-table generate-valid-dur-task-table drop-valid-dur-task-table create-causal-diagram create-task-based-distributions create-task-time-bucket-distribution create-task-intersection-duration-distributions create-part-number-analysis create-mc3-analysis create-purchase-brand-analysis create-initiation-channel-analysis create-prescription-source-analysis create-approval-channel-analysis create-pettype-analysis create-npet-conditions-analysis create-ncorrection-fields-analysis create-prior-approved-rx-analysis create-prior-approved-non-vet-diet-rx-analysis create-correction-field-analysis create-mc3-pettype-analysis create-mc3-coh-pettype-final-model create-stats-comparison create-stats-comparison-one-sided create-stats-comparison-user create-stats-comparison-user-one-sided estimate-differences-reml user-performance-analysis create-task-grouping-analysis test
+.PHONY: setup generate-task-table generate-task-intersection-table generate-task-sequence-table drop-task-table generate-valid-dur-task-table drop-valid-dur-task-table create-causal-diagram create-task-based-distributions create-task-time-bucket-distribution create-task-intersection-duration-distributions create-part-number-analysis create-mc3-analysis create-purchase-brand-analysis create-initiation-channel-analysis create-prescription-source-analysis create-approval-channel-analysis create-pettype-analysis create-npet-conditions-analysis create-ncorrection-fields-analysis create-prior-approved-rx-analysis create-prior-approved-non-vet-diet-rx-analysis create-correction-field-analysis create-mc3-pettype-analysis create-mc3-coh-pettype-final-model create-cohort-user-date-model create-cohort-user-date-pettype-cell-model create-test-model create-test-model-exp create-test-model-final create-stats-comparison create-stats-comparison-one-sided create-stats-comparison-user create-stats-comparison-user-one-sided estimate-differences-reml user-performance-analysis create-task-grouping-analysis test
 
 setup:
 	uv sync
@@ -122,6 +122,21 @@ create-mc3-pettype-analysis:
 
 create-mc3-coh-pettype-final-model:
 	uv run python -m src.python.fit_mc3_coh_pettype_final_model $(if $(filter 1 true yes,$(REDRAW)),--redraw-only,)
+
+create-cohort-user-date-model:
+	uv run python -m src.python.fit_cohort_user_date_model $(if $(filter 1 true yes,$(REDRAW)),--redraw-only,)
+
+create-cohort-user-date-pettype-cell-model:
+	uv run python -m src.python.fit_cohort_user_date_pettype_cell_model $(if $(filter 1 true yes,$(REDRAW)),--redraw-only,)
+
+create-test-model:
+	uv run python -m src.python.fit_test_model
+
+create-test-model-exp:
+	uv run python -m src.python.fit_test_model_exp
+
+create-test-model-final:
+	uv run python -m src.python.fit_test_model_final
 
 create-stats-comparison:
 	uv run python -m src.python.stats_comparison $(if $(filter 1 true yes,$(REDRAW)),--redraw-only,)
