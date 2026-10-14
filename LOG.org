@@ -1,5 +1,18 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-14 Render the causal diagram with transparency
+
+- Added =-b transparent= to the Dockerized Mermaid CLI Make target and
+  regenerated =outputs/charts/DUR_detailed.png= as an RGBA image.
+- Rebuilt the report PDF and inspected the diagram page; the =DRAFT=
+  watermark now shows through the diagram background. No test suite was run.
+
+* 2026-10-14 Darken the report draft watermark
+
+- Changed the =DRAFT= watermark lightness from =0.94= to =0.88=.
+- Rebuilt the PDF and inspected a table page to confirm the darker
+  watermark remains behind readable text. No test suite was run.
+
 * 2026-10-14 Reconcile valid and non-intersecting DUR counts
 
 - Added the 54,138 non-intersecting DURs outside the valid table to the

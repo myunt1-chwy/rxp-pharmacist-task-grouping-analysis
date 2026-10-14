@@ -212,7 +212,7 @@ This is a destructive operation. The target opens the external-browser authentic
 
 ## Create the causal diagram
 
-Render `src/mermaid/DUR.mmd` as a 2400×1600 PNG:
+Render `src/mermaid/DUR.mmd` as a transparent-background PNG:
 
 ```bash
 make create-causal-diagram

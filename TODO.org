@@ -1110,6 +1110,14 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
     - [X] Enable the watermark in the LaTeX report entry file.
     - [X] Rebuild and inspect the PDF.
 
+*** DONE Darken the DRAFT watermark slightly
+    - [X] Adjust its lightness and rebuild the PDF.
+    - [X] Inspect a rendered table page for readability.
+
+*** DONE Render the causal diagram with a transparent background
+    - [X] Add the Mermaid CLI transparency option to the Make target.
+    - [X] Regenerate the PNG and rebuild and inspect the PDF.
+
 *** DONE Reconcile valid DURs with non-intersecting DURs in the reports
     - [X] Add the 54,138 excluded DURs and their imputed processing time.
     - [X] Update both report tables and the Markdown generator.
