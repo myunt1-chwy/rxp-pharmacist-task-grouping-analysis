@@ -1,5 +1,74 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-14 Reconcile valid and non-intersecting DUR counts
+
+- Added the 54,138 non-intersecting DURs outside the valid table to the
+  model Markdown population table, its standalone table, and the LaTeX
+  cutoff table. Their 3,421,868 imputed seconds are the difference between
+  the existing non-intersecting and valid-DUR totals.
+- Updated the Markdown report generator so the reconciliation persists.
+  Rebuilt and visually checked the PDF; no test suite was run.
+
+* 2026-10-14 Add a draft watermark to the PDF report
+
+- Enabled a faint =DRAFT= watermark on every page through the LaTeX report
+  entry file.
+- Rebuilt the report PDF and inspected pages 1 and 2 to confirm the
+  watermark sits behind readable text and tables. No test suite was run.
+
+* 2026-10-14 Convert the valid-DUR cutoff table to LaTeX
+
+- Replaced the Markdown cutoff table in =reproducing_results.tex= with a
+  captioned LaTeX table, label, and prose reference. Clarified that the
+  excluded group is at or above the 156.608019-second cutoff.
+- Rebuilt the PDF with =make create-task-grouping-analysis=; no test suite
+  was run.
+
+* 2026-10-14 Convert the null-handoff intersection table to LaTeX
+
+- Replaced the Markdown intersection table and =xxxTODO= marker in
+  =reproducing_results.tex= with a captioned LaTeX table. Added a label and
+  referenced it from the preceding paragraph.
+- Rebuilt the PDF with =make create-task-grouping-analysis=. The label
+  resolved and the final build log reported no layout warnings. No tests
+  were run.
+
+* 2026-10-14 Recalculate intersections for null-handoff DURs
+
+- Re-ran the read-only intersection aggregate for =TASK_TYPE = 'DUR'= and
+  =HANDOFF_TYPE IS NULL=. Found 332,599 intersecting tasks totaling
+  16,046,580 imputed seconds (4,457.38 hours) and 3,668,159
+  non-intersecting tasks totaling 181,510,958 seconds (50,419.71 hours).
+  The groups reconcile to 4,000,758 null-handoff DURs and 197,557,538
+  seconds; every selected task had a sequence record.
+- Updated the =test-model-final.md= intersection table and its generator to
+  use this population. Saved the scoped query and table separately so the
+  earlier all-DUR intersection totals remain available.
+
+* 2026-10-14 Add intersecting DUR totals to the model Markdown report
+
+- Added intersecting and non-intersecting task counts and imputed processing
+  seconds/hours to the all-DUR section of =test-model-final.md=, with a link
+  to the read-only intersection query. Updated the report generator so the
+  table persists on regeneration.
+
+* 2026-10-14 Fix the reproducing-results PDF build
+
+- Reproduced the =make create-task-grouping-analysis= failure. XeLaTeX
+  reported =Missing $ inserted= at the source table name in
+  =reproducing_results.tex=.
+- Escaped the underscore before =LIFECYCLE= in the inline =\texttt{}=
+  identifier. Rebuilt the PDF successfully; the handoff-table reference
+  resolved. No test suite was run.
+
+* 2026-10-14 Convert the handoff table in reproducing results to LaTeX
+
+- Replaced the Markdown handoff-type table under the data preliminaries with
+  a captioned LaTeX table, labeled it, and referenced it from the prose.
+- Kept the existing task and duration totals; labeled the missing handoff
+  type as =NULL= to match the queried source. Reviewed the diff without
+  running tests, as requested.
+
 * 2026-10-14 Sum intersecting DUR processing time
 
 - Joined all DUR rows in =MY_RXP_TASKS= to the task-sequence table and used

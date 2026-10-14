@@ -8,9 +8,89 @@ In addition you need to have access to a Snowflake role that has access to the f
  CHEWYBI.CUSTOMER_PETPROFILES
  EDLDB.PDM.PRODUCT
  EDLDB.BT_HCA_HCDM.RXP_PRESCRIPTIONS
+ EDLDB.PET_HEALTH_ANALYTICS_SANDBOX.FCT__RX_RESULT_FIELD_CHANGE_SUMMARY
 \end{verbatim}
 and the pet health analytics sandbox in the dev environment;
 \begin{verbatim}
  EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX
 \end{verbatim}
 to generate transient tables.
+
+\subsection{Data Preliminaries and Assumptions}
+The study considers DUR tasks recorded in
+\texttt{EDLDB.PET\_HEALTH\_ANALYTICS\_SANDBOX.FCT\_\_TASKS\_LIFECYCLE}
+between 2026-02-01 and 2026-08-04.
+
+Since the analysis is interested in figuring out the effect of a
+pharmacist repeatedly doing similar work, the study excludes DUR tasks
+that required a follow-up. We assume failed DURs break the
+concentration of the pharmacist and the effect of doing consecutive
+similar tasks.  Table~\ref{tab:dur-handoff-type-processing} shows the
+handoff-type distribution for all DUR tasks.
+
+Only the actual time spent on the DUR is used
+(\texttt{DWELL\_IN\_PROGRESS\_TO\_CLOSED\_SECONDS}). In the remainder
+of this report, that duration is called processing time or process
+duration.
+\begin{center}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Handoff type & DUR tasks & Processing time (seconds) & Hours \\
+\midrule
+\texttt{NULL} & 4,000,758 & 197,557,538 & 54,877.09 \\
+\texttt{PHARMACIST\_FOLLOW\_UP} & 117,503 & 13,334,300 & 3,703.97 \\
+\texttt{TECHNICIAN\_FOLLOW\_UP} & 6,736 & 820,191 & 227.83 \\
+\texttt{LEAD\_FOLLOW\_UP} & 3,489 & 383,589 & 106.55 \\
+\midrule
+\textbf{All DURs} & \textbf{4,128,486} & \textbf{212,095,618} & \textbf{58,915.45} \\
+\bottomrule
+\end{tabular}
+\captionof{table}{DUR task counts and imputed processing time by handoff type.}
+\label{tab:dur-handoff-type-processing}
+\end{center}
+
+For analysis purposes we do not consider DUR tasks that happen simultaneously.
+Table~\ref{tab:dur-null-handoff-intersection} shows the intersection status
+of DUR tasks with no handoff type.
+
+\begin{center}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Intersection status & DUR tasks & Processing time (seconds) & Hours \\
+\midrule
+Intersecting & 332,599 & 16,046,580 & 4,457.38 \\
+Not intersecting & 3,668,159 & 181,510,958 & 50,419.71 \\
+\midrule
+\textbf{All DURs with NULL handoff type} & \textbf{4,000,758} & \textbf{197,557,538} & \textbf{54,877.09} \\
+\bottomrule
+\end{tabular}
+\captionof{table}{DUR task counts and imputed processing time by intersection status for tasks with no handoff type.}
+\label{tab:dur-null-handoff-intersection}
+\end{center}
+
+
+Finally, valid DURs at or above the approximate 95th-percentile
+processing-time cutoff of 156.608019 seconds are excluded as outliers.
+Table~\ref{tab:valid-dur-p95-processing} shows the valid DURs on each
+side of the cutoff and reconciles them to all non-intersecting DURs with
+no handoff type. The other excluded group is calculated by subtraction;
+the aggregate does not separate its individual exclusion reasons.
+
+\begin{center}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Duration group & DUR tasks & Processing time (seconds) & Hours \\
+\midrule
+Below cutoff & 3,433,218 & 89,130,671 & 24,758.52 \\
+At or above cutoff & 180,803 & 88,958,419 & 24,710.67 \\
+Other excluded (non-intersecting) & 54,138 & 3,421,868 & 950.52 \\
+\midrule
+\textbf{All non-intersecting DURs} & \textbf{3,668,159} & \textbf{181,510,958} & \textbf{50,419.71} \\
+\bottomrule
+\end{tabular}
+\captionof{table}{Reconciliation of non-intersecting DURs with no handoff type to valid DURs around the 156.608019-second cutoff.}
+\label{tab:valid-dur-p95-processing}
+\end{center}

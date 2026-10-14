@@ -143,6 +143,20 @@ handoff type. These totals
 come from the [read-only handoff-type query](../../../src/sql/my_rxp_tasks_handoff_type.sql).
 The valid-DUR sample requires `HANDOFF_TYPE IS NULL`.
 
+### Intersection status for DUR tasks with NULL handoff type
+
+| Intersection status | DUR tasks | Processing time (seconds) | Hours |
+|---|---:|---:|---:|
+| Intersecting | 332,599 | 16,046,580 | 4,457.38 |
+| Not intersecting | 3,668,159 | 181,510,958 | 50,419.71 |
+| **All DURs with NULL handoff type** | **4,000,758** | **197,557,538** | **54,877.09** |
+
+An intersecting DUR has `N_INTERSECTING_TASKS > 0` in
+`MY_RXP_TASKS_WITH_SEQUENCE`: its processing interval overlaps another task
+for the same user. The [read-only intersection query](../../../src/sql/dur_null_handoff_processing_time_by_intersection.sql)
+uses DUR tasks with `HANDOFF_TYPE IS NULL`, without the model's other validity
+or duration-cutoff filters. Every such DUR task had a sequence record.
+
 To regenerate the aggregate, run the
 [read-only SQL](../../../src/sql/total_dur_processing_time.sql) from the repository root:
 
@@ -217,6 +231,8 @@ parent part number; the dashed vertical line marks zero.
 | Valid DURs below 156.608019 seconds | 3,433,218 | 89,130,671 | 24,758.52 |
 | Valid DURs at or above 156.608019 seconds | 180,803 | 88,958,419 | 24,710.67 |
 | **All valid DURs** in `MY_RXP_VALID_DUR_TASKS` | **3,614,021** | **178,089,090** | **49,469.19** |
+| Other non-intersecting DURs excluded by validity checks | 54,138 | 3,421,868 | 950.52 |
+| **All non-intersecting DURs with NULL handoff type** | **3,668,159** | **181,510,958** | **50,419.71** |
 | All DURs below 156.608019 seconds in `MY_RXP_TASKS` | 3,905,692 | 104,384,954 | 28,995.82 |
 | **All DURs** in `MY_RXP_TASKS` | **4,128,486** | **212,095,618** | **58,915.45** |
 
@@ -227,7 +243,11 @@ The cutoff comes from the model's eligible sample and is applied here to all
 DURs in `MY_RXP_TASKS` as well as to the valid-DUR breakdown.
 The [valid-DUR cutoff breakdown](../../../src/sql/valid_dur_model_p95_breakdown.sql)
 shows why the totals differ. The first two rows partition the valid-DUR table at the model cutoff;
-the valid tasks below it are the 3,433,218-task model sample. The full-table
+the valid tasks below it are the 3,433,218-task model sample.
+The 54,138 other non-intersecting tasks and 3,421,868 seconds are the difference
+between the null-handoff non-intersecting population
+and the valid-DUR table; the available aggregate does not
+separate their individual exclusion reasons. The full-table
 below-cutoff row also includes 472,474 other DUR tasks totaling
 15,254,283 seconds that did not meet the valid-DUR criteria.
 

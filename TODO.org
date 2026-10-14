@@ -1081,6 +1081,40 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
     - [X] Reconcile the count and duration totals to all DURs.
     - [X] Save the read-only query and Markdown summary table.
 
+*** DONE Convert the reproducing-results handoff table to LaTeX
+    - [X] Replace the Markdown table with a captioned LaTeX table.
+    - [X] Add a label and prose reference without running tests.
+
+*** DONE Fix the reproducing-results PDF build
+    - [X] Reproduce the LaTeX error from the report target.
+    - [X] Escape the source table name and rebuild the PDF.
+
+*** DONE Record intersecting DUR totals in the model Markdown report
+    - [X] Add the intersection counts and durations to the all-DUR section.
+    - [X] Preserve the table in the report generator and link its query.
+
+*** DONE Recalculate intersections for null-handoff DURs
+    - [X] Filter to DUR tasks with NULL handoff type.
+    - [X] Reconcile intersection groups to the null-handoff total.
+    - [X] Update the model report and save the scoped query and table.
+
+*** DONE Convert the null-handoff intersection table to LaTeX
+    - [X] Replace the reproducing-results TODO with a captioned table.
+    - [X] Add a label and prose reference.
+
+*** DONE Convert the valid-DUR cutoff table to LaTeX
+    - [X] Replace the Markdown table with a captioned LaTeX table.
+    - [X] Add a label and prose reference, then rebuild the PDF.
+
+*** DONE Add a faint DRAFT watermark to the PDF report
+    - [X] Enable the watermark in the LaTeX report entry file.
+    - [X] Rebuild and inspect the PDF.
+
+*** DONE Reconcile valid DURs with non-intersecting DURs in the reports
+    - [X] Add the 54,138 excluded DURs and their imputed processing time.
+    - [X] Update both report tables and the Markdown generator.
+    - [X] Rebuild and inspect the PDF.
+
 *** DONE Rename statistics comparison analysis artifacts
     - [X] Rename task-level and user-level modules, reports, caches, figures, and SQL files.
     - [X] Update Make targets, imports, documentation, tests, and LaTeX references.

@@ -36,6 +36,7 @@ BELOW_P95_DUR_SQL_PATH = ROOT / "src" / "sql" / "total_dur_below_model_p95.sql"
 VALID_DUR_SQL_PATH = ROOT / "src" / "sql" / "total_valid_dur_processing_time.sql"
 VALID_DUR_P95_BREAKDOWN_SQL_PATH = ROOT / "src" / "sql" / "valid_dur_model_p95_breakdown.sql"
 HANDOFF_TYPE_SQL_PATH = ROOT / "src" / "sql" / "my_rxp_tasks_handoff_type.sql"
+INTERSECTION_SQL_PATH = ROOT / "src" / "sql" / "dur_null_handoff_processing_time_by_intersection.sql"
 REPORT_PATH = ROOT / "outputs" / "reports" / "md" / f"{NAME}.md"
 CHART_DIR = ROOT / "outputs" / "charts" / NAME
 USER_QQ_PATH = CHART_DIR / "user_random_intercepts_qq.png"
@@ -65,11 +66,17 @@ VALID_DUR_TASKS = 3_614_021
 VALID_DUR_SECONDS = 178_089_090
 VALID_DUR_AT_OR_ABOVE_P95_TASKS = 180_803
 VALID_DUR_AT_OR_ABOVE_P95_SECONDS = 88_958_419
+NULL_HANDOFF_DUR_TASKS = 4_000_758
+NULL_HANDOFF_DUR_SECONDS = 197_557_538
 HANDOFF_TYPE_DUR_TOTALS = (
-    ("NULL", 4_000_758, 197_557_538),
+    ("NULL", NULL_HANDOFF_DUR_TASKS, NULL_HANDOFF_DUR_SECONDS),
     ("PHARMACIST_FOLLOW_UP", 117_503, 13_334_300),
     ("TECHNICIAN_FOLLOW_UP", 6_736, 820_191),
     ("LEAD_FOLLOW_UP", 3_489, 383_589),
+)
+INTERSECTION_DUR_TOTALS = (
+    ("Intersecting", 332_599, 16_046_580),
+    ("Not intersecting", 3_668_159, 181_510_958),
 )
 
 
@@ -144,24 +151,39 @@ def write_report(
         f"| `{handoff_type}` | {tasks:,} | {seconds:,} | {seconds / 3600:,.2f} |"
         for handoff_type, tasks, seconds in HANDOFF_TYPE_DUR_TOTALS
     )
+    intersection_rows = "\n".join(
+        f"| {status} | {tasks:,} | {seconds:,} | {seconds / 3600:,.2f} |"
+        for status, tasks, seconds in INTERSECTION_DUR_TOTALS
+    )
 
     counterfactual_section = ""
     if counterfactual is not None:
+        non_intersecting_tasks, non_intersecting_seconds = INTERSECTION_DUR_TOTALS[1][1:]
+        other_excluded_tasks = non_intersecting_tasks - VALID_DUR_TASKS
+        other_excluded_seconds = non_intersecting_seconds - VALID_DUR_SECONDS
         dur_population_table = f"""| DUR population | Number of DURs | Total processing time (seconds) | Hours |
 |---|---:|---:|---:|
 | Valid DURs below {BELOW_P95_CUTOFF_SECONDS:.6f} seconds | {VALID_DUR_TASKS - VALID_DUR_AT_OR_ABOVE_P95_TASKS:,} | {VALID_DUR_SECONDS - VALID_DUR_AT_OR_ABOVE_P95_SECONDS:,} | {(VALID_DUR_SECONDS - VALID_DUR_AT_OR_ABOVE_P95_SECONDS) / 3600:,.2f} |
 | Valid DURs at or above {BELOW_P95_CUTOFF_SECONDS:.6f} seconds | {VALID_DUR_AT_OR_ABOVE_P95_TASKS:,} | {VALID_DUR_AT_OR_ABOVE_P95_SECONDS:,} | {VALID_DUR_AT_OR_ABOVE_P95_SECONDS / 3600:,.2f} |
 | **All valid DURs** in `MY_RXP_VALID_DUR_TASKS` | **{VALID_DUR_TASKS:,}** | **{VALID_DUR_SECONDS:,}** | **{VALID_DUR_SECONDS / 3600:,.2f}** |
+| Other non-intersecting DURs excluded by validity checks | {other_excluded_tasks:,} | {other_excluded_seconds:,} | {other_excluded_seconds / 3600:,.2f} |
+| **All non-intersecting DURs with NULL handoff type** | **{non_intersecting_tasks:,}** | **{non_intersecting_seconds:,}** | **{non_intersecting_seconds / 3600:,.2f}** |
 | All DURs below {BELOW_P95_CUTOFF_SECONDS:.6f} seconds in `MY_RXP_TASKS` | {BELOW_P95_DUR_TASKS:,} | {BELOW_P95_DUR_SECONDS:,} | {BELOW_P95_DUR_SECONDS / 3600:,.2f} |
 | **All DURs** in `MY_RXP_TASKS` | **{ALL_DUR_TASKS:,}** | **{ALL_DUR_SECONDS:,}** | **{ALL_DUR_SECONDS / 3600:,.2f}** |"""
         dur_population_explanation = f"""The first two rows partition the valid-DUR table at the model cutoff;
-the valid tasks below it are the {VALID_DUR_TASKS - VALID_DUR_AT_OR_ABOVE_P95_TASKS:,}-task model sample. The full-table
+the valid tasks below it are the {VALID_DUR_TASKS - VALID_DUR_AT_OR_ABOVE_P95_TASKS:,}-task model sample.
+The {other_excluded_tasks:,} other non-intersecting tasks and {other_excluded_seconds:,} seconds are the difference
+between the null-handoff non-intersecting population
+and the valid-DUR table; the available aggregate does not
+separate their individual exclusion reasons. The full-table
 below-cutoff row also includes {BELOW_P95_DUR_TASKS - (VALID_DUR_TASKS - VALID_DUR_AT_OR_ABOVE_P95_TASKS):,} other DUR tasks totaling
 {BELOW_P95_DUR_SECONDS - (VALID_DUR_SECONDS - VALID_DUR_AT_OR_ABOVE_P95_SECONDS):,} seconds that did not meet the valid-DUR criteria."""
         DUR_POPULATION_TABLE_PATH.parent.mkdir(parents=True, exist_ok=True)
         DUR_POPULATION_TABLE_PATH.write_text(
             f"# DUR population totals\n\n{dur_population_table}\n\n"
-            f"{dur_population_explanation}\n",
+            f"{dur_population_explanation}\n\n"
+            f"[Null-handoff intersection source query]"
+            f"({os.path.relpath(INTERSECTION_SQL_PATH, DUR_POPULATION_TABLE_PATH.parent)})\n",
             encoding="utf-8",
         )
         start_date = counterfactual.by_user_day["d"].min()
@@ -250,6 +272,19 @@ The `NULL` row includes tasks without a handoff type. No DUR row has a blank
 handoff type. These totals
 come from the [read-only handoff-type query]({link(HANDOFF_TYPE_SQL_PATH)}).
 The valid-DUR sample requires `HANDOFF_TYPE IS NULL`.
+
+### Intersection status for DUR tasks with NULL handoff type
+
+| Intersection status | DUR tasks | Processing time (seconds) | Hours |
+|---|---:|---:|---:|
+{intersection_rows}
+| **All DURs with NULL handoff type** | **{NULL_HANDOFF_DUR_TASKS:,}** | **{NULL_HANDOFF_DUR_SECONDS:,}** | **{NULL_HANDOFF_DUR_SECONDS / 3600:,.2f}** |
+
+An intersecting DUR has `N_INTERSECTING_TASKS > 0` in
+`MY_RXP_TASKS_WITH_SEQUENCE`: its processing interval overlaps another task
+for the same user. The [read-only intersection query]({link(INTERSECTION_SQL_PATH)})
+uses DUR tasks with `HANDOFF_TYPE IS NULL`, without the model's other validity
+or duration-cutoff filters. Every such DUR task had a sequence record.
 
 To regenerate the aggregate, run the
 [read-only SQL]({link(ALL_DUR_SQL_PATH)}) from the repository root:
