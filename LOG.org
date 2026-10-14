@@ -1,5 +1,244 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-14 Add parent part number random intercept to test-model-final
+
+- Extended the cohort-only SQL extract with =PARENT_PART_NUMBER=, refreshed it
+  from Snowflake, and fitted crossed user, date, and parent-part-number random
+  intercepts in =test-model-final=. The extract has 3,433,218 tasks and 885
+  parent part numbers; no parent part numbers are missing.
+- The REML fit converged. The parent-part-number random-intercept SD is
+  0.169522 (approximate 95% CI [0.160562, 0.178982]). =SAME_PRECEDING= is
+  -0.034871 (95% CI [-0.036552, -0.033189]), an adjusted duration ratio
+  of 0.965730. The global intercept is 3.034533 log seconds.
+- Updated the report, parent-effect data and table, Q–Q and density plots.
+  Visually checked the plots; the parent-part Q–Q plot has a few tail departures.
+  The full suite passed (141 tests), and =git diff --check= passed.
+
+* 2026-10-14 Build test-model-final with cohort-only indicators
+
+- Added =test-model-final= with the same log-duration, no-cell fixed effects,
+  and user/date random intercepts as =test-model-exp=. Its indicators use
+  =COHORT_SEQN= and =COHORT_BATCH_LEN= from the existing cohort-only cache.
+- Compared the two raw caches by =(USER_ID, TASK_ID)=: all 3,433,218 tasks
+  matched, with no duration or control mismatches. The approximate P95
+  metadata differs slightly between extracts, but no retained task differs.
+  =SAME_PRECEDING= differed on 1,430,449 tasks and =SAME_FOLLOWING= on
+  1,429,253 tasks.
+- The fit converged. =SAME_PRECEDING= was -0.037134 (95% CI [-0.038828,
+  -0.035439]) on the log scale, a duration ratio of 0.963547. The
+  =SAME_FOLLOWING= estimate was -0.003052 (95% CI [-0.004747, -0.001358]).
+  The global intercept was 2.919039 log seconds.
+- Generated separate report, data, tables, Q-Q plots, prediction plot, and
+  user/date density plots; visually inspected the date density. The full
+  suite passed (141 tests).
+
+* 2026-10-14 Plot test-model-exp random-intercept densities
+
+- Added separate Altair density plots for the 340 user and 182 date fitted
+  random intercepts, each with one equal-weight value per user or date and a
+  zero reference line. Both PNGs have transparent backgrounds and appear in
+  the =test-model-exp= report and chart index.
+- Regenerated the model and visually inspected both plots. The user density
+  has one broad peak; the date density shows a second positive peak, matching
+  the strong departure in the date Q-Q plot. The focused tests and
+  =git diff --check= passed.
+
+* 2026-10-14 Build test-model-exp with log duration
+
+- Added =test-model-exp= using the same retained cohort-and-pet extract and
+  model specification as =test-model=, with natural log duration in place of
+  the fitted Box-Cox outcome. The new Make target writes separate data,
+  tables, report, and four diagnostic charts, all ignored by Git.
+- The fit converged on 3,433,218 tasks. The =SAME_PRECEDING= coefficient was
+  -0.171335 (95% CI [-0.175693, -0.166977]) on the log scale, an adjusted
+  duration ratio of 0.842539 (15.75% lower). =SAME_FOLLOWING= was 0.000389
+  (95% CI [-0.003998, 0.004775]). The global intercept was 2.904094 log
+  seconds; user and date random-intercept SDs were 0.542884 and 0.088697.
+- The date random-intercept Q-Q plot departs strongly from normality and the
+  residual Q-Q plot curves in both tails. The report notes that its intervals
+  are model-based approximations. The full test suite passed (139 tests).
+
+* 2026-10-14 Report the test-model global intercept
+
+- Recovered the profiled global intercept as the transformed-outcome mean
+  after removing fitted fixed effects and weighted user/date random effects.
+  It is 2.553233 on the Box-Cox scale for reference categories, zero
+  indicator values, and zero random intercepts.
+- Added the estimate and interpretation to the =test-model= report,
+  regenerated the fit, and verified the calculation against row-level
+  residuals. The focused test and =git diff --check= passed.
+
+* 2026-10-14 Build test-model without fixed cells
+
+- Added an empty-cell option to the fitting core. It profiles one global
+  intercept internally and reports zero stratification cells.
+- Added =test-model= with cohort, pet type, weekday, correction, approval
+  channel, and prescription source fixed effects; user and date are random
+  intercepts. It reuses the cohort-and-pet raw extract and preserves those
+  definitions of =SAME_PRECEDING= and =SAME_FOLLOWING=.
+- The fit converged on 3,433,218 tasks, 340 users, and 182 dates.
+  =SAME_PRECEDING= was -0.136583 (95% CI [-0.140013, -0.133153]) and
+  =SAME_FOLLOWING= was 0.000090 (95% CI [-0.003362, 0.003542]) on the
+  Box-Cox scale. User and date random-intercept SDs were 0.420982 and
+  0.070698, respectively.
+- The date random-intercept Q-Q plot departs strongly from normality and the
+  residual Q-Q plot curves in both tails; the report flags the approximation.
+  Synthetic data recovered the treatment coefficient, the full suite passed
+  (137 tests), and the generated report, tables, and four diagnostics exist.
+
+* 2026-10-14 Use cohort-and-pet batches in the user-random model
+
+- The valid-DUR table exposes =COHORT_PET_SEQN= as task position within a
+  cohort-and-pet batch and =COHORT_PET_BATCH_LEN= as its length. The requested
+  =COHORT_PET_BATCH_SEQN= is an intermediate batch identifier, not a source
+  table output column. Used the within-batch position to define
+  =SAME_PRECEDING= and =SAME_FOLLOWING=.
+- Parameterized the shared SQL template's sequence and length fields while
+  retaining the cohort-only defaults for the existing fixed-user model.
+  Added a separate SQL file and raw cache for the user-random variant; its
+  Make target now supports =REDRAW=1=. The generated SQL is ignored by Git.
+- Pulled the new extract from Snowflake and refit 3,433,218 retained tasks.
+  The fit converged: =SAME_PRECEDING= -0.134601 (95% CI [-0.138032,
+  -0.131169]); =SAME_FOLLOWING= 0.002054 (95% CI [-0.001399, 0.005508]).
+  =SAME_PRECEDING= is 1 on 126,838 tasks (3.69%); 1,045 of 2,841 cells
+  (36.78%) have at least two tasks at both indicator values.
+- The full suite passed (136 tests), a focused rerun passed (6 tests), cached
+  redraw succeeded, and generated report, tables, and three diagnostics exist.
+
+* 2026-10-14 Count cells with repeated SAME_PRECEDING values
+
+- Added to the =cohort_user_date_pettype_cell_model= report the number of
+  =(COH, PETTYPE, D)= cells with at least two retained tasks for each
+  =SAME_PRECEDING= value: 1,746 of 2,841 cells (61.46%).
+- Regenerated the report from the shared cache. Both focused tests and
+  =git diff --check= passed.
+
+* 2026-10-14 Describe sequence-indicator distributions in the user-random model
+
+- Added marginal and joint =SAME_PRECEDING=/=SAME_FOLLOWING= tables to the
+  =cohort_user_date_pettype_cell_model= report, using the retained post-P95
+  sample as the denominator.
+- Added the key counts and percentages directly to the report description so
+  they are visible before the tables.
+- Regenerated the report from the shared cache. Of 3,433,218 tasks, 1,557,287
+  (45.36%) have =SAME_PRECEDING= and 1,554,376 (45.27%) have
+  =SAME_FOLLOWING=; 760,093 (22.14%) have both.
+- The focused test passed and =git diff --check= passed.
+
+* 2026-10-14 Name the user-random model cohort_user_date_pettype_cell_model
+
+- Renamed the model module, Make target, test, generated report, tables, user
+  effects data, and chart directory. Its `(COH, PETTYPE, D)` fixed cells and
+  =USER_ID= random intercept are unchanged.
+- Regenerated the report with =make create-cohort-user-date-pettype-cell-model=.
+  The fit converged with the same 3,433,218 tasks and =SAME_PRECEDING=
+  estimate of -0.029587. The focused test passed and =git diff --check= passed.
+
+* 2026-10-13 Add cohort/pet-type/date cells with a user random intercept
+
+** Implementation
+
+- Added a separate model with fixed =(COH, PETTYPE, D)= cells and a
+  =USER_ID= random intercept. The cohort/pet-type/user/date fixed-only model
+  remains available.
+- Reused its valid-DUR extract, strict global P95 filter, Box-Cox outcome,
+  sequence indicators, correction, approval-channel, and prescription-source
+  controls. Date in the cell absorbs weekday.
+- Added =create-cohort-user-date-pettype-cell-model= with a separate report,
+  fixed- and user-effect tables, user-effect data, and user/residual/prediction
+  diagnostics. The generated outputs are ignored by Git.
+
+** Validation
+
+- The target fitted 3,433,218 tasks, 2,841 cells, and 340 users from the
+  shared raw cache and converged. =SAME_PRECEDING= was -0.029587 (95% CI
+  [-0.030922, -0.028252]); =SAME_FOLLOWING= was -0.002348 (95% CI
+  [-0.003683, -0.001013]) on the Box-Cox scale. User random-intercept SD
+  was 0.420278 (95% CI [0.388573, 0.454570]).
+- Synthetic data recovered the treatment coefficient with user as the only
+  random intercept. The full test suite passed: 134 tests.
+- Inspected the generated user Q-Q plot and confirmed report, table, and
+  chart files and =git diff --check=.
+
+* 2026-10-13 Promote process date into fixed cells and remove the date random intercept
+
+** Summary
+
+Replaced the date random intercept with date-specific fixed cells in the
+cohort-by-user model.  Fixed cells are now =(COH, PETTYPE, USER_ID, D)=.
+Weekday contrasts are absorbed by the date cells and omitted. The model has no
+random effects: it is a pure fixed-effects OLS with cell intercepts.
+
+** Changes
+
+- =src/python/fit_mc3_coh_pettype_final_model.py=:
+  - Added =base_fixed_columns= parameter to =build_fixed_effect_design=.
+  - Added =_fit_fixed_only= function for cell-demeaned OLS with no random effects.
+  - Updated =_cross_products= to handle empty =random_columns= (empty Z matrices).
+  - Relaxed =fit_final_model= to accept =random_columns=()= and branch to the
+    fixed-only path; replaced the hard =random_columns= nonempty check.
+  - Widened =FinalModelResult.random_sds= type from 3-tuple to variable-length.
+- =src/python/fit_cohort_user_date_model.py=:
+  - Changed =CELL_COLUMNS= to =(coh, pettype, user_id, d)=.
+  - Set =BASE_FIXED_COLUMNS= to =TREATMENT_COLUMNS= only (no weekday).
+  - Passed =random_columns=()= to =fit_final_model=.
+  - Removed date-effect outputs, date Q-Q diagnostics, and date table.
+  - Rewrote the report formula: no =h_d=, no weekday sum, documented absorption.
+- =tests/test_fit_cohort_user_date_model.py=:
+  - Updated to test fixed-only path with zero random columns.
+  - Asserted no weekday terms, no date random intercept, and correct formula.
+
+** Validation
+
+- =make create-cohort-user-date-model REDRAW=1= succeeded from existing cache.
+- Converged: True (OLS, no optimization needed).
+- 3,433,218 tasks, 139,104 cells (COH × PETTYPE × USER_ID × D).
+- =SAME_PRECEDING= estimate: -0.029075 (95% CI [-0.030394, -0.027755]).
+- =SAME_FOLLOWING= estimate: -0.001206 (95% CI [-0.002526, 0.000114]);
+  this interval includes zero.
+- Conditional R²: 0.362, residual SD: 0.592.
+- No weekday or date random terms in fixed effects or variance components.
+- Residual Q-Q and predicted-vs-outcome charts written; obsolete generated
+  date-random-effect artifacts removed.
+- 133 tests passed; MC3 model tests unchanged.
+- =git diff --check= clean.
+
+* 2026-10-13 Add PETTYPE as a categorical fixed effect to the cohort-by-user/date model
+
+** Summary
+
+Added =PETTYPE= as a categorical fixed main effect to the cohort-by-user/date
+mixed-effects model.  The MC3/COH/PETTYPE model and its tests are unchanged.
+
+** Changes
+
+- =src/sql/cohort_user_date_model.sql.j2=: added =PETTYPE::VARCHAR= to the
+  base CTE and the final SELECT.
+- =src/python/fit_mc3_coh_pettype_final_model.py=: parameterized
+  =build_fixed_effect_design= with an optional =categorical_effects= keyword
+  argument, defaulting to the existing =(approval_channel, prescription_source)=.
+- =src/python/fit_cohort_user_date_model.py=:
+  - Defined =CATEGORICAL_EFFECTS = ("approval_channel", "prescription_source",
+    "pettype")= and passed it to =build_fixed_effect_design=.
+  - Removed =pettype= from the dummy-column list in =prepare_frame=.
+  - Updated the report formula to include a pet-type summation
+    ($\psi_t$ contrasts), reference level, and contrast-level listing.
+- =tests/test_fit_cohort_user_date_model.py=: added =pettype= to the simulated
+  frame with Dog/Cat/Bird levels and pet-type effects; asserted =PETTYPE::VARCHAR=
+  in SQL, =pettype= in design references, >=2 PETTYPE contrast labels, and
+  pet-type documentation in the report.
+
+** Validation
+
+- Fresh Snowflake extract pulled 3,433,218 tasks with =PETTYPE= from
+  =MY_RXP_VALID_DUR_TASKS=.
+- =make create-cohort-user-date-model REDRAW=1= succeeded from the refreshed cache.
+- Model converged (=True=), conditional R-squared 0.304, REML NLL 3,155,135.8.
+- 8 PETTYPE contrasts versus =Dog= reference; 7 of 8 significant at 95%.
+- All 3 diagnostic charts written (date Q-Q, residual Q-Q, predicted vs outcome).
+- 133 tests passed; both the MC3 and cohort-by-user/date suites green.
+- =git diff --check= clean.
+
 * 2026-10-13 Repair random-effects model appendix
 
 ** Summary
@@ -123,6 +362,7 @@
 - Inspected pages 15 and 16; figures, tables, SQL, and References fit without
   splits or clipping. The LaTeX log has no warnings or overfull boxes.
 - =git diff --check= passed.
+
 
 * 2026-10-13 Redraw prescription-source and approval-channel figures
 
@@ -1403,3 +1643,85 @@ table.
 - Visually inspected the weekday and shift charts; weekday order and all five
   cell metrics render clearly.
 - Ran =git diff --check=: passed.
+* 2026-10-13 Add cohort-by-user mixed-effects model
+
+** Implementation
+
+- Added a separate valid-DUR SQL extract using =COHORT_SEQN= and
+  =COHORT_BATCH_LEN= for preceding/following indicators. The existing
+  consecutive-task and one-hour-break rules remain in the source table.
+- Parameterized the mixed-model fitting core for fixed-cell and random-effect
+  columns. Eliminated cell means before the dense random-effect solve so the
+  1,394 cohort/user cells do not require a 1,394-square factorization.
+- Added a separate Make target, raw and transformed data caches, Markdown
+  tables and report, and date, residual, and prediction diagnostics. These
+  generated artifacts are ignored by Git. The existing MC3 SQL, report, and
+  PDF were not edited.
+
+** Validation
+
+- The full suite passed: 133 tests. The synthetic test recovered a
+  =SAME_PRECEDING= coefficient of -0.30 within 0.07, with date as the only
+  random intercept.
+- =make create-cohort-user-date-model= downloaded 3,433,218 task rows from
+  Snowflake and converged. =REDRAW=1= succeeded from its own raw cache.
+- The fitted =SAME_PRECEDING= coefficient was -0.028938 (95% CI
+  [-0.030267, -0.027609]) on the Box-Cox scale; the =SAME_FOLLOWING=
+  placebo was -0.001795 (95% CI [-0.003124, -0.000466]). Date SD was
+  0.073150 (95% CI [0.065830, 0.081283]).
+- Inspected all three PNG diagnostics and confirmed generated files and report
+  links. The date-intercept Q-Q plot deviates markedly from normality; the
+  report flags this and the residual-tail curvature as inference limitations.
+- =git diff --check= passed.
+
+** Clarification
+
+- Clarified in the generated report that the paired t-test is observational
+  too, and neither analysis identifies a causal effect. The three new tests
+  passed, and the report was regenerated with =REDRAW=1=.
+
+* 2026-10-13 Add pet type to the cohort-by-user/date model
+
+** Implementation
+
+- Added =PETTYPE= to the model-specific Snowflake extract and made it a
+  categorical fixed main effect. The `(COH, USER_ID)` cells and date-only
+  random intercept remain unchanged.
+- Parameterized the shared fixed-effect design's categorical columns; the
+  existing MC3 model retains its original defaults.
+- Added pet-type contrasts, Dog as the fitted reference, and the updated
+  formula to the cohort-by-user report.
+
+** Validation
+
+- The full test suite passed: 133 tests. After the report wording adjustment,
+  eight focused model tests passed.
+- A fresh Snowflake extraction produced 3,433,218 cached rows including
+  =PETTYPE=. The Cortex invocation stalled after downloading the cache, so
+  the fit was completed and verified locally with =REDRAW=1=.
+- The updated fit converged. =SAME_PRECEDING= was -0.028874 (95% CI
+  [-0.030201, -0.027547]) on the Box-Cox scale. The report and fixed-effect
+  table contain eight pet-type contrasts against Dog, including Cat 0.104194
+  (95% CI [0.102216, 0.106172]).
+- Confirmed the date, residual, and prediction charts and =git diff --check=.
+
+* 2026-10-13 Use cohort/pet-type/user fixed cells
+
+** Implementation
+
+- Changed the additional model's fixed cells from =(COH, USER_ID)= to
+  =(COH, PETTYPE, USER_ID)= and removed the separate pet-type main effect.
+  Date remains the only random intercept; the other controls are unchanged.
+- Updated the model formula, report labels, diagnostics README, and synthetic
+  tests. The existing MC3 model and PDF remain unchanged.
+
+** Validation
+
+- Refit with =make create-cohort-user-date-model REDRAW=1= using the cache
+  refreshed for the prior task. The 3,433,218-task model converged with
+  4,561 observed fixed cells and no standalone =PETTYPE= coefficient.
+- =SAME_PRECEDING= was -0.028742 (95% CI [-0.030068, -0.027416]) on the
+  Box-Cox scale; =SAME_FOLLOWING= was -0.001445 (95% CI
+  [-0.002771, -0.000118]).
+- All 133 tests passed. Confirmed the regenerated fixed-effect table,
+  date/residual/prediction diagnostics, and =git diff --check=.
