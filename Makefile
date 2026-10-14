@@ -12,7 +12,8 @@ TASK_GROUPING_ANALYSIS_APPENDIX := \
 	src/latex/appendix/dur_factors.tex \
 	src/latex/appendix/reproducing_results.tex \
 	src/latex/appendix/modeling_dur_processing_time.tex \
-	src/latex/appendix/cohort_user_one_sided_comparison.tex
+	src/latex/appendix/cohort_user_one_sided_comparison.tex \
+	src/latex/appendix/estimating_potential.tex
 TASK_GROUPING_ANALYSIS_CHARTS := \
 	outputs/charts/DUR_detailed.png \
 	outputs/charts/user-performance-analysis/user-median-dur-duration-distributions.png \

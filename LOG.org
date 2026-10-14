@@ -1,5 +1,12 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-14 Track the estimating-potential appendix in the PDF target
+
+- Added =src/latex/appendix/estimating_potential.tex= to the Makefile's
+  appendix dependencies. The existing report source already inputs it.
+- Rebuilt the PDF successfully and confirmed LaTeX read the appendix file.
+  No test suite was run.
+
 * 2026-10-14 Render the causal diagram with transparency
 
 - Added =-b transparent= to the Dockerized Mermaid CLI Make target and

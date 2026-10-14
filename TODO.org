@@ -1118,6 +1118,10 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
     - [X] Add the Mermaid CLI transparency option to the Make target.
     - [X] Regenerate the PNG and rebuild and inspect the PDF.
 
+*** DONE Track estimating_potential.tex in the report Make target
+    - [X] Add the appendix file to the PDF dependencies.
+    - [X] Rebuild the PDF and confirm the file is included.
+
 *** DONE Reconcile valid DURs with non-intersecting DURs in the reports
     - [X] Add the 54,138 excluded DURs and their imputed processing time.
     - [X] Update both report tables and the Markdown generator.
