@@ -4,8 +4,16 @@ preceded by the same task is executed faster.  The tests show that for
 cohort 1,2,3 there is a non-zero improvement but for cohort 4, the
 test cannot reject that there is no improvement.
 
-The method does not try to test for confounders \ref{ref:confounding}  which are possible factors affecting both the decision of scheduling one task after another and the output which is duration. In this study, we try to account for the user and the cohort, but we are not able to control for day of the week, pet or part number which might be in the set of confounders. Confounders can change the analysis result significantly.
-A similar approach in \ref{ref:grouping-similar-work} points out that there is statistical reason to believe that controlling for cohort and user still may not eliminate the effect of confounders.
+The method does not try to test for confounders \ref{ref:confounding}
+which are possible factors affecting both the decision of scheduling
+one task after another and the output which is duration. In this
+study, we try to account for the user and the cohort, but we are not
+able to control for day of the week, pet or part number which might be
+in the set of confounders. Confounders can change the analysis result
+significantly.  A similar approach in \ref{ref:grouping-similar-work}
+points out that there is statistical reason to believe that
+controlling for cohort and user still may not eliminate the effect of
+confounders.
 
 \subsubsection{Purpose and method}
 This analysis compares Same Cohort and Different Cohort DUR work time within
