@@ -4,6 +4,9 @@
   :CATEGORY: chewy
   :REFNUM:   1.
   :END:
+** DONE Show clickable report references in blue
+   - [X] Set internal references, citations, and URLs to blue.
+
 ** DONE Recover the user's executive summary from the PDF
    - [X] Restore the original wording in =src/latex/main.tex=.
    - [X] Preserve dates, punctuation, and section references.
