@@ -157,3 +157,69 @@ Upper 95\% bound & $-0.033189052$ & \$39,830.15 & \$80,320.46 \\
 \captionof{table}{Period and annualized implied labor value under the fitted \texttt{SAME\_PRECEDING} coefficient and its 95\% confidence bounds, at \$90 per pharmacist hour. Annualized values use unrounded period estimates.}
 \label{tab:same-preceding-counterfactual-beta-bounds}
 \end{center}
+
+\subsubsection{Monte Carlo Distribution of Potential Labor Savings}
+\label{sec:potential-monte-carlo}
+We ran 10,000 simulations to estimate how uncertainty in the
+\texttt{SAME\_PRECEDING} coefficient and variation in individual task durations
+ affect the potential labor value. Each simulation draws one coefficient
+$\beta_P \sim \mathcal{N}(-0.034870727,\,0.000858014^2)$ shared by all tasks,
+and a fresh independent residual $\epsilon_i \sim \mathcal{N}(0,\,0.767615^2)$
+for every task, including tasks with either original value of
+\texttt{SAME\_PRECEDING}. Other fitted coefficients, random effects, and the
+residual standard deviation remain fixed.
+
+For each task, the original and grouped scenarios share the same residual:
+\[
+ T_i^{\mathrm{original}}=\exp(\eta_{i,-P}+\beta_P P_i+\epsilon_i),
+ \qquad
+ T_i^{\mathrm{grouped}}=\exp(\eta_{i,-P}+\beta_P P_i^*+\epsilon_i),
+\]
+where $\eta_{i,-P}$ is the fitted log-duration predictor excluding the
+same-preceding term. Within each pharmacist-day-cohort group, tasks are ordered
+by process start time, with task ID breaking ties. The first task keeps its
+original indicator; only later tasks with $P_i=0$ change to $P_i^*=1$.
+Thus unchanged tasks cancel in the paired savings calculation. This uses
+3,433,218 retained tasks, of which 1,814,117 are eligible for change.
+
+Table~\ref{tab:potential-monte-carlo} summarizes the simulated savings at
+\$90 per hour. Annualized values multiply the 181-day source-period values by
+$365/181$, assuming the same daily task volume and mix. These simulations
+use model-generated durations, so their mean differs from the observed-duration
+counterfactual in Table~\ref{tab:same-preceding-counterfactual-summary}.
+
+\begin{center}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Quantity & Mean & Central 95\% simulation interval \\
+\midrule
+Source-period hours saved & 469.0 & 446.4--491.8 \\
+Source-period labor value & \$42,213 & \$40,173--\$44,258 \\
+Annualized labor value & \$85,125 & \$81,012--\$89,251 \\
+\bottomrule
+\end{tabular}
+\captionof{table}{Potential labor savings across 10,000 simulations with coefficient and task-level residual uncertainty. Intervals are the 2.5th and 97.5th percentiles.}
+\label{tab:potential-monte-carlo}
+\end{center}
+
+Figure~\ref{fig:potential-monte-carlo-histogram} compares this distribution
+with a coefficient-only calculation that averages over residual variation
+analytically. The distributions nearly overlap: independent task-level
+residuals average out across the large workload. All 10,000 simulations
+produced positive savings. This follows from the negative coefficient draws
+and the paired calculation; it does not establish that implementation would
+always produce a financial benefit.
+
+\begin{center}
+\includegraphics[width=\linewidth,alt={Overlapping histograms of annualized potential labor value with coefficient uncertainty alone and with coefficient plus residual uncertainty}]{outputs/charts/dur_labor_savings_monte_carlo/histogram.png}
+\captionof{figure}{Simulated annualized potential DUR labor value. Both scenarios use the same coefficient draws; the combined scenario also draws a fresh residual for every task in every simulation.}
+\label{fig:potential-monte-carlo-histogram}
+\end{center}
+
+These intervals are conditional on the fitted model and the scheduling
+assumptions. Sharing a task's residual between scenarios assumes the same
+unmeasured task difficulty in both scenarios. The simulation excludes
+implementation costs and uncertainty in other model parameters, causal
+interpretation, scheduling feasibility, future workload, and conversion of
+released time into cash savings. The historical duration cutoff selects the
+input sample; simulated durations above that cutoff are retained.

@@ -5,3 +5,9 @@ build/
 *.parquet
 generated/cohort_user_date_model.sql
 generated/cohort_user_date_pettype_cell_model.sql
+
+# Generated Monte Carlo artifacts (retain the authored implementation plan).
+data/dur_labor_savings_monte_carlo_*.json
+outputs/reports/md/dur_labor_savings_monte_carlo.md
+outputs/tables/dur_labor_savings_monte_carlo.md
+outputs/charts/dur_labor_savings_monte_carlo/

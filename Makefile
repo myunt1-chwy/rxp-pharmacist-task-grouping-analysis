@@ -23,6 +23,7 @@ TASK_GROUPING_ANALYSIS_CHARTS := \
 	outputs/charts/DUR_partition_sankey.png \
 	outputs/charts/DUR_processing_time_sankey.png \
 	outputs/charts/same_preceding_counterfactual.png \
+	outputs/charts/dur_labor_savings_monte_carlo/histogram.png \
 	outputs/charts/user-performance-analysis/user-median-dur-duration-distributions.png \
 	outputs/charts/user-performance-analysis/user-performance-median-all-cohorts-scatter-matrix.png \
 	outputs/charts/tasks-based-distributions/task-duration-by-cohort-boxplots.png \
@@ -181,3 +182,16 @@ $(TASK_GROUPING_ANALYSIS_PDF): $(TASK_GROUPING_ANALYSIS_LATEX) $(TASK_GROUPING_A
 
 test:
 	uv run pytest
+
+SIMULATIONS ?= 10000
+SEED ?= 20261015
+CHUNK_SIZE ?= 100000
+WORKERS ?= 4
+.PHONY: simulate-dur-labor-savings
+simulate-dur-labor-savings:
+	uv run python -m src.python.simulate_dur_labor_savings --simulations $(SIMULATIONS) --seed $(SEED) --chunk-size $(CHUNK_SIZE) --workers $(WORKERS)
+
+.PHONY: create-dur-labor-savings-flowchart
+create-dur-labor-savings-flowchart:
+	mkdir -p outputs/charts/dur_labor_savings_monte_carlo
+	docker run --rm -v "$(CURDIR):/mermaid" minlag/mermaid-cli -i /mermaid/src/mermaid/dur_labor_savings_monte_carlo.mmd -o /mermaid/outputs/charts/dur_labor_savings_monte_carlo/flowchart.png -w 1600 -H 2400 -b transparent

@@ -20,6 +20,25 @@ class CounterfactualTotals:
     duration_ratio: float | None
 
 
+def counterfactual_masks(frame: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+    """Return first-task and adjustable-task masks in the input row order.
+
+    Callers must supply nonmissing identifiers, valid start times and dates,
+    and binary same_preceding indicators, as checked by same_preceding_totals.
+    """
+    tasks = frame.reset_index(drop=True)
+    first_indices = (
+        tasks.sort_values(
+            ["user_id", "d", "coh", "process_start_time", "task_id"], kind="stable"
+        )
+        .drop_duplicates(["user_id", "d", "coh"])
+        .index
+    )
+    first = tasks.index.isin(first_indices)
+    adjusted = (tasks["same_preceding"].to_numpy() == 0) & ~first
+    return first, adjusted
+
+
 def same_preceding_totals(
     frame: pd.DataFrame,
     *,
@@ -64,15 +83,7 @@ def same_preceding_totals(
     if not tasks["same_preceding"].isin((0, 1)).all():
         raise ValueError("same_preceding must be zero or one")
 
-    first_indices = (
-        tasks.sort_values(
-            ["user_id", "d", "coh", "process_start_time", "task_id"], kind="stable"
-        )
-        .drop_duplicates(["user_id", "d", "coh"])
-        .index
-    )
-    first = tasks.index.isin(first_indices)
-    adjusted = (tasks["same_preceding"].to_numpy() == 0) & ~first
+    first, adjusted = counterfactual_masks(tasks)
     tasks["original_seconds"] = duration.to_numpy(dtype=float)
     ratio = float(np.exp(log_coefficient)) if log_coefficient is not None else None
     if ratio is not None:
@@ -116,6 +127,6 @@ def same_preceding_totals(
         original_seconds=float(by_user_day["original_seconds"].sum()),
         adjusted_seconds=float(by_user_day["adjusted_seconds"].sum()),
         adjusted_tasks=int(adjusted.sum()),
-        first_tasks=len(first_indices),
+        first_tasks=int(first.sum()),
         duration_ratio=ratio,
     )

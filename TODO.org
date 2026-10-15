@@ -4,6 +4,16 @@
   :CATEGORY: chewy
   :REFNUM:   1.
   :END:
+** DONE Add Monte Carlo results and histogram to the LaTeX appendix
+   - [X] Add the final subsubsection with labeled results and histogram.
+
+** DONE Simulate the distribution of DUR labor savings
+   - [X] Save the implementation plan and Mermaid flowchart in Markdown.
+   - [X] Reuse eligibility rules and implement paired residual simulation.
+   - [X] Add coefficient-only comparison and analytical precision checks.
+   - [X] Verify eligibility, cancellation, reproducibility, and expected savings.
+   - [X] Run 10,000 simulations from cached data and inspect the results.
+
 ** DONE Correct the ten reported PDF typos
    - [X] Fix wording, missing and repeated words, pluralization, and spelling.
    - [X] Remove the stray letter after the savings table.

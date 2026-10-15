@@ -1,5 +1,33 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-15 Add Monte Carlo results to the LaTeX report
+
+- Added the final subsubsection in estimating_potential.tex with simulation
+  methodology, paired residual assumptions, savings intervals, and histogram.
+- Added table, figure, and section labels and references, and registered the
+  histogram as a PDF build dependency.
+
+* 2026-10-15 Implement Monte Carlo DUR labor savings
+
+- Added a standalone cached-data simulation with one beta draw per workload
+  and a fresh residual per task, shared between each task's two scenarios.
+- Reused the counterfactual eligibility rules, saved the Mermaid plan, and
+  added a Make target, provenance, summary tables, and transparent charts.
+- Eight focused tests pass, including deterministic pairing, unchanged-task
+  cancellation, chunk reproducibility, and agreement with analytic expectations.
+- Rendered the Mermaid flowchart to a transparent PNG using the repository's
+  Docker workflow and embedded it in the Markdown plan. Added a rebuild target.
+- Added configurable worker threads with independent simulation streams and
+  ordered results. A 50-workload benchmark took 1.662 seconds with one worker
+  and 0.487 seconds with four; outputs were identical. Eight focused tests pass.
+- Preserved the verified fitted cache when separating fit fingerprints from
+  simulation/report code, avoiding an unnecessary refit for worker changes.
+- Completed 10,000 simulations with four workers in 92.41 seconds. Annualized
+  mean labor value is $85,125; the central 95% simulation interval is
+  $81,012 to $89,251, conditional on the model and scheduling assumptions.
+- Checked analytical expectations and paired residual precision, corrected
+  histogram bar orientation, and inspected the generated charts and flowchart.
+
 * 2026-10-15 Correct report typos
 
 - Corrected all ten reported spelling, wording, and typographical issues in
@@ -2169,3 +2197,5 @@ table.
   [-0.002771, -0.000118]).
 - All 133 tests passed. Confirmed the regenerated fixed-effect table,
   date/residual/prediction diagnostics, and =git diff --check=.
+- Rebuilt the PDF successfully; section 2.4.4, Table 8, and Figure 5 resolve
+  correctly, with no LaTeX warnings or overfull boxes in the final build log.
