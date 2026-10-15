@@ -4,8 +4,20 @@
 %%% End:
 \subsection{Estimating the Potential Cost Savings of Grouping Similar Tasks}\label{estimating-potential-cost-savings}
 In this section, we apply the 3.4\% reduction to a subset of DUR tasks
-to arrive at a labor savings in the range \$80,000--\$88,000 per year.
+to arrive at a labor savings in the range \$80,000--\$88,000 per
+year. See section \ref{potential-results} for more details.
 
+The labor savings not only depend on the 3.4\% rate of reduction but
+also on the DUR tasks that are eligible to benefit from this via
+minimum context switching.
+
+In the first following section, we discuss the selection of eligible tasks
+in detail.
+
+After that, we discuss the assumptions on scheduling and the logic to
+compute the potential labor savings on the eligible population.
+
+We finish with the presentation of the results.
 
 \subsubsection{Determining the Eligible DUR Tasks For Duration Reduction}
 In this section we discuss, the historical DUR tasks that were deemed
@@ -77,7 +89,7 @@ from the model.
 \end{center}
 
 \clearpage
-\section{Results}
+\subsubsection{Results}\label{potential-results}
 Tables~\ref{tab:same-preceding-counterfactual-summary} and
 \ref{tab:same-preceding-counterfactual-cohorts} give the resulting
 totals for retained process dates from 2026-02-01 through
@@ -145,3 +157,4 @@ Upper 95\% bound & $-0.033189052$ & \$39,830.15 & \$80,320.46 \\
 \captionof{table}{Period and annualized implied labor value under the fitted \texttt{SAME\_PRECEDING} coefficient and its 95\% confidence bounds, at \$90 per pharmacist hour. Annualized values use unrounded period estimates.}
 \label{tab:same-preceding-counterfactual-beta-bounds}
 \end{center}
+b

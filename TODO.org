@@ -4,6 +4,97 @@
   :CATEGORY: chewy
   :REFNUM:   1.
   :END:
+** DONE Show clickable report references in blue
+   - [X] Set internal references, citations, and URLs to blue.
+
+** DONE Recover the user's executive summary from the PDF
+   - [X] Restore the original wording in =src/latex/main.tex=.
+   - [X] Preserve dates, punctuation, and section references.
+
+** TODO Address report critique from 2026-10-15
+   Review of =outputs/reports/pdf/task_grouping_analysis.pdf=.
+   Page references below refer to the reviewed 17-page PDF.
+   Preserve the user's executive summary; any suggested changes to it are
+   for the user to review, not authorization to edit it.
+
+*** Analysis and interpretation
+**** TODO [#A] Reconcile study dates and distinguish analysis populations
+     - [ ] Verify January 2--August 1 in the summary, February 1--August 4
+       in the data section, and the 181-day February 1--August 1 extract.
+     - [ ] Distinguish task-created dates from retained process dates and
+       specify inclusive/exclusive boundaries.
+     - [ ] Explain why the paired comparison uses August 1 onward and
+       whether it is a separate supporting analysis. (Pages 1, 2, 11--12, 17.)
+
+**** TODO [#A] Explain the uncertainty covered by the annual savings range
+     - [ ] State that $80,000--$88,000 varies only the preceding-task
+       coefficient over its fitted confidence interval.
+     - [ ] Explain that scheduling feasibility, unmeasured confounding,
+       future volume, and conversion of capacity into cash savings are
+       outside that range.
+     - [ ] Describe the result as potential labor value under maximum
+       scheduling flexibility. (Page 17.)
+
+**** TODO [#A] Connect the task-level reduction to the overall reduction
+     - [ ] Explain why the 3.4% reduction applies to only 1,814,117 of
+       3,433,218 retained tasks and yields a 1.88% overall time reduction.
+     - [ ] Identify tasks already following the same cohort and the first
+       task in each user-day-cohort group as unchanged. (Page 17.)
+
+**** TODO [#A] Define processing time and its relationship to active labor
+     - [ ] Document the recorded duration field and any imputation.
+     - [ ] Resolve the inconsistent descriptions of actual time spent and
+       imputed processing time.
+     - [ ] State the assumption needed to value reduced recorded duration
+       as reduced pharmacist labor. (Pages 2, 12, 17.)
+
+**** TODO [#A] Explain the scope and impact of the duration cutoff
+     - [ ] Highlight that 180,803 above-cutoff tasks account for 24,710.67
+       hours, versus 24,758.52 hours in the retained sample.
+     - [ ] Distinguish the exclusion rule from unverified explanations
+       such as multitasking or abnormal durations.
+     - [ ] State that the estimate applies to the retained shorter-duration
+       population. (Pages 2 and 14.)
+
+**** TODO [#A] Distinguish the savings scenario from a feasible schedule
+     - [ ] Describe assumptions about task availability, urgency, service
+       requirements, and reordering within a pharmacist's day.
+     - [ ] Explain that actual reordering changes preceding and following
+       relationships, while the calculation applies only the preceding
+       coefficient.
+     - [ ] State that the calculation does not demonstrate an executable
+       schedule. (Pages 15--17.)
+
+*** Product narrative and document structure
+**** DONE [#B] Connect the findings to a product decision
+     - [X] Describe a limited scheduling pilot to test the achievable benefit.
+     - [X] Identify processing time as a benefit measure and review quality
+       and turnaround time as guardrails.
+
+**** DONE [#B] Present the primary results before the appendix
+     - [ ] Move the main savings table and its assumptions ahead of the
+       detailed supporting material, preserving the executive summary.
+     - [ ] Check section numbering and references after reordering.
+
+**** DONE [#B] Express the observational limitation precisely
+     - [X] Explain that the study identifies an association and that a
+       scheduling experiment is needed to establish achievable benefit.
+     - [X] Flag the summary's "grain of salt" wording for the user's
+       consideration without changing it. (Pages 1 and 12.)
+
+*** Presentation and copy editing
+**** DONE [#B] Improve Sankey label readability
+     - [X] Enlarge labels in Figures 31 and 32 and reduce dependence on
+       repeatedly consulting the numbered key.
+     - [X] Inspect the figures at normal PDF viewing size. (Page 15.)
+
+**** DONE [#C] Copy edit the report and check the final layout
+     - [X] Correct "week of day", "95% percentile", "ppdated fields",
+       and other grammar or terminology issues outside the executive summary.
+     - [X] Flag the summary sentence beginning "See section 2.9 obtained
+       by applying" for the user's consideration without changing it.
+     - [X] Rebuild and inspect the report after authorized report edits.
+
 ** DONE Validate DUR task sequencing and source SQL
    :PROPERTIES:
    :REFNUM:   1.1.
