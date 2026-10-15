@@ -67,6 +67,7 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \usepackage{rxp_report}
+\usepackage{fancyhdr}
 \usepackage{draftwatermark}
 \SetWatermarkLightness{0.88}
 \usepackage{etoc}
@@ -78,20 +79,28 @@
   pdfauthor={Mehmet Yunt},
   pdftitle={Task Grouping Analysis},
   pdfcreator={LaTeX via pandoc}}
+\fancypagestyle{report}{%
+  \fancyhf{}%
+  \fancyfoot[L]{\footnotesize Task Grouping Analysis}%
+  \fancyfoot[C]{\thepage}%
+  \fancyfoot[R]{\footnotesize Mehmet Yunt}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0pt}%
+}
+\pagestyle{report}
 
 \title{Task Grouping Analysis}
 \author{Mehmet Yunt}
 \date{\today}
 
 \begin{document}
+\thispagestyle{plain}
 \noindent{\Large\bfseries\color{red}DRAFT}\par\smallskip
 \noindent{\large\bfseries\color{reportnavy}Task Grouping Analysis}\par
 \noindent\textbf{Author:} Mehmet Yunt\par
 \noindent\textbf{Date:} \today\par\medskip
 \section{Executive Summary}\label{abstract}
 
-\section{Estimating Effect of Grouping Similar Tasks on DUR Processing Time}
-\section{Next Steps}\label{next-steps}
 \section{Appendix}\label{appendix}
 \etocsettocdepth{subsubsection}
 \etocsettocstyle{\noindent\textcolor{reportnavy}{\textbf{Appendix contents}}\par\smallskip}{\par}

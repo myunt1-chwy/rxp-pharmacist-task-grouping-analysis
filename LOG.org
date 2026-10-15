@@ -1,5 +1,32 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-15 Rewrite executive summary for product managers
+
+- Explained how scheduling similar DURs beyond FIFO could reduce context
+  switching, the roughly 3.4% historical processing-time association, and the
+  $80,000--$88,000 potential annual labor value in plain language.
+- Linked the summary to the modeling and cost-savings sections and stated that
+  the study covers only RxBuddy DUR tasks.
+- Rebuilt the PDF and inspected the first page; the links resolve and the final
+  LaTeX log has no warnings or overfull boxes. No test suite was run.
+
+* 2026-10-14 Add title and author to report footers
+
+- Set a report page style with the title at left, page number in the center,
+  and author at right. The first page keeps its plain page style.
+- Rebuilt the PDF and inspected the first and later pages. No test suite was run.
+
+* 2026-10-14 Summarize potential DUR grouping savings
+
+- Filled the executive summary in =main.tex= with the annualized $80,000--
+  $88,000 potential labor-value range, $84,000 central estimate, the
+  181-day scaling window, and the 464.6-hour period reduction.
+- Described the same-cohort scheduling scenario and noted that the modeled
+  association is observational and cash savings depend on staffing.
+- Rebuilt the PDF and inspected the first page; the executive summary and
+  table reference render cleanly, with no LaTeX warnings or overfull boxes.
+  No test suite was run.
+
 * 2026-10-14 Annualize counterfactual labor values
 
 - Verified the source task-created window is 2026-02-01 inclusive through

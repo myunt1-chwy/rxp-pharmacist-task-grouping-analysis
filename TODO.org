@@ -1039,42 +1039,6 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
     - [X] Add the calculation to the model report and reusable model code.
     - [X] Report retained process dates and implied labor value at $95 per hour.
 
-*** DONE Recompute same-preceding counterfactual within each user-day-cohort
-    - [X] Order all cohort tasks by process start time and task ID.
-    - [X] Keep the cohort's first task unchanged; adjust later SAME_PRECEDING = 0 tasks.
-    - [X] Regenerate the report and aggregate tables from cached data.
-
-*** DONE Diagram the same-preceding counterfactual algorithm
-    - [X] Add Mermaid flowchart showing grouping, ordering, task decisions, and totals.
-    - [X] Render a transparent PNG from the diagram source.
-
-*** DONE Price the same-preceding counterfactual at $90 per hour
-    - [X] Update the report calculation, test expectation, and Mermaid diagram.
-    - [X] Regenerate the model report, cohort table, and chart from cached data.
-
-*** DONE Add the counterfactual flowchart to the estimating-potential appendix
-    - [X] Place the rendered chart with a caption and label.
-    - [X] Reference the figure from the algorithm description.
-    - [X] Add the chart to the PDF Make dependencies and inspect the build.
-
-*** DONE Render the counterfactual flowchart with transparent background and math
-    - [X] Typeset the duration ratio with Mermaid KaTeX, including \exp(\beta_P).
-    - [X] Verify transparent pixels and inspect the rebuilt PDF figure.
-
-*** DONE Tabulate counterfactual results in the estimating-potential appendix
-    - [X] Add referenced overall and cohort tables from test-model-final.
-    - [X] Rebuild the PDF and inspect table layout and references.
-
-*** DONE Evaluate counterfactual at SAME_PRECEDING coefficient bounds
-    - [X] Refit from cached data and recompute the scenario at both 95% bounds.
-    - [X] Tabulate the three implied labor values in Markdown and LaTeX.
-    - [X] Rebuild the PDF and inspect the labeled sensitivity table.
-
-*** DONE Annualize coefficient-sensitivity labor values
-    - [X] Verify the inclusive/exclusive source-date window is 181 days.
-    - [X] Add 365-day values for all three coefficients to the tables.
-    - [X] Explain the August 1 process-date spillover and inspect the PDF.
-
 *** DONE Document the full DUR workload in test-model-final
     - [X] Add the all-DUR count and imputed processing-time total to the report.
     - [X] Provide the read-only SQL and rerun command.
@@ -1149,51 +1113,6 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
 *** DONE Darken the DRAFT watermark slightly
     - [X] Adjust its lightness and rebuild the PDF.
     - [X] Inspect a rendered table page for readability.
-
-*** DONE Render the causal diagram with a transparent background
-    - [X] Add the Mermaid CLI transparency option to the Make target.
-    - [X] Regenerate the PNG and rebuild and inspect the PDF.
-
-*** DONE Track estimating_potential.tex in the report Make target
-    - [X] Add the appendix file to the PDF dependencies.
-    - [X] Rebuild the PDF and confirm the file is included.
-
-*** DONE Add a red DRAFT notice above the report title
-    - [X] Place the notice on the first page above the title.
-    - [X] Rebuild and inspect the PDF.
-
-*** DONE Add a Mermaid Sankey of DUR task partitions
-    - [X] Reconcile handoff, overlap, cutoff, and SAME_PRECEDING counts.
-    - [X] Add the Mermaid source, transparent PNG, and Make target.
-    - [X] Include the figure in the appendix and inspect the PDF.
-    - [X] Reduce band height and fit the figure on a portrait page.
-
-*** DONE Add a processing-time Sankey to the report
-    - [X] Reconcile imputed processing seconds across the same stages.
-    - [X] Render the transparent Mermaid figure and add its totals table.
-    - [X] Include the figure in the appendix and inspect the PDF.
-
-*** DONE Rename overlap groups in both DUR Sankey figures
-    - [X] Use possible multitasking and singletasking in both diagrams.
-    - [X] Update the figure explanation and regenerate the PDF.
-
-*** DONE Number the regions in both DUR Sankey figures
-    - [X] Apply stable region numbers to matching nodes in both diagrams.
-    - [X] Add a region key and regenerate the PDF.
-
-*** DONE Check the high-duration null-handoff DUR distribution and cohorts
-    - [X] Query duration buckets for all null-handoff and valid DURs.
-    - [X] Reconcile the 180,803-task tail and check task-key uniqueness.
-    - [X] Break the above-cutoff groups out by cohort and record the results.
-
-*** DONE Reproduce null-handoff DUR durations from the original lifecycle fact
-    - [X] Reapply the pharmacist role and task-created date filters.
-    - [X] Match all duration buckets and the above-cutoff cohort totals.
-    - [X] Recreate the valid above-cutoff totals with raw durations and overlap filters.
-
-*** DONE Sum above-cutoff null-handoff DURs directly in the lifecycle fact
-    - [X] Use only fact rows with the task-created window, DUR type, null handoff, and raw dwell above cutoff.
-    - [X] Record count, distinct keys, seconds, hours, and exact SQL.
 
 *** DONE Reconcile valid DURs with non-intersecting DURs in the reports
     - [X] Add the 54,138 excluded DURs and their imputed processing time.
@@ -1270,7 +1189,13 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
 
 
 
+** TODO Generate the entitlement document
+   * TODO Create the latex file
+   * TODO Create sankey mermaid png diagram that shows the  breakdown of tasks
 
+
+
+   * TODO Describe the methodology used computing the potential
 
 * Scrap
   :PROPERTIES:

@@ -1,19 +1,28 @@
 \subsection{Modeling DUR Processing Time}\label{modeling-dur-processing-time}
+In this section, we develop a model that incorporates the following factors
+\begin{itemize}
+\item whether the task was preceded by a task of similar cohort
+\item pharmacist
+\item pet type
+\item if there were alterations done during the DUR process
+\item date effects
+\item approval and prescription channels
+\item cohort
+\item week of day
+\end{itemize}
 
-\subsubsection{Summary}
-A same-cohort following task is associated with a \(-0.10\%\) change in
-current-task duration (95\% CI: \(-0.27\%\) to \(0.07\%\)); the
-\texttt{SAME\_FOLLOWING} coefficient is not significant (\(p=0.238\)).
-This is a placebo comparison because a later task cannot change time
-already spent on the current one. A same-cohort preceding task is
-associated with a \(3.43\%\) shorter duration (95\% CI: \(3.26\%\) to
-\(3.59\%\) shorter). These are conditional observational associations,
-not causal effects.
+We find that being preceded by a task of the same cohort reduces DUR
+duration about 3.4\% assuming everything else stays the same with the
+task.
+We note that this is not a causal model nor is the data obtained
+from a randomized controlled experiment setup. Even though extreme
+care has been taken to reduce confounding, it may still be present.
 
 \subsubsection{Data}
-The analysis retains 3,433,218 DUR tasks with positive imputed
-duration below a strict, global approximate 95th-percentile cutoff of
-156.608019 seconds. Let \(Y_i\) be duration in seconds, \(S_i\) the
+The model uses 3,433,218 DUR tasks with durations below the global 95th-percentile cutoff of
+156.608019 seconds.
+
+Let \(Y_i\) be duration in seconds, \(S_i\) the
 task's position in its same-cohort batch, and \(L_i\) the batch length.
 The sequence indicators are
 \[
@@ -39,21 +48,6 @@ Indicator & Value & Tasks & Share of sample \\
 \bottomrule
 \end{tabular}
 \end{center}
-
-\subsubsection{All DUR task processing time}
-A read-only aggregate of every \texttt{TASK\_TYPE = 'DUR'} row in
-\texttt{MY\_RXP\_TASKS}, queried on 2026-10-14, found 4,128,486 tasks
-and 212,095,618 imputed processing seconds (58,915.45 hours).
-Process dates span 2026-02-01 through 2026-08-04. Imputed duration
-replaces null raw values with one second (19,550 rows). This total
-covers all DUR rows, including those outside the filtered model sample.
-The read-only query is saved in
-\texttt{src/sql/total\_dur\_processing\_time.sql}. Run it from the
-repository root with:
-\begin{verbatim}
-.venv/bin/python skills/rxp-sql/scripts/run_snowflake_query.py \
-    src/sql/total_dur_processing_time.sql
-\end{verbatim}
 
 \subsubsection{Model}
 The outcome is the natural logarithm of duration:
@@ -208,18 +202,16 @@ The conditional fit measures include estimated random intercepts.
 Exponentiating a sequence coefficient gives its conditional duration
 ratio: \(\exp(\widehat\beta_P)=0.965730\). The model assumes additive
 effects, independent normally distributed random intercepts and
-residuals, and common residual variance. Unmodeled user, date, and
-parent-part differences must be unrelated to the included predictors
-for the random-intercept interpretation. Confidence intervals depend
-on these assumptions. This model and the paired \(t\)-test use different
-task populations and preceding-task rules, so their estimates are not
-directly comparable.
+residuals, and common residual variance.
 
 \subsubsection{Random-intercept distributions}
 Figure~\ref{fig:random-intercept-densities} shows the fitted intercept
 distributions for users (a), parent part numbers (b), and dates (c).
 Each grouping level has equal weight within its panel; the dashed
 vertical line marks zero.
+
+The users (pharmacists) and dates random effects suggest bimodal
+distributions and invite further analysis.
 
 \Needspace{13\baselineskip}
 \begin{center}
