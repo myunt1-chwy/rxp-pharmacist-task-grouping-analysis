@@ -66,34 +66,34 @@
        schedule. (Pages 15--17.)
 
 *** Product narrative and document structure
-**** TODO [#B] Connect the findings to a product decision
-     - [ ] Describe a limited scheduling pilot to test the achievable benefit.
-     - [ ] Identify processing time as a benefit measure and review quality
+**** DONE [#B] Connect the findings to a product decision
+     - [X] Describe a limited scheduling pilot to test the achievable benefit.
+     - [X] Identify processing time as a benefit measure and review quality
        and turnaround time as guardrails.
 
-**** TODO [#B] Present the primary results before the appendix
+**** DONE [#B] Present the primary results before the appendix
      - [ ] Move the main savings table and its assumptions ahead of the
        detailed supporting material, preserving the executive summary.
      - [ ] Check section numbering and references after reordering.
 
-**** TODO [#B] Express the observational limitation precisely
-     - [ ] Explain that the study identifies an association and that a
+**** DONE [#B] Express the observational limitation precisely
+     - [X] Explain that the study identifies an association and that a
        scheduling experiment is needed to establish achievable benefit.
-     - [ ] Flag the summary's "grain of salt" wording for the user's
+     - [X] Flag the summary's "grain of salt" wording for the user's
        consideration without changing it. (Pages 1 and 12.)
 
 *** Presentation and copy editing
-**** TODO [#B] Improve Sankey label readability
-     - [ ] Enlarge labels in Figures 31 and 32 and reduce dependence on
+**** DONE [#B] Improve Sankey label readability
+     - [X] Enlarge labels in Figures 31 and 32 and reduce dependence on
        repeatedly consulting the numbered key.
-     - [ ] Inspect the figures at normal PDF viewing size. (Page 15.)
+     - [X] Inspect the figures at normal PDF viewing size. (Page 15.)
 
-**** TODO [#C] Copy edit the report and check the final layout
-     - [ ] Correct "week of day", "95% percentile", "ppdated fields",
+**** DONE [#C] Copy edit the report and check the final layout
+     - [X] Correct "week of day", "95% percentile", "ppdated fields",
        and other grammar or terminology issues outside the executive summary.
-     - [ ] Flag the summary sentence beginning "See section 2.9 obtained
+     - [X] Flag the summary sentence beginning "See section 2.9 obtained
        by applying" for the user's consideration without changing it.
-     - [ ] Rebuild and inspect the report after authorized report edits.
+     - [X] Rebuild and inspect the report after authorized report edits.
 
 ** DONE Validate DUR task sequencing and source SQL
    :PROPERTIES:
