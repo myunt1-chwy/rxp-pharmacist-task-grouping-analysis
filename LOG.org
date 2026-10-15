@@ -1,5 +1,90 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-14 Annualize counterfactual labor values
+
+- Verified the source task-created window is 2026-02-01 inclusive through
+  2026-08-01 exclusive, or 181 days. The observed process-date span includes
+  August 1 and is 182 dates, but that date is spillover rather than another
+  full source day.
+- Multiplied unrounded period labor values by $365/181$. Annualized results
+  are $88,312.30 at the lower coefficient bound, $84,319.74 at the fitted
+  estimate, and $80,320.46 at the upper bound.
+- Updated the Markdown audit and LaTeX tables with the annualization assumption.
+- Rebuilt the PDF and inspected the annualized values and table reference on
+  page 17. No LaTeX warnings or overfull boxes appeared; no test suite was run.
+
+* 2026-10-14 Evaluate counterfactual at coefficient confidence bounds
+
+- Refit =test-model-final= from cached data and applied the unchanged
+  user-day-cohort counterfactual to the exact lower and upper 95% bounds for
+  =SAME_PRECEDING=. No Snowflake extract was run.
+- At $90 per hour, the lower coefficient bound implies $43,793.22, the fitted
+  estimate $41,813.35, and the upper bound $39,830.15. The adjusted task count
+  stays 1,814,117 in every scenario.
+- Saved a Markdown audit table and added a referenced three-row LaTeX table,
+  with a caveat that coefficient bounds are not a cash-savings interval.
+- Rebuilt the PDF and inspected Table 11 and its reference; no LaTeX warnings
+  or overfull boxes were reported. No test suite was run.
+
+* 2026-10-14 Tabulate counterfactual results in the appendix
+
+- Added labeled overall and cohort tables after the algorithm flowchart,
+  using the $90-per-hour model-report results and a note on interpretation.
+- Rebuilt and visually inspected the PDF tables and their references. No test
+  suite was run.
+
+* 2026-10-14 Typeset the counterfactual flowchart formula
+
+- Changed the Mermaid reduction node to KaTeX math:
+  =\text{duration}\times\exp(\beta_P)=.
+- Regenerated the PNG with =-b transparent=. Confirmed it is RGBA and its
+  top-left pixel has alpha 0, then rebuilt and visually inspected Figure 33
+  in the PDF. No test suite was run.
+
+* 2026-10-14 Add the counterfactual flowchart to the appendix
+
+- Added the transparent Mermaid flowchart to the estimating-potential
+  appendix with a caption, label, and text reference.
+- Added the chart to the PDF Make dependencies and rebuilt the report.
+- Inspected the rendered appendix page: Figure 33 and its reference resolve,
+  the flowchart is legible, and the draft watermark remains visible. No test
+  suite was run.
+
+* 2026-10-14 Reprice the counterfactual at $90 per hour
+
+- Changed the pharmacist labor rate from $95 to $90 per hour in the shared
+  report calculation and Mermaid flowchart.
+- Regenerated the model report, cohort table, and transparent flowchart from
+  cached data; the time reduction remains 464.6 hours and the implied labor
+  value is now $41,813.35.
+- Four focused tests and =git diff --check= passed.
+
+* 2026-10-14 Diagram the same-preceding counterfactual
+
+- Added a Mermaid flowchart for grouping by user-day-cohort, ordering all
+  tasks, preserving each group's first task, adjusting later
+  =SAME_PRECEDING=0= tasks, and summing the time and labor value.
+- Rendered a transparent PNG with the existing Mermaid Make target.
+
+* 2026-10-14 Recompute counterfactual by user-day-cohort
+
+- Changed the shared counterfactual to order all tasks within each user,
+  process date, and cohort by process start time and task ID. Each cohort's
+  first task remains unchanged; later =SAME_PRECEDING=0= tasks receive the
+  fitted duration reduction.
+- Regenerated the model report and aggregate tables from cached data, without
+  a new Snowflake extract. The scenario adjusts 1,814,117 tasks and saves
+  464.6 hours, worth $44,136.32 at $95 per hour.
+- Focused counterfactual and report tests passed.
+
+* 2026-10-14 Number the DUR Sankey regions
+
+- Added matching region identifiers 1 through 12 to the count and
+  processing-time Sankey labels, and a compact key in the appendix.
+- Added those identifiers to the processing-time source table.
+- Regenerated both transparent PNGs and rebuilt and inspected the portrait
+  PDF; the key and both figures fit on one page. No test suite was run.
+
 * 2026-10-14 Sum above-cutoff DUR dwell directly from lifecycle facts
 
 - Queried only =FCT__TASKS_LIFECYCLE= for DURs created from 2026-02-01

@@ -51,7 +51,7 @@ PREDICTION_PATH = CHART_DIR / "predicted_vs_log_actual.png"
 CELL_COLUMNS = base_model.CELL_COLUMNS
 RANDOM_COLUMNS = ("user_id", "d", "parent_part_number")
 CATEGORICAL_EFFECTS = base_model.CATEGORICAL_EFFECTS
-PHARMACIST_COST_PER_HOUR = 95.0
+PHARMACIST_COST_PER_HOUR = 90.0
 USD = "$"
 ALL_DUR_TASKS = 4_128_486
 ALL_DUR_SECONDS = 212_095_618
@@ -212,9 +212,10 @@ DURs in `MY_RXP_TASKS` as well as to the valid-DUR breakdown.
 The [valid-DUR cutoff breakdown]({link(VALID_DUR_P95_BREAKDOWN_SQL_PATH)})
 shows why the totals differ. {dur_population_explanation}
 
-Within each user and process date, the earliest retained task by
-PROCESS_START_TIME is kept unchanged (TASK_ID resolves an exact timestamp tie).
-Other tasks with SAME_PRECEDING = 0 receive the fitted duration ratio
+Within each user, process date, and cohort, all retained tasks are ordered by
+PROCESS_START_TIME (TASK_ID resolves an exact timestamp tie). The first task
+in each list keeps its original duration, whether SAME_PRECEDING is 0 or 1.
+Later tasks with SAME_PRECEDING = 0 receive the fitted duration ratio
 exp(beta_P) = {counterfactual.duration_ratio:.6f}; tasks already marked 1 are
 unchanged. This is an arithmetic scenario using observed durations and a
 single fitted association, not a causal estimate or a prediction of how task
@@ -224,7 +225,7 @@ ordering would change.
 |---|---:|
 | First retained process date | {start_date} |
 | Last retained process date | {end_date} |
-| User-days / unchanged first tasks | {counterfactual.first_tasks:,} |
+| User-day-cohorts / unchanged first tasks | {counterfactual.first_tasks:,} |
 | Additional tasks adjusted | {counterfactual.adjusted_tasks:,} |
 | Original total (seconds) | {original:,.1f} |
 | Adjusted total (seconds) | {adjusted:,.1f} |

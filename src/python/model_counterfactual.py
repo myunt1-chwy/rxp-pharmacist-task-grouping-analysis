@@ -26,11 +26,12 @@ def same_preceding_totals(
     log_coefficient: float | None = None,
     adjusted_duration_seconds: np.ndarray | None = None,
 ) -> CounterfactualTotals:
-    """Apply model-implied durations except to each user's first task/day.
+    """Apply model-implied durations except to each user-day-cohort's first task.
 
-    Process start time determines the first retained task for each user and
-    process date. Task ID resolves an exact timestamp tie. Log models may pass
-    their coefficient; other outcome scales may pass back-transformed seconds.
+    Process start time orders all retained tasks, regardless of same_preceding,
+    within each user, process date, and cohort. Task ID resolves an exact
+    timestamp tie. Log models may pass their coefficient; other outcome scales
+    may pass back-transformed seconds.
     """
     columns = (
         "user_id", "task_id", "d", "coh", "process_start_time",
@@ -65,9 +66,9 @@ def same_preceding_totals(
 
     first_indices = (
         tasks.sort_values(
-            ["user_id", "d", "process_start_time", "task_id"], kind="stable"
+            ["user_id", "d", "coh", "process_start_time", "task_id"], kind="stable"
         )
-        .drop_duplicates(["user_id", "d"])
+        .drop_duplicates(["user_id", "d", "coh"])
         .index
     )
     first = tasks.index.isin(first_indices)

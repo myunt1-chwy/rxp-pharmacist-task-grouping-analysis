@@ -251,9 +251,10 @@ separate their individual exclusion reasons. The full-table
 below-cutoff row also includes 472,474 other DUR tasks totaling
 15,254,283 seconds that did not meet the valid-DUR criteria.
 
-Within each user and process date, the earliest retained task by
-PROCESS_START_TIME is kept unchanged (TASK_ID resolves an exact timestamp tie).
-Other tasks with SAME_PRECEDING = 0 receive the fitted duration ratio
+Within each user, process date, and cohort, all retained tasks are ordered by
+PROCESS_START_TIME (TASK_ID resolves an exact timestamp tie). The first task
+in each list keeps its original duration, whether SAME_PRECEDING is 0 or 1.
+Later tasks with SAME_PRECEDING = 0 receive the fitted duration ratio
 exp(beta_P) = 0.965730; tasks already marked 1 are
 unchanged. This is an arithmetic scenario using observed durations and a
 single fitted association, not a causal estimate or a prediction of how task
@@ -263,22 +264,22 @@ ordering would change.
 |---|---:|
 | First retained process date | 2026-02-01 |
 | Last retained process date | 2026-08-01 |
-| User-days / unchanged first tasks | 20,655 |
-| Additional tasks adjusted | 1,857,289 |
+| User-day-cohorts / unchanged first tasks | 64,681 |
+| Additional tasks adjusted | 1,814,117 |
 | Original total (seconds) | 89,130,671.0 |
-| Adjusted total (seconds) | 87,399,687.5 |
-| Difference (hours) | 480.8 |
-| Change from original | -1.94% |
-| Pharmacist cost per hour | $95.00 |
-| Implied labor value | $45,678.73 |
+| Adjusted total (seconds) | 87,458,136.9 |
+| Difference (hours) | 464.6 |
+| Change from original | -1.88% |
+| Pharmacist cost per hour | $90.00 |
+| Implied labor value | $41,813.35 |
 
 | Cohort | Tasks | Adjusted tasks | Original seconds | Adjusted seconds | Difference seconds | Change | Labor value |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Cohort 1 | 1,904,176 | 871,413 | 43,800,431.0 | 43,095,005.5 | 705,425.5 | -1.61% | $18,615.40 |
-| Cohort 2 | 1,331,432 | 803,137 | 37,428,756.0 | 36,653,839.5 | 774,916.5 | -2.07% | $20,449.19 |
-| Cohort 3 | 159,018 | 146,321 | 6,121,581.0 | 5,928,435.8 | 193,145.2 | -3.16% | $5,096.89 |
-| Cohort 4 | 17,615 | 16,560 | 868,270.0 | 840,245.0 | 28,025.0 | -3.23% | $739.55 |
-| Unknown | 20,977 | 19,858 | 911,633.0 | 882,161.6 | 29,471.4 | -3.23% | $777.72 |
+| Cohort 1 | 1,904,176 | 862,667 | 43,800,431.0 | 43,103,502.2 | 696,928.8 | -1.59% | $17,423.22 |
+| Cohort 2 | 1,331,432 | 791,247 | 37,428,756.0 | 36,667,828.8 | 760,927.2 | -2.03% | $19,023.18 |
+| Cohort 3 | 159,018 | 132,205 | 6,121,581.0 | 5,950,003.0 | 171,578.0 | -2.80% | $4,289.45 |
+| Cohort 4 | 17,615 | 13,962 | 868,270.0 | 845,453.7 | 22,816.3 | -2.63% | $570.41 |
+| Unknown | 20,977 | 14,036 | 911,633.0 | 891,349.3 | 20,283.7 | -2.22% | $507.09 |
 
 The [cohort totals](../../tables/test_model_final_counterfactual_cohort.md),
 [user-day totals](../../tables/test_model_final_counterfactual_user_day.md), and
@@ -286,6 +287,6 @@ The [cohort totals](../../tables/test_model_final_counterfactual_cohort.md),
 give the underlying aggregates.
 
 The implied labor value is
-(89,130,671.0 - 87,399,687.5) / 3,600 × $95.00
-= $45,678.73.
+(89,130,671.0 - 87,458,136.9) / 3,600 × $90.00
+= $41,813.35.
 Realizing cash savings would depend on staffing decisions.

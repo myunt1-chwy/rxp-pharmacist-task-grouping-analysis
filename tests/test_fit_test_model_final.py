@@ -90,7 +90,7 @@ def test_final_model_recovers_effect_and_describes_cohort_batch(tmp_path, monkey
     assert "Parent part numbers | 24" in report
     assert "First retained process date | 2026-02-01" in report
     assert "Last retained process date | 2026-02-14" in report
-    assert "Pharmacist cost per hour | $95.00" in report
+    assert "Pharmacist cost per hour | $90.00" in report
     expected_value = (
         (counterfactual.original_seconds - counterfactual.adjusted_seconds)
         / 3600 * model.PHARMACIST_COST_PER_HOUR
@@ -111,7 +111,7 @@ def test_final_model_recovers_effect_and_describes_cohort_batch(tmp_path, monkey
     assert "| **All valid DURs** in `MY_RXP_VALID_DUR_TASKS` | **3,614,021** | **178,089,090** | **49,469.19** |" in report
     assert "| All DURs below 156.608019 seconds in `MY_RXP_TASKS` | 3,905,692 | 104,384,954 | 28,995.82 |" in report
     assert "| **All DURs** in `MY_RXP_TASKS` | **4,128,486** | **212,095,618** | **58,915.45** |" in report
-    assert report.index("| DUR population |") < report.index("Within each user and process date")
+    assert report.index("| DUR population |") < report.index("Within each user, process date, and cohort")
     assert report.index("| **All DURs** in `MY_RXP_TASKS`") > report.index(
         "| All DURs below 156.608019 seconds in `MY_RXP_TASKS`"
     )

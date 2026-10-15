@@ -22,6 +22,7 @@ TASK_GROUPING_ANALYSIS_CHARTS := \
 	outputs/charts/DUR_detailed.png \
 	outputs/charts/DUR_partition_sankey.png \
 	outputs/charts/DUR_processing_time_sankey.png \
+	outputs/charts/same_preceding_counterfactual.png \
 	outputs/charts/user-performance-analysis/user-median-dur-duration-distributions.png \
 	outputs/charts/user-performance-analysis/user-performance-median-all-cohorts-scatter-matrix.png \
 	outputs/charts/tasks-based-distributions/task-duration-by-cohort-boxplots.png \
