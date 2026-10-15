@@ -1,5 +1,14 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-15 Correct report typos
+
+- Corrected all ten reported spelling, wording, and typographical issues in
+  the appendix sources, including the stray letter after the savings table.
+- Clarified the malformed scheduling-assumption sentence without changing
+  its meaning. The executive summary was not edited.
+- Rebuilt the PDF and inspected the corrected results/example page. The
+  LaTeX log has no warnings or overfull boxes. No tests were run.
+
 * 2026-10-15 Show clickable report references in blue
 
 - Enabled blue text for internal references, citations, and URLs through
