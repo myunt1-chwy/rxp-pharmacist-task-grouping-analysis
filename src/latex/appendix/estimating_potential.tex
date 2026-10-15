@@ -31,8 +31,8 @@ case. The ``Possible multitasking'' group was excluded because the
 pharmacist was working on multiple DURs or tasks at the same time, and
 we assume that any context switching benefit would be lost.
 
-DUR's with processing times more than 156.6 seconds were
-excluded. These DURs have durations above the 95\% percentile
+DURs with processing times more than 156.6 seconds were
+excluded. These DURs have durations above the 95th percentile
 threshold and deemed abnormal. The pharmacist is possibly
 multitasking.
 
@@ -72,7 +72,7 @@ The leading number on each region is its identifier in both figures:
 In this section, we assume
 \begin{itemize}
   \item that the DUR tasks of a pharmacist can be rearranged for a given day.
-  \item that the pharmacist does not multitask or encounter a DUR failure during stretches of successful DURs to that break the streak.
+  \item that stretches of successful DURs are not interrupted by multitasking or a DUR failure.
 \end{itemize}
 
 Figure~\ref{fig:same-preceding-counterfactual-flow} shows the
@@ -157,4 +157,3 @@ Upper 95\% bound & $-0.033189052$ & \$39,830.15 & \$80,320.46 \\
 \captionof{table}{Period and annualized implied labor value under the fitted \texttt{SAME\_PRECEDING} coefficient and its 95\% confidence bounds, at \$90 per pharmacist hour. Annualized values use unrounded period estimates.}
 \label{tab:same-preceding-counterfactual-beta-bounds}
 \end{center}
-b

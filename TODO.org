@@ -4,6 +4,10 @@
   :CATEGORY: chewy
   :REFNUM:   1.
   :END:
+** DONE Correct the ten reported PDF typos
+   - [X] Fix wording, missing and repeated words, pluralization, and spelling.
+   - [X] Remove the stray letter after the savings table.
+
 ** DONE Show clickable report references in blue
    - [X] Set internal references, citations, and URLs to blue.
 
