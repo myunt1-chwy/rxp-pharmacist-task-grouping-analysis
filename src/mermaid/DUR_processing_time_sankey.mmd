@@ -1,0 +1,33 @@
+---
+config:
+  themeVariables:
+    fontSize: 24px
+  sankey:
+    width: 1500
+    height: 600
+    showValues: false
+    linkColor: source
+    nodeAlignment: left
+    labelStyle: outlined
+    nodePadding: 24
+---
+sankey
+
+%% Flow values are imputed processing seconds; labels show hours rounded to 0.01.
+%% Stage totals: outputs/tables/DUR_processing_time_sankey.md.
+%% The final split sums duration_seconds by same_preceding in
+%% data/test_model_final_log_data.parquet (3,433,218 eligible tasks).
+"1 All DURs (58,915.45 h)","2 No handoff (54,877.09 h)",197557538
+"1 All DURs (58,915.45 h)","3 Pharmacist follow-up (3,703.97 h)",13334300
+"1 All DURs (58,915.45 h)","4 Technician follow-up (227.83 h)",820191
+"1 All DURs (58,915.45 h)","5 Lead follow-up (106.55 h)",383589
+
+"2 No handoff (54,877.09 h)","6 Possible multitasking (4,457.38 h)",16046580
+"2 No handoff (54,877.09 h)","7 Singletasking (50,419.71 h)",181510958
+
+"7 Singletasking (50,419.71 h)","8 Other validity exclusions (950.52 h)",3421868
+"7 Singletasking (50,419.71 h)","9 At or above cutoff (24,710.67 h)",88958419
+"7 Singletasking (50,419.71 h)","10 Below cutoff (24,758.52 h)",89130671
+
+"10 Below cutoff (24,758.52 h)","11 SAME_PRECEDING = 1 (10,532.67 h)",37917597
+"10 Below cutoff (24,758.52 h)","12 SAME_PRECEDING = 0 (14,225.85 h)",51213074

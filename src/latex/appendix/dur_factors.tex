@@ -1,0 +1,222 @@
+\subsection{ Visual Summary of Factors Affecting DUR  }
+This section contains a visual summary of the factors that affect DUR duration. The goal is to be exhaustive in detail knowing well that
+some of the factors cannot be measured.
+Figure~\ref{fig:dur-detailed-causal-graph} shows the hypothesized relationships. This graph guides the exploratory data analysis and the final model structure. The main factors affecting DUR duration are the pharmacist, the short and long term experience of the pharmacist (Pharmacist Past in the figure), the task itself containing; the prescription the pet, the product and other metadata, the software platform (Oracle or RxBuddy), time of day, time of the week, seasonality, management/process regulations  and external disturbances such as inbound calls.
+\begin{center}
+\begin{minipage}{\linewidth}
+\centering
+\fbox{\includegraphics[width=\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax,height=0.48\textheight,keepaspectratio,alt={Causal graph of hypothesized factors affecting approved DUR processing time}]{outputs/charts/DUR_detailed.png}}
+\captionof{figure}{Hypothesized factors affecting approved DUR processing time.}\label{fig:dur-detailed-causal-graph}
+\end{minipage}
+\end{center}
+\subsection{ Select Factors Affecting DUR Duration}\label{factors-affecting-successful-durs}
+We carried out extensive exploratory data analysis to understand the factors affecting DUR duration. The following sections contain the more prominent factors encountered.
+The causal graph section contains a visual summary of the hypothesized mechanisms that affect DUR duration.
+\subsubsection{Pharmacist Performance}
+Pharmacists vary in their speed to process DURs (Figure~\ref{fig:user-median-dur-distributions}). In addition, if a pharmacist is fast in handling a cohort 1 DUR, highly likely he/she is also fast handling other cohort DURs. Figure~\ref{fig:user-median-all-cohorts} shows the correlation of DUR median duration of  120 people who have carried out at least 30 task per cohort. As can be seen the performances correlate positively.
+\begin{center}
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.29\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,keepaspectratio,alt={Distribution of median DUR duration per user by cohort}]{outputs/charts/user-performance-analysis/user-median-dur-duration-distributions.png}}}
+\captionof{figure}{Distribution of per-pharmacist median DUR duration by cohort.}\label{fig:user-median-dur-distributions}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.29\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,keepaspectratio,alt={Scatter matrix of user median DUR duration across all four cohorts}]{outputs/charts/user-performance-analysis/user-performance-median-all-cohorts-scatter-matrix.png}}}
+\captionof{figure}{Median DUR duration across cohorts for 120 pharmacists.}\label{fig:user-median-all-cohorts}
+\end{minipage}
+\end{center}
+
+\subsubsection{Cohort and Part Number}
+Figure~\ref{fig:duration-by-cohort} compares task-level DUR durations across cohorts. Figure~\ref{fig:duration-by-part-number} compares part-number-level mean durations within each cohort. We can see that, within a cohort the DUR duration varies a lot. This is partly due to the pharmacist and the pet type.
+
+\begin{center}
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.22\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.22\textheight,keepaspectratio,alt={Boxplots of task-level DUR duration by cohort with summary statistics}]{outputs/charts/tasks-based-distributions/task-duration-by-cohort-boxplots.png}}}
+\captionof{figure}{Task-level DUR duration distributions by cohort.}\label{fig:duration-by-cohort}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.22\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.22\textheight,keepaspectratio,alt={Boxplots of part-number-level mean DUR duration by cohort}]{outputs/charts/part-number-analysis/part-number-analysis-cohort-boxplots.png}}}
+\captionof{figure}{Part-number-level mean DUR duration distributions by cohort.}\label{fig:duration-by-part-number}
+\end{minipage}
+\end{center}
+
+\clearpage
+\subsubsection{Pet Type}
+DUR durations vary across different pet types. Pharmacists seem to be able to process the more common dog, cat and horse related DURs faster on average as expected.  The distributions for Cohorts 1--4 are shown in Figures~\ref{fig:pettype-cohort-1}--\ref{fig:pettype-cohort-4}, respectively.
+
+\begin{center}
+\begin{minipage}{\linewidth}
+\centering
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by pet type in Cohort 1}]{outputs/charts/pettype-analysis/pettype-analysis-cohort-1.png}}}
+\captionof{figure}{DUR duration by pet type, Cohort 1.}\label{fig:pettype-cohort-1}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by pet type in Cohort 2}]{outputs/charts/pettype-analysis/pettype-analysis-cohort-2.png}}}
+\captionof{figure}{DUR duration by pet type, Cohort 2.}\label{fig:pettype-cohort-2}
+\end{minipage}
+
+\vspace{1em}
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by pet type in Cohort 3}]{outputs/charts/pettype-analysis/pettype-analysis-cohort-3.png}}}
+\captionof{figure}{DUR duration by pet type, Cohort 3.}\label{fig:pettype-cohort-3}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by pet type in Cohort 4}]{outputs/charts/pettype-analysis/pettype-analysis-cohort-4.png}}}
+\captionof{figure}{DUR duration by pet type, Cohort 4.}\label{fig:pettype-cohort-4}
+\end{minipage}
+\end{minipage}
+\end{center}
+\clearpage
+\subsubsection{Alterations/Corrections}
+As expected, the more the pharmacist updates the prescription information, the longer the DUR process takes.
+
+Figures~\ref{fig:ncorrection-fields-cohort-1}--\ref{fig:ncorrection-fields-cohort-4} show DUR duration by the number of fields altered for Cohorts 1--4, respectively.
+
+\begin{center}
+\begin{minipage}{\linewidth}
+\centering
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by number of correction fields in Cohort 1}]{outputs/charts/ncorrection-fields-analysis/ncorrection-fields-analysis-cohort-1.png}}}
+\captionof{figure}{DUR duration by number of correction fields, Cohort 1.}\label{fig:ncorrection-fields-cohort-1}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by number of correction fields in Cohort 2}]{outputs/charts/ncorrection-fields-analysis/ncorrection-fields-analysis-cohort-2.png}}}
+\captionof{figure}{DUR duration by number of correction fields, Cohort 2.}\label{fig:ncorrection-fields-cohort-2}
+\end{minipage}
+
+\vspace{1em}
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by number of correction fields in Cohort 3}]{outputs/charts/ncorrection-fields-analysis/ncorrection-fields-analysis-cohort-3.png}}}
+\captionof{figure}{DUR duration by number of correction fields, Cohort 3.}\label{fig:ncorrection-fields-cohort-3}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by number of correction fields in Cohort 4}]{outputs/charts/ncorrection-fields-analysis/ncorrection-fields-analysis-cohort-4.png}}}
+\captionof{figure}{DUR duration by number of correction fields, Cohort 4.}\label{fig:ncorrection-fields-cohort-4}
+\end{minipage}
+\end{minipage}
+\end{center}
+\clearpage
+Figures~\ref{fig:correction-field-cohort-1}--\ref{fig:correction-field-cohort-4} show the corresponding distributions by the presence of that field name in the altered fields. This is not the contribution of each field by itself.
+\begin{center}
+\begin{minipage}{\linewidth}
+\centering
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by correction field name in Cohort 1}]{outputs/charts/correction-field-analysis/correction-field-analysis-cohort-1.png}}}
+\captionof{figure}{DUR duration by correction field name, Cohort 1.}\label{fig:correction-field-cohort-1}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by correction field name in Cohort 2}]{outputs/charts/correction-field-analysis/correction-field-analysis-cohort-2.png}}}
+\captionof{figure}{DUR duration by correction field name, Cohort 2.}\label{fig:correction-field-cohort-2}
+\end{minipage}
+
+\vspace{1em}
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by correction field name in Cohort 3}]{outputs/charts/correction-field-analysis/correction-field-analysis-cohort-3.png}}}
+\captionof{figure}{DUR duration by correction field name, Cohort 3.}\label{fig:correction-field-cohort-3}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by correction field name in Cohort 4}]{outputs/charts/correction-field-analysis/correction-field-analysis-cohort-4.png}}}
+\captionof{figure}{DUR duration by correction field name, Cohort 4.}\label{fig:correction-field-cohort-4}
+\end{minipage}
+\end{minipage}
+\end{center}
+\clearpage
+\subsubsection{Prescription Source/Approval Channel}
+Figures~\ref{fig:prescription-source-cohort-1}--\ref{fig:prescription-source-cohort-4} compare DUR durations by prescription source across Cohorts 1--4.
+The one thing that stands out is that prescriptions that arrive with customer email take longer time.
+\begin{center}
+\begin{minipage}{\linewidth}
+\centering
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by prescription source in Cohort 1}]{outputs/charts/prescription-source-analysis/prescription-source-analysis-cohort-1.png}}}
+\captionof{figure}{DUR duration by prescription source, Cohort 1.}\label{fig:prescription-source-cohort-1}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by prescription source in Cohort 2}]{outputs/charts/prescription-source-analysis/prescription-source-analysis-cohort-2.png}}}
+\captionof{figure}{DUR duration by prescription source, Cohort 2.}\label{fig:prescription-source-cohort-2}
+\end{minipage}
+
+\vspace{1em}
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by prescription source in Cohort 3}]{outputs/charts/prescription-source-analysis/prescription-source-analysis-cohort-3.png}}}
+\captionof{figure}{DUR duration by prescription source, Cohort 3.}\label{fig:prescription-source-cohort-3}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by prescription source in Cohort 4}]{outputs/charts/prescription-source-analysis/prescription-source-analysis-cohort-4.png}}}
+\captionof{figure}{DUR duration by prescription source, Cohort 4.}\label{fig:prescription-source-cohort-4}
+\end{minipage}
+\end{minipage}
+\end{center}
+\clearpage
+Figures~\ref{fig:approval-channel-cohort-1}--\ref{fig:approval-channel-cohort-4} compare DUR durations by approval channel across the same cohorts. Customer email is associated with longer DUR times.
+\begin{center}
+\begin{minipage}{\linewidth}
+\centering
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by approval channel in Cohort 1}]{outputs/charts/approval-channel-analysis/approval-channel-analysis-cohort-1.png}}}
+\captionof{figure}{DUR duration by approval channel, Cohort 1.}\label{fig:approval-channel-cohort-1}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by approval channel in Cohort 2}]{outputs/charts/approval-channel-analysis/approval-channel-analysis-cohort-2.png}}}
+\captionof{figure}{DUR duration by approval channel, Cohort 2.}\label{fig:approval-channel-cohort-2}
+\end{minipage}
+
+\vspace{1em}
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by approval channel in Cohort 3}]{outputs/charts/approval-channel-analysis/approval-channel-analysis-cohort-3.png}}}
+\captionof{figure}{DUR duration by approval channel, Cohort 3.}\label{fig:approval-channel-cohort-3}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\vspace{0pt}
+\centering
+\fbox{\parbox[c][0.30\textheight][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\centering\includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio,alt={DUR duration by approval channel in Cohort 4}]{outputs/charts/approval-channel-analysis/approval-channel-analysis-cohort-4.png}}}
+\captionof{figure}{DUR duration by approval channel, Cohort 4.}\label{fig:approval-channel-cohort-4}
+\end{minipage}
+\end{minipage}
+\end{center}

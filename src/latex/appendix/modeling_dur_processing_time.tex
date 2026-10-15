@@ -1,0 +1,235 @@
+\subsection{Modeling DUR Processing Time}\label{modeling-dur-processing-time}
+In this section, we develop a model that incorporates the following factors
+\begin{itemize}
+\item whether the task was preceded by a task of similar cohort
+\item pharmacist
+\item pet type
+\item if there were alterations done during the DUR process
+\item date effects
+\item approval and prescription channels
+\item cohort
+\item week of day
+\end{itemize}
+
+We find that being preceded by a task of the same cohort reduces DUR
+duration about 3.4\% assuming everything else stays the same with the
+task.
+We note that this is not a causal model nor is the data obtained
+from a randomized controlled experiment setup. Even though extreme
+care has been taken to reduce confounding, it may still be present.
+
+\subsubsection{Data}
+The model uses 3,433,218 DUR tasks with durations below the global 95th-percentile cutoff of
+156.608019 seconds.
+
+Let \(Y_i\) be duration in seconds, \(S_i\) the
+task's position in its same-cohort batch, and \(L_i\) the batch length.
+The sequence indicators are
+\[
+P_i=\mathbf{1}(L_i>1\land S_i>1),\qquad
+F_i=\mathbf{1}(L_i>1\land S_i<L_i).
+\]
+\texttt{SAME\_PRECEDING} (\(P_i\)) means an earlier task in the
+same-cohort batch precedes task \(i\). \texttt{SAME\_FOLLOWING}
+(\(F_i\)) means a later task in that batch follows it. Consecutive
+tasks for a user must have no break longer than one hour; overlapping
+and failed DUR tasks are excluded. Both indicators can equal one.
+Missing parent part numbers form a separate category.
+
+\begin{center}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Indicator & Value & Tasks & Share of sample \\
+\midrule
+\texttt{SAME\_PRECEDING} & 0 & 1,875,931 & 54.64\% \\
+\texttt{SAME\_PRECEDING} & 1 & 1,557,287 & 45.36\% \\
+\texttt{SAME\_FOLLOWING} & 0 & 1,878,842 & 54.73\% \\
+\texttt{SAME\_FOLLOWING} & 1 & 1,554,376 & 45.27\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{Model}
+The outcome is the natural logarithm of duration:
+\[
+\begin{aligned}
+\log(Y_i)={}&\alpha+\beta_P P_i+\beta_F F_i+\beta_C C_i
+ +\gamma_{c_i}+\delta_{p_i}+\theta_{w_i}\\
+&+\phi_{a_i}+\psi_{s_i}
+ +b_{u(i)}+h_{d(i)}+q_{r(i)}+\epsilon_i .
+\end{aligned}
+\]
+\begin{itemize}
+\item \(Y_i\): positive imputed DUR duration, in seconds, for task \(i\).
+\item \(\alpha\): global intercept for the reference categories, zero
+indicators, and zero random intercepts.
+\item \(P_i,F_i\): same-preceding and same-following indicators above;
+\(\beta_P,\beta_F\) are their conditional log-duration coefficients.
+\item \(C_i=\mathbf{1}(N_i>0)\): whether task \(i\) has at least one
+correction; \(\beta_C\) is its coefficient.
+\item \(\gamma_{c_i},\delta_{p_i},\theta_{w_i},\phi_{a_i},\psi_{s_i}\):
+additive fixed effects for cohort, pet type, weekday, approval channel,
+and prescription source. Their references are Cohort 1, Dog, Sunday,
+\texttt{PH}, and \texttt{PRACTICE\_HUB}. There are no fixed-effect
+cells or interactions.
+\item \(b_{u(i)},h_{d(i)},q_{r(i)}\): crossed random intercepts for user,
+process date, and parent part number. They are independent normals
+with mean zero and variances \(\sigma_u^2,\sigma_d^2,\sigma_r^2\).
+\item \(\epsilon_i\): independent normal task residual with mean zero
+and common variance \(\sigma_e^2\).
+\end{itemize}
+
+\subsubsection{Numerical procedure}
+The global approximate 95th-percentile cutoff is applied to all
+otherwise eligible positive durations; equality with the cutoff is
+excluded. Retained durations are log-transformed. Categorical
+variables are encoded as contrasts to the stated references and the
+three grouping variables as crossed random intercepts.
+
+Restricted maximum likelihood (REML) estimates fixed coefficients
+and variance components. The implementation accumulates
+cross-products and profiles out fixed coefficients and residual
+variance at each candidate set of random-effect variance ratios.
+Cholesky solves evaluate the profiled objective; bounded L-BFGS-B
+minimizes it on the log-variance-ratio scale. The fit converged.
+
+Fixed-effect standard errors come from the fitted covariance matrix.
+The two-sided \(p\)-values and 95\% confidence intervals use normal
+Wald approximations, with \(z=\widehat\beta/
+\mathrm{SE}(\widehat\beta)\). A coefficient is marked significant when
+its interval excludes zero. Random-intercept SD intervals use observed
+information on the log-SD scale; the residual-SD interval uses a
+chi-square approximation. All estimates and SDs are on the log scale.
+
+\subsubsection{Fixed-effect coefficients}
+\texttt{AC} means approval channel relative to \texttt{PH};
+\texttt{PS} means prescription source relative to
+\texttt{PRACTICE\_HUB}. Cohort and pet-type contrasts use Cohort 1 and
+Dog as references. Yellow highlights significant rows.
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{@{}p{0.35\linewidth}rrrlc@{}}
+\toprule
+Term & Estimate & SE & \(p\)-value & 95\% CI & Significant \\
+\midrule
+\endfirsthead
+\toprule
+Term & Estimate & SE & \(p\)-value & 95\% CI & Significant \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+\rowcolor{yellow!35} SAME\_PRECEDING & -0.034871 & 0.000858 & $<10^{-300}$ & [-0.036552, -0.033189] & Yes \\
+SAME\_FOLLOWING & -0.001013 & 0.000858 & 0.237696 & [-0.002695, 0.000669] & No \\
+\rowcolor{yellow!35} HAS\_CORRECTION & 0.335919 & 0.001002 & $<10^{-300}$ & [0.333956, 0.337883] & Yes \\
+WEEKDAY\_MON & 0.007606 & 0.024733 & 0.758432 & [-0.040869, 0.056081] & No \\
+WEEKDAY\_TUE & 0.018008 & 0.024728 & 0.46647 & [-0.030459, 0.066475] & No \\
+WEEKDAY\_WED & 0.013373 & 0.024734 & 0.588742 & [-0.035105, 0.061851] & No \\
+WEEKDAY\_THU & 0.010322 & 0.024736 & 0.67648 & [-0.038161, 0.058804] & No \\
+WEEKDAY\_FRI & 0.008029 & 0.024735 & 0.745478 & [-0.040450, 0.056509] & No \\
+WEEKDAY\_SAT & 0.003198 & 0.024754 & 0.897221 & [-0.045320, 0.051715] & No \\
+\rowcolor{yellow!35} Coh: Cohort 2 vs Cohort 1 & 0.208007 & 0.016863 & $5.85261\times10^{-35}$ & [0.174956, 0.241058] & Yes \\
+\rowcolor{yellow!35} Coh: Cohort 3 vs Cohort 1 & 0.504763 & 0.017907 & $8.19508\times10^{-175}$ & [0.469666, 0.539860] & Yes \\
+\rowcolor{yellow!35} Coh: Cohort 4 vs Cohort 1 & 0.548922 & 0.035367 & $2.50295\times10^{-54}$ & [0.479605, 0.618240] & Yes \\
+\rowcolor{yellow!35} Coh: Unknown vs Cohort 1 & 0.610945 & 0.034303 & $5.86458\times10^{-71}$ & [0.543713, 0.678177] & Yes \\
+Pet: Missing vs Dog & -0.809849 & 0.542986 & 0.135837 & [-1.874083, 0.254384] & No \\
+\rowcolor{yellow!35} Pet: Bird vs Dog & 0.430595 & 0.032426 & $3.05603\times10^{-40}$ & [0.367041, 0.494149] & Yes \\
+\rowcolor{yellow!35} Pet: Cat vs Dog & 0.053896 & 0.002680 & $5.71345\times10^{-90}$ & [0.048644, 0.059148] & Yes \\
+\rowcolor{yellow!35} Pet: Farm Animal vs Dog & 0.508492 & 0.192162 & 0.008141 & [0.131862, 0.885123] & Yes \\
+\rowcolor{yellow!35} Pet: Fish vs Dog & 0.566626 & 0.146524 & 0.000110128 & [0.279444, 0.853808] & Yes \\
+\rowcolor{yellow!35} Pet: Horse vs Dog & -0.023698 & 0.010410 & 0.0228128 & [-0.044101, -0.003296] & Yes \\
+\rowcolor{yellow!35} Pet: Reptile vs Dog & 0.314481 & 0.050987 & $6.92146\times10^{-10}$ & [0.214549, 0.414414] & Yes \\
+\rowcolor{yellow!35} Pet: Small Pet vs Dog & 0.322064 & 0.012358 & $1.02986\times10^{-149}$ & [0.297842, 0.346287] & Yes \\
+\rowcolor{yellow!35} AC: CLINIC\_EMAIL vs PH & 0.299482 & 0.057477 & $1.88374\times10^{-7}$ & [0.186829, 0.412134] & Yes \\
+\rowcolor{yellow!35} AC: CUSTOMER\_MAIL vs PH & 0.600193 & 0.016604 & $4.01198\times10^{-286}$ & [0.567650, 0.632735] & Yes \\
+\rowcolor{yellow!35} AC: DIGITAL vs PH & 0.190563 & 0.051772 & 0.000232496 & [0.089092, 0.292034] & Yes \\
+\rowcolor{yellow!35} AC: FAX vs PH & 0.258302 & 0.014273 & $3.33691\times10^{-73}$ & [0.230328, 0.286277] & Yes \\
+\rowcolor{yellow!35} AC: PARTNER vs PH & -0.043703 & 0.010128 & $1.59659\times10^{-5}$ & [-0.063555, -0.023852] & Yes \\
+AC: RHAPSODY vs PH & 0.094970 & 0.066836 & 0.155337 & [-0.036027, 0.225966] & No \\
+AC: VERBAL vs PH & -0.020313 & 0.013558 & 0.134062 & [-0.046885, 0.006259] & No \\
+AC: VET vs PH & 0.012257 & 0.134401 & 0.927334 & [-0.251165, 0.275679] & No \\
+PS: CLINIC\_EMAIL vs PRACTICE\_HUB & -0.004722 & 0.014214 & 0.739731 & [-0.032581, 0.023137] & No \\
+PS: CS\_FIRST\_CONTACT vs PRACTICE\_HUB & -0.109942 & 0.259207 & 0.671457 & [-0.617979, 0.398094] & No \\
+\rowcolor{yellow!35} PS: CUSTOMER\_MAIL vs PRACTICE\_HUB & 0.054217 & 0.016288 & 0.000872503 & [0.022294, 0.086141] & Yes \\
+PS: CVC vs PRACTICE\_HUB & 0.027068 & 0.066757 & 0.685129 & [-0.103774, 0.157911] & No \\
+PS: DIGITAL vs PRACTICE\_HUB & 0.025127 & 0.050985 & 0.622127 & [-0.074801, 0.125055] & No \\
+PS: FAX vs PRACTICE\_HUB & -0.007227 & 0.014269 & 0.612511 & [-0.035193, 0.020739] & No \\
+\rowcolor{yellow!35} PS: PARTNER\_API vs PRACTICE\_HUB & 0.026072 & 0.010098 & 0.00982729 & [0.006280, 0.045863] & Yes \\
+PS: RHAPSODY vs PRACTICE\_HUB & -0.039594 & 0.079752 & 0.619565 & [-0.195905, 0.116717] & No \\
+\rowcolor{yellow!35} PS: TELEMEDICINE vs PRACTICE\_HUB & 0.236886 & 0.067306 & 0.000432265 & [0.104970, 0.368803] & Yes \\
+PS: VERBAL vs PRACTICE\_HUB & -0.004447 & 0.014919 & 0.76563 & [-0.033689, 0.024794] & No \\
+\end{longtable}
+\endgroup
+
+\subsubsection{Random-effects statistics}
+\begin{center}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Component & SD (log scale) & Approximate 95\% CI \\
+\midrule
+User random intercept & 0.545034 & [0.503849, 0.589586] \\
+Date random intercept & 0.088873 & [0.079975, 0.098762] \\
+Parent-part-number random intercept & 0.169522 & [0.160562, 0.178982] \\
+Residual & 0.767615 & [0.767041, 0.768189] \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{Fit statistics}
+The global intercept is \(\widehat\alpha=3.034533\) log seconds. It
+applies to the reference categories, no correction, neither sequence
+indicator, and zero random intercepts.
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Quantity & Value \\
+\midrule
+Tasks & 3,433,218 \\
+Users & 340 \\
+Dates & 182 \\
+Parent part numbers & 885 \\
+Conditional \(R^2\) (log scale) & 0.300786 \\
+Conditional RMSE (log seconds) & 0.767469 \\
+REML negative log-likelihood & 3,966,831.492274 \\
+Converged & Yes \\
+\bottomrule
+\end{tabular}
+\end{center}
+The conditional fit measures include estimated random intercepts.
+
+\subsubsection{Interpretation and assumptions}
+Exponentiating a sequence coefficient gives its conditional duration
+ratio: \(\exp(\widehat\beta_P)=0.965730\). The model assumes additive
+effects, independent normally distributed random intercepts and
+residuals, and common residual variance.
+
+\subsubsection{Random-intercept distributions}
+Figure~\ref{fig:random-intercept-densities} shows the fitted intercept
+distributions for users (a), parent part numbers (b), and dates (c).
+Each grouping level has equal weight within its panel; the dashed
+vertical line marks zero.
+
+The users (pharmacists) and dates random effects suggest bimodal
+distributions and invite further analysis.
+
+\Needspace{13\baselineskip}
+\begin{center}
+\begin{minipage}[t]{0.32\linewidth}
+\centering
+\includegraphics[width=\linewidth]{outputs/charts/test-model-final/user_random_intercepts_density.png}\\
+\textbf{(a) User}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.32\linewidth}
+\centering
+\includegraphics[width=\linewidth]{outputs/charts/test-model-final/parent_random_intercepts_density.png}\\
+\textbf{(b) Parent part number}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.32\linewidth}
+\centering
+\includegraphics[width=\linewidth]{outputs/charts/test-model-final/date_random_intercepts_density.png}\\
+\textbf{(c) Date}
+\end{minipage}
+\captionof{figure}{Fitted random-intercept densities on the log-duration scale.}
+\label{fig:random-intercept-densities}
+\end{center}

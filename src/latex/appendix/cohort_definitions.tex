@@ -1,0 +1,42 @@
+\subsection{Cohort Definitions}
+This section is verbatim reproduced from the conversation with JD Wright to provide
+background on the history of cohorts and their rationale.
+
+\textbf{Cohort 1}: Boxed parasiticides. This was the best starting point
+because it represents roughly 40\% of total DUR volume and the
+majority of the initial digital volume, while the clinical rules are
+relatively standardized and label-driven. The primary checks are
+species, weight range, monthly directions, days\textquotesingle{}
+supply, duplicate parasite coverage, and known contraindications. This
+gave us a high-volume population with relatively low variability for
+validating the core RxBuddy and DUR Copilot experience.
+
+\textbf{Cohort 2}: Non-controlled, non-boxed medications. This represents
+roughly 29\% of total DUR volume and materially expands coverage, but
+the clinical review is more complex. These medications require
+generalized dosing evaluation, including strength, dose, frequency,
+route, indication, species appropriateness, duplicate therapy,
+contraindications, and potential interactions. We separated this
+cohort so those broader AI checks could be validated without also
+introducing compounding or controlled-substance requirements at the
+same time.
+
+\textbf{Cohort 3}: Non-controlled compounded medications. This is a smaller
+segment at roughly 4.4\% of DUR volume, but it has distinct clinical
+and compliance requirements. Compounds require a documented
+compounding reason, formulation-specific directions, and validation
+that the prescribed days\textquotesingle{} supply does not exceed the
+product\textquotesingle s beyond-use date. BUD rules vary by dosage
+form, storage conditions, formulation, and stability-study results.
+Keeping compounds separate allowed us to test these specialized
+workflows and manage their impact on pharmacist throughput
+independently.
+
+\textbf{Cohort 4}: Gabapentin and the high-scrutiny regulatory workflow. This
+represents roughly 1.1\% of DUR volume. The implemented Phase 4 scope
+focused on uncontrolled gabapentin rather than the full
+controlled-substance population, but it was separated because it
+introduces site eligibility, pharmacist skill gating, regulatory
+indicators, mixed-order handling, and state-specific scrutiny. It also
+gave us a contained way to validate infrastructure that will be needed
+for broader controlled-substance support later.

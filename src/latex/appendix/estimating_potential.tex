@@ -1,0 +1,147 @@
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "../main"
+%%% End:
+\subsection{Estimating the Potential Cost Savings of Grouping Similar Tasks}\label{estimating-potential-cost-savings}
+In this section, we apply the 3.4\% reduction to a subset of DUR tasks
+to arrive at a labor savings in the range \$80,000--\$88,000 per year.
+
+
+\subsubsection{Determining the Eligible DUR Tasks For Duration Reduction}
+In this section we discuss, the historical DUR tasks that were deemed
+candidates for the hypothetical duration reduction.
+
+Figures~\ref{fig:dur-partition-sankey} and
+\ref{fig:dur-processing-time-sankey} summarize DUR task counts and
+imputed processing time. DURs that required a hand-off were excluded
+assuming that the pharmacist would lose concentration in this
+case. The ``Possible multitasking'' group was excluded because the
+pharmacist was working on multiple DURs or tasks at the same time, and
+we assume that any context switching benefit would be lost.
+
+DUR's with processing times more than 156.6 seconds were
+excluded. These DURs have durations above the 95\% percentile
+threshold and deemed abnormal. The pharmacist is possibly
+multitasking.
+
+The \texttt{SAME\_PRECEDING=1} denotes historical DUR tasks that may already
+benefit from following a DUR of the same cohort.
+
+The \texttt{SAME\_PRECEDING=0} tasks are subjected to the 3.4\% reduction in
+DUR times.
+
+\clearpage
+The leading number on each region is its identifier in both figures:
+\begin{center}
+\small
+\begin{tabular}{r l @{\hspace{1.5em}} r l}
+1 & All DURs & 7 & Singletasking \\
+2 & No handoff & 8 & Other validity exclusions \\
+3 & Pharmacist follow-up & 9 & At or above cutoff \\
+4 & Technician follow-up & 10 & Below cutoff \\
+5 & Lead follow-up & 11 & \texttt{SAME\_PRECEDING = 1} \\
+6 & Possible multitasking & 12 & \texttt{SAME\_PRECEDING = 0}
+\end{tabular}
+\end{center}
+
+\begin{center}
+\includegraphics[width=\linewidth,height=0.45\textheight,keepaspectratio,alt={Numbered Sankey regions for DUR task counts by handoff, possible multitasking or singletasking, validity, duration cutoff, and same-preceding indicator}]{outputs/charts/DUR_partition_sankey.png}
+\captionof{figure}{DUR task counts partitioned by handoff type, possible multitasking or singletasking, validity, the 156.608019-second cutoff, and \texttt{SAME\_PRECEDING}.}
+\label{fig:dur-partition-sankey}
+\end{center}
+
+\begin{center}
+\includegraphics[width=\linewidth,height=0.45\textheight,keepaspectratio,alt={Numbered Sankey regions for DUR processing hours by handoff, possible multitasking or singletasking, validity, duration cutoff, and same-preceding indicator}]{outputs/charts/DUR_processing_time_sankey.png}
+\captionof{figure}{DUR processing time partitioned by the same stages. Flow widths use imputed processing seconds; node labels show hours rounded to two decimal places.}
+\label{fig:dur-processing-time-sankey}
+\end{center}
+
+\subsubsection{Reduction Methodology}
+In this section, we assume
+\begin{itemize}
+  \item that the DUR tasks of a pharmacist can be rearranged for a given day.
+  \item that the pharmacist does not multitask or encounter a DUR failure during stretches of successful DURs to that break the streak.
+\end{itemize}
+
+Figure~\ref{fig:same-preceding-counterfactual-flow} shows the
+calculation: within each user, process date, and cohort, the first
+task keeps its observed duration and later tasks with
+\texttt{SAME\_PRECEDING = 0} receive the reduced duration obtained
+from the model.
+
+\clearpage
+\begin{center}
+\includegraphics[width=\linewidth,height=0.78\textheight,keepaspectratio,alt={Flowchart of the same-preceding counterfactual grouped by user, process date, and cohort}]{outputs/charts/same_preceding_counterfactual.png}
+\captionof{figure}{Same-preceding counterfactual algorithm. Tasks are ordered within each user-day-cohort group; the first task and tasks already marked \texttt{SAME\_PRECEDING = 1} retain their observed durations.}
+\label{fig:same-preceding-counterfactual-flow}
+\end{center}
+
+\clearpage
+\section{Results}
+Tables~\ref{tab:same-preceding-counterfactual-summary} and
+\ref{tab:same-preceding-counterfactual-cohorts} give the resulting
+totals for retained process dates from 2026-02-01 through
+2026-08-01. The fitted duration ratio applied to eligible later tasks
+is $\exp(\beta_P)=0.965730$. See section \ref{modeling-dur-processing-time}
+for how this value was computed.
+
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Quantity & Value \\
+\midrule
+Retained DUR tasks & 3,433,218 \\
+User-day-cohort groups / unchanged first tasks & 64,681 \\
+Later \texttt{SAME\_PRECEDING = 0} tasks adjusted & 1,814,117 \\
+Original processing time (seconds) & 89,130,671.0 \\
+Scenario processing time (seconds) & 87,458,136.9 \\
+Time reduction (hours) & 464.6 \\
+Change from original & $-1.88\%$ \\
+Pharmacist cost per hour & \$90.00 \\
+Implied labor value & \$41,813.35 \\
+\bottomrule
+\end{tabular}
+\captionof{table}{Overall same-preceding counterfactual for the retained model sample.}
+\label{tab:same-preceding-counterfactual-summary}
+\end{center}
+
+\begin{center}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Cohort & Tasks & Adjusted & Original (s) & Scenario (s) & Saved (h) & Value (\$) \\
+\midrule
+Cohort 1 & 1,904,176 & 862,667 & 43,800,431.0 & 43,103,502.2 & 193.6 & 17,423.22 \\
+Cohort 2 & 1,331,432 & 791,247 & 37,428,756.0 & 36,667,828.8 & 211.4 & 19,023.18 \\
+Cohort 3 & 159,018 & 132,205 & 6,121,581.0 & 5,950,003.0 & 47.7 & 4,289.45 \\
+Cohort 4 & 17,615 & 13,962 & 868,270.0 & 845,453.7 & 6.3 & 570.41 \\
+Unknown & 20,977 & 14,036 & 911,633.0 & 891,349.3 & 5.6 & 507.09 \\
+\midrule
+Total & 3,433,218 & 1,814,117 & 89,130,671.0 & 87,458,136.9 & 464.6 & 41,813.35 \\
+\bottomrule
+\end{tabular}
+\captionof{table}{Counterfactual processing time and implied labor value by cohort, at \$90 per pharmacist hour. Rounded cohort values may differ slightly from the total.}
+\label{tab:same-preceding-counterfactual-cohorts}
+\end{center}
+
+Table~\ref{tab:same-preceding-counterfactual-beta-bounds} varies only the
+\texttt{SAME\_PRECEDING} coefficient over its fitted 95\% confidence interval.
+Each row uses the same 1,814,117 adjusted tasks and \$90 hourly rate.
+The source extract includes tasks created from 2026-02-01 inclusive through
+2026-08-01 exclusive, a 181-day window. Annualized values multiply the period values by
+$365/181$, assuming the same average daily volume and task mix throughout the year.
+
+\begin{center}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Coefficient scenario & $\beta_P$ & 181-day value & 365-day value \\
+\midrule
+Lower 95\% bound & $-0.036552403$ & \$43,793.22 & \$88,312.30 \\
+Fitted estimate & $-0.034870727$ & \$41,813.35 & \$84,319.74 \\
+Upper 95\% bound & $-0.033189052$ & \$39,830.15 & \$80,320.46 \\
+\bottomrule
+\end{tabular}
+\captionof{table}{Period and annualized implied labor value under the fitted \texttt{SAME\_PRECEDING} coefficient and its 95\% confidence bounds, at \$90 per pharmacist hour. Annualized values use unrounded period estimates.}
+\label{tab:same-preceding-counterfactual-beta-bounds}
+\end{center}

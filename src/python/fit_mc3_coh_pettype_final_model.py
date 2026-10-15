@@ -52,7 +52,7 @@ WEEKDAYS = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 WEEKDAY_COLUMNS = tuple(f"weekday_{day.lower()}" for day in WEEKDAYS[:-1])
 BASE_FIXED_EFFECT_COLUMNS = TREATMENT_COLUMNS + WEEKDAY_COLUMNS
 CATEGORICAL_EFFECTS = ("approval_channel", "prescription_source")
-ETA_BOUNDS = ((-16.0, 16.0),) * 3
+ETA_BOUNDS = (-16.0, 16.0)
 
 
 @dataclass(frozen=True)
@@ -115,7 +115,7 @@ class FinalModelResult:
     parent_effects: pd.DataFrame
     residual_quantiles: pd.DataFrame
     prediction_bins: pd.DataFrame
-    random_sds: tuple[float, float, float]
+    random_sds: tuple[float, ...]
     random_sd_cis: tuple[tuple[float, float], ...]
     residual_sd: float
     residual_sd_ci: tuple[float, float]
@@ -242,15 +242,21 @@ def transform_duration(
     return BoxCoxResult(frame=transformed_frame, lambda_=float(fitted_lambda))
 
 
-def build_fixed_effect_design(frame: pd.DataFrame) -> FixedEffectDesign:
-    """Build treatment, weekday, approval, and source fixed-effect columns."""
+def build_fixed_effect_design(
+    frame: pd.DataFrame,
+    *,
+    categorical_effects: tuple[str, ...] = CATEGORICAL_EFFECTS,
+    base_fixed_columns: tuple[str, ...] | None = None,
+) -> FixedEffectDesign:
+    """Build treatment, weekday, and categorical fixed-effect columns."""
 
     designed = normalize_frame(frame)
-    columns = list(BASE_FIXED_EFFECT_COLUMNS)
-    labels = [column.upper() for column in BASE_FIXED_EFFECT_COLUMNS]
+    base = BASE_FIXED_EFFECT_COLUMNS if base_fixed_columns is None else base_fixed_columns
+    columns = list(base)
+    labels = [column.upper() for column in base]
     references: dict[str, str] = {}
     levels_by_effect: dict[str, tuple[str, ...]] = {}
-    for effect in CATEGORICAL_EFFECTS:
+    for effect in categorical_effects:
         counts = designed[effect].value_counts()
         maximum = counts.max()
         reference = sorted(counts[counts == maximum].index.astype(str))[0]
@@ -271,7 +277,12 @@ def build_fixed_effect_design(frame: pd.DataFrame) -> FixedEffectDesign:
     )
 
 
-def _cross_products(design: FixedEffectDesign) -> CrossProducts:
+def _cross_products(
+    design: FixedEffectDesign,
+    *,
+    cell_columns: tuple[str, ...] = CELL_COLUMNS,
+    random_columns: tuple[str, ...] = RANDOM_COLUMNS,
+) -> CrossProducts:
     frame = normalize_frame(design.frame)
     y = frame["boxcox_duration"].to_numpy(dtype=np.float64)
     x = frame.loc[:, design.columns].to_numpy(dtype=np.float64)
@@ -279,7 +290,7 @@ def _cross_products(design: FixedEffectDesign) -> CrossProducts:
         raise ValueError("model outcome and covariates must be finite")
     random_codes_list: list[np.ndarray] = []
     random_levels_list: list[pd.Index] = []
-    for column in RANDOM_COLUMNS:
+    for column in random_columns:
         codes, levels = pd.factorize(frame[column], sort=True)
         random_codes_list.append(codes)
         random_levels_list.append(pd.Index(levels))
@@ -322,11 +333,16 @@ def _cross_products(design: FixedEffectDesign) -> CrossProducts:
                 ]
             )
         )
-    z_y = np.concatenate(z_y_parts)
-    z_x = np.vstack(z_x_parts)
+    z_y = np.concatenate(z_y_parts) if z_y_parts else np.empty(0)
+    z_x = np.vstack(z_x_parts) if z_x_parts else np.empty((0, x.shape[1]))
 
-    cell_index = pd.MultiIndex.from_frame(frame.loc[:, CELL_COLUMNS])
-    cell_codes, cells = pd.factorize(cell_index, sort=True)
+    if cell_columns:
+        cell_index = pd.MultiIndex.from_frame(frame.loc[:, cell_columns])
+        cell_codes, cells = pd.factorize(cell_index, sort=True)
+    else:
+        # One internal intercept absorbs the global mean; there are no strata.
+        cell_codes = np.zeros(n, dtype=np.intp)
+        cells = pd.MultiIndex.from_tuples([("overall",)], names=["intercept"])
     z_cell_parts = []
     for index, codes in enumerate(random_codes):
         z_cell_parts.append(
@@ -335,7 +351,7 @@ def _cross_products(design: FixedEffectDesign) -> CrossProducts:
                 shape=(len(cells), sizes[index]),
             ).toarray()
         )
-    z_cell = np.hstack(z_cell_parts)
+    z_cell = np.hstack(z_cell_parts) if z_cell_parts else np.empty((len(cells), 0))
     n_cell = np.bincount(cell_codes).astype(np.float64)
     y_cell = np.bincount(cell_codes, weights=y)
     x_cell = np.column_stack(
@@ -380,39 +396,41 @@ def _evaluate_profile(
     inverse_g = np.concatenate(
         [np.full(size, 1.0 / rho[index]) for index, size in enumerate(sizes)]
     )
-    random_information = stats.ztz.copy()
+    # Remove cell means first. This keeps the dense factorization at the
+    # number of random levels, even when there are many cohort/user cells.
+    inv_cell_counts = 1.0 / stats.n_cell
+    random_information = stats.ztz - stats.z_cell.T @ (
+        inv_cell_counts[:, None] * stats.z_cell
+    )
     random_information.flat[:: len(inverse_g) + 1] += inverse_g
     random_factor = cho_factor(random_information, lower=True, check_finite=False)
 
     def solve_random(values: np.ndarray) -> np.ndarray:
         return cho_solve(random_factor, values, check_finite=False)
 
-    solved_y = solve_random(stats.z_y)
-    solved_x = solve_random(stats.z_x)
-    solved_cell = solve_random(stats.z_cell.T)
-    yry = stats.yy - float(stats.z_y @ solved_y)
-    xry = stats.xy - stats.z_x.T @ solved_y
-    xrx = stats.xx - stats.z_x.T @ solved_x
-    dy = stats.y_cell - stats.z_cell @ solved_y
-    dx = stats.x_cell - stats.z_cell @ solved_x
-    cell_information = np.diag(stats.n_cell) - stats.z_cell @ solved_cell
-    cell_information = (cell_information + cell_information.T) / 2.0
-    cell_factor = cho_factor(cell_information, lower=True, check_finite=False)
-    solved_dy = cho_solve(cell_factor, dy, check_finite=False)
-    solved_dx = cho_solve(cell_factor, dx, check_finite=False)
-    information = xrx - dx.T @ solved_dx
+    wy = stats.z_y - stats.z_cell.T @ (inv_cell_counts * stats.y_cell)
+    wx = stats.z_x - stats.z_cell.T @ (inv_cell_counts[:, None] * stats.x_cell)
+    yry = stats.yy - float(stats.y_cell @ (inv_cell_counts * stats.y_cell))
+    xry = stats.xy - stats.x_cell.T @ (inv_cell_counts * stats.y_cell)
+    xrx = stats.xx - stats.x_cell.T @ (inv_cell_counts[:, None] * stats.x_cell)
+    solved_y = solve_random(wy)
+    solved_x = solve_random(wx)
+    information = xrx - wx.T @ solved_x
     information = (information + information.T) / 2.0
     information_factor = cho_factor(information, lower=True, check_finite=False)
-    rhs = xry - dx.T @ solved_dy
+    rhs = xry - wx.T @ solved_y
     beta = cho_solve(information_factor, rhs, check_finite=False)
-    cell_effects = cho_solve(cell_factor, dy - dx @ beta, check_finite=False)
-    rss = yry - float(cell_effects @ dy) - float(beta @ xry)
+    random_effects = solved_y - solved_x @ beta
+    cell_effects = inv_cell_counts * (
+        stats.y_cell - stats.x_cell @ beta - stats.z_cell @ random_effects
+    )
+    rss = yry - float(wy @ solved_y) - float(beta @ rhs)
     if not np.isfinite(rss) or rss <= 0:
         raise ValueError("profile residual sum of squares is not positive")
     sigma2 = rss / stats.residual_df
     logdet_random = 2.0 * float(np.log(np.diag(random_factor[0])).sum())
     logdet_r = float(sizes @ eta) + logdet_random
-    logdet_cells = 2.0 * float(np.log(np.diag(cell_factor[0])).sum())
+    logdet_cells = float(np.log(stats.n_cell).sum())
     logdet_fixed = 2.0 * float(np.log(np.diag(information_factor[0])).sum())
     nll = 0.5 * (
         stats.residual_df
@@ -426,8 +444,6 @@ def _evaluate_profile(
         np.eye(len(stats.fixed_columns)),
         check_finite=False,
     )
-    random_sum = stats.z_y - stats.z_x @ beta - stats.z_cell.T @ cell_effects
-    random_effects = solve_random(random_sum)
     random_variance = None
     if include_random_variance:
         random_variance = sigma2 * np.diag(
@@ -539,34 +555,87 @@ def _prediction_bins(predicted: np.ndarray, observed: np.ndarray) -> pd.DataFram
     )
 
 
-def fit_final_model(design: FixedEffectDesign) -> FinalModelResult:
-    stats = _cross_products(design)
+def _fit_fixed_only(stats: CrossProducts) -> ProfileEvaluation:
+    """Solve cell-demeaned OLS when the model has no random effects."""
+    inv_cell_counts = 1.0 / stats.n_cell
+    xrx = stats.xx - stats.x_cell.T @ (inv_cell_counts[:, None] * stats.x_cell)
+    xry = stats.xy - stats.x_cell.T @ (inv_cell_counts * stats.y_cell)
+    xrx = (xrx + xrx.T) / 2.0
+    info_factor = cho_factor(xrx, lower=True, check_finite=False)
+    beta = cho_solve(info_factor, xry, check_finite=False)
+    cell_effects = inv_cell_counts * (stats.y_cell - stats.x_cell @ beta)
+    rss = float(
+        stats.yy
+        - stats.y_cell @ (inv_cell_counts * stats.y_cell)
+        - beta @ xry
+    )
+    if rss <= 0:
+        raise ValueError("OLS residual sum of squares is not positive")
+    sigma2 = rss / stats.residual_df
+    logdet_cells = float(np.log(stats.n_cell).sum())
+    logdet_fixed = 2.0 * float(np.log(np.diag(info_factor[0])).sum())
+    nll = 0.5 * (
+        stats.residual_df * (np.log(2.0 * np.pi) + 1.0 + np.log(sigma2))
+        + logdet_cells
+        + logdet_fixed
+    )
+    beta_covariance = sigma2 * cho_solve(
+        info_factor, np.eye(len(beta)), check_finite=False,
+    )
+    return ProfileEvaluation(
+        eta=np.empty(0),
+        rho=np.empty(0),
+        nll=float(nll),
+        sigma2=float(sigma2),
+        beta=beta,
+        beta_covariance=beta_covariance,
+        cell_effects=cell_effects,
+        random_effects=np.empty(0),
+        random_effect_variance=np.empty(0),
+    )
 
-    def objective(eta: np.ndarray) -> float:
-        try:
-            return _evaluate_profile(eta, stats).nll
-        except (ValueError, np.linalg.LinAlgError):
-            return np.inf
 
-    optimization = minimize(
-        objective,
-        x0=np.zeros(3),
-        bounds=ETA_BOUNDS,
-        method="L-BFGS-B",
-        options={"ftol": 1e-11, "gtol": 1e-7, "maxiter": 200},
+def fit_final_model(
+    design: FixedEffectDesign,
+    *,
+    cell_columns: tuple[str, ...] = CELL_COLUMNS,
+    random_columns: tuple[str, ...] = RANDOM_COLUMNS,
+) -> FinalModelResult:
+    stats = _cross_products(
+        design, cell_columns=cell_columns, random_columns=random_columns
     )
-    if not optimization.success or not np.isfinite(optimization.fun):
-        raise ValueError(f"REML optimization failed: {optimization.message}")
-    best = _evaluate_profile(
-        np.asarray(optimization.x), stats, include_random_variance=True
-    )
-    if best.random_effect_variance is None:
-        raise ValueError("random-effect variance was not calculated")
-    eta_covariance = _eta_covariance(best, stats)
-    random_sd_cis = tuple(
-        _random_sd_interval(index, best, stats, eta_covariance)
-        for index in range(3)
-    )
+
+    if random_columns:
+        def objective(eta: np.ndarray) -> float:
+            try:
+                return _evaluate_profile(eta, stats).nll
+            except (ValueError, np.linalg.LinAlgError):
+                return np.inf
+
+        optimization = minimize(
+            objective,
+            x0=np.zeros(len(random_columns)),
+            bounds=[ETA_BOUNDS] * len(random_columns),
+            method="L-BFGS-B",
+            options={"ftol": 1e-11, "gtol": 1e-7, "maxiter": 200},
+        )
+        if not optimization.success or not np.isfinite(optimization.fun):
+            raise ValueError(f"REML optimization failed: {optimization.message}")
+        best = _evaluate_profile(
+            np.asarray(optimization.x), stats, include_random_variance=True
+        )
+        if best.random_effect_variance is None:
+            raise ValueError("random-effect variance was not calculated")
+        eta_covariance = _eta_covariance(best, stats)
+        random_sd_cis = tuple(
+            _random_sd_interval(index, best, stats, eta_covariance)
+            for index in range(len(random_columns))
+        )
+        converged = bool(optimization.success)
+    else:
+        best = _fit_fixed_only(stats)
+        random_sd_cis = ()
+        converged = True
     standard_errors = np.sqrt(np.diag(best.beta_covariance))
     z_values = best.beta / standard_errors
     fixed_effects = pd.DataFrame(
@@ -582,7 +651,7 @@ def fit_final_model(design: FixedEffectDesign) -> FinalModelResult:
     )
 
     effect_frames = []
-    for index, identifier in enumerate(("user_id", "d", "parent_part_number")):
+    for index, identifier in enumerate(random_columns):
         start, end = stats.random_offsets[index : index + 2]
         effect_frames.append(
             _effect_frame(
@@ -593,6 +662,7 @@ def fit_final_model(design: FixedEffectDesign) -> FinalModelResult:
                 identifier,
             )
         )
+    effects_by_column = dict(zip(random_columns, effect_frames, strict=True))
     conditional_residuals = stats.y - stats.x @ best.beta - best.cell_effects[
         stats.cell_codes
     ]
@@ -613,13 +683,14 @@ def fit_final_model(design: FixedEffectDesign) -> FinalModelResult:
     residual_df = stats.residual_df
     return FinalModelResult(
         fixed_effects=fixed_effects,
-        user_effects=effect_frames[0],
-        date_effects=effect_frames[1],
-        parent_effects=effect_frames[2],
+        user_effects=effects_by_column.get("user_id", pd.DataFrame()),
+        date_effects=effects_by_column.get("d", pd.DataFrame()),
+        parent_effects=effects_by_column.get("parent_part_number", pd.DataFrame()),
         residual_quantiles=residual_quantiles,
         prediction_bins=_prediction_bins(fitted_values, stats.y),
         random_sds=tuple(
-            float(np.sqrt(best.rho[index] * best.sigma2)) for index in range(3)
+            float(np.sqrt(best.rho[index] * best.sigma2))
+            for index in range(len(random_columns))
         ),
         random_sd_cis=random_sd_cis,
         residual_sd=residual_sd,
@@ -642,12 +713,12 @@ def fit_final_model(design: FixedEffectDesign) -> FinalModelResult:
         ),
         conditional_rmse=float(np.sqrt(np.mean(conditional_residuals**2))),
         n_observations=len(stats.y),
-        n_cells=len(stats.cells),
-        n_users=len(stats.random_levels[0]),
-        n_dates=len(stats.random_levels[1]),
-        n_parent_parts=len(stats.random_levels[2]),
+        n_cells=len(stats.cells) if cell_columns else 0,
+        n_users=design.frame["user_id"].nunique(),
+        n_dates=design.frame["d"].nunique(),
+        n_parent_parts=design.frame["parent_part_number"].nunique(),
         reml_nll=best.nll,
-        converged=bool(optimization.success),
+        converged=converged,
     )
 
 

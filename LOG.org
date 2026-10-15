@@ -1,5 +1,1304 @@
 #+TITLE: Pharmacist Task Grouping Analysis Log
 
+* 2026-10-15 Rewrite executive summary for product managers
+
+- Explained how scheduling similar DURs beyond FIFO could reduce context
+  switching, the roughly 3.4% historical processing-time association, and the
+  $80,000--$88,000 potential annual labor value in plain language.
+- Linked the summary to the modeling and cost-savings sections and stated that
+  the study covers only RxBuddy DUR tasks.
+- Rebuilt the PDF and inspected the first page; the links resolve and the final
+  LaTeX log has no warnings or overfull boxes. No test suite was run.
+
+* 2026-10-14 Add title and author to report footers
+
+- Set a report page style with the title at left, page number in the center,
+  and author at right. The first page keeps its plain page style.
+- Rebuilt the PDF and inspected the first and later pages. No test suite was run.
+
+* 2026-10-14 Summarize potential DUR grouping savings
+
+- Filled the executive summary in =main.tex= with the annualized $80,000--
+  $88,000 potential labor-value range, $84,000 central estimate, the
+  181-day scaling window, and the 464.6-hour period reduction.
+- Described the same-cohort scheduling scenario and noted that the modeled
+  association is observational and cash savings depend on staffing.
+- Rebuilt the PDF and inspected the first page; the executive summary and
+  table reference render cleanly, with no LaTeX warnings or overfull boxes.
+  No test suite was run.
+
+* 2026-10-14 Annualize counterfactual labor values
+
+- Verified the source task-created window is 2026-02-01 inclusive through
+  2026-08-01 exclusive, or 181 days. The observed process-date span includes
+  August 1 and is 182 dates, but that date is spillover rather than another
+  full source day.
+- Multiplied unrounded period labor values by $365/181$. Annualized results
+  are $88,312.30 at the lower coefficient bound, $84,319.74 at the fitted
+  estimate, and $80,320.46 at the upper bound.
+- Updated the Markdown audit and LaTeX tables with the annualization assumption.
+- Rebuilt the PDF and inspected the annualized values and table reference on
+  page 17. No LaTeX warnings or overfull boxes appeared; no test suite was run.
+
+* 2026-10-14 Evaluate counterfactual at coefficient confidence bounds
+
+- Refit =test-model-final= from cached data and applied the unchanged
+  user-day-cohort counterfactual to the exact lower and upper 95% bounds for
+  =SAME_PRECEDING=. No Snowflake extract was run.
+- At $90 per hour, the lower coefficient bound implies $43,793.22, the fitted
+  estimate $41,813.35, and the upper bound $39,830.15. The adjusted task count
+  stays 1,814,117 in every scenario.
+- Saved a Markdown audit table and added a referenced three-row LaTeX table,
+  with a caveat that coefficient bounds are not a cash-savings interval.
+- Rebuilt the PDF and inspected Table 11 and its reference; no LaTeX warnings
+  or overfull boxes were reported. No test suite was run.
+
+* 2026-10-14 Tabulate counterfactual results in the appendix
+
+- Added labeled overall and cohort tables after the algorithm flowchart,
+  using the $90-per-hour model-report results and a note on interpretation.
+- Rebuilt and visually inspected the PDF tables and their references. No test
+  suite was run.
+
+* 2026-10-14 Typeset the counterfactual flowchart formula
+
+- Changed the Mermaid reduction node to KaTeX math:
+  =\text{duration}\times\exp(\beta_P)=.
+- Regenerated the PNG with =-b transparent=. Confirmed it is RGBA and its
+  top-left pixel has alpha 0, then rebuilt and visually inspected Figure 33
+  in the PDF. No test suite was run.
+
+* 2026-10-14 Add the counterfactual flowchart to the appendix
+
+- Added the transparent Mermaid flowchart to the estimating-potential
+  appendix with a caption, label, and text reference.
+- Added the chart to the PDF Make dependencies and rebuilt the report.
+- Inspected the rendered appendix page: Figure 33 and its reference resolve,
+  the flowchart is legible, and the draft watermark remains visible. No test
+  suite was run.
+
+* 2026-10-14 Reprice the counterfactual at $90 per hour
+
+- Changed the pharmacist labor rate from $95 to $90 per hour in the shared
+  report calculation and Mermaid flowchart.
+- Regenerated the model report, cohort table, and transparent flowchart from
+  cached data; the time reduction remains 464.6 hours and the implied labor
+  value is now $41,813.35.
+- Four focused tests and =git diff --check= passed.
+
+* 2026-10-14 Diagram the same-preceding counterfactual
+
+- Added a Mermaid flowchart for grouping by user-day-cohort, ordering all
+  tasks, preserving each group's first task, adjusting later
+  =SAME_PRECEDING=0= tasks, and summing the time and labor value.
+- Rendered a transparent PNG with the existing Mermaid Make target.
+
+* 2026-10-14 Recompute counterfactual by user-day-cohort
+
+- Changed the shared counterfactual to order all tasks within each user,
+  process date, and cohort by process start time and task ID. Each cohort's
+  first task remains unchanged; later =SAME_PRECEDING=0= tasks receive the
+  fitted duration reduction.
+- Regenerated the model report and aggregate tables from cached data, without
+  a new Snowflake extract. The scenario adjusts 1,814,117 tasks and saves
+  464.6 hours, worth $44,136.32 at $95 per hour.
+- Focused counterfactual and report tests passed.
+
+* 2026-10-14 Number the DUR Sankey regions
+
+- Added matching region identifiers 1 through 12 to the count and
+  processing-time Sankey labels, and a compact key in the appendix.
+- Added those identifiers to the processing-time source table.
+- Regenerated both transparent PNGs and rebuilt and inspected the portrait
+  PDF; the key and both figures fit on one page. No test suite was run.
+
+* 2026-10-14 Sum above-cutoff DUR dwell directly from lifecycle facts
+
+- Queried only =FCT__TASKS_LIFECYCLE= for DURs created from 2026-02-01
+  inclusive through 2026-08-01 exclusive, with null handoff and raw dwell
+  greater than 156.608019 seconds. No employee or validity join was used.
+- Found 200,468 rows and distinct user/task keys, totaling 99,126,769 raw
+  seconds (27,535.21 hours). Saved the SQL and one-row result table.
+- Clarified the appendix comparison between above- and below-cutoff valid
+  DUR processing hours during the pre-commit review, and described the
+  above-cutoff exclusion without attributing unmeasured multitasking.
+
+* 2026-10-14 Reproduce DUR duration totals from lifecycle facts
+
+- Reapplied the pharmacist employee, task-created date, DUR, and null-handoff
+  filters to =FCT__TASKS_LIFECYCLE=. All 11 duration buckets matched the
+  =MY_RXP_TASKS= counts and seconds exactly.
+- Reproduced 200,422 above-cutoff null-handoff DURs and 99,104,001 seconds
+  by cohort directly from the fact.
+- Applying non-refill, positive raw duration, and the existing overlap summary
+  reproduced the narrower valid tail by cohort: 180,803 distinct tasks and
+  88,958,419 raw seconds. A key-level cross-check found no missing, duration,
+  or cohort mismatches against the valid-DUR table.
+
+* 2026-10-14 Check null-handoff DUR processing-time distribution
+
+- Queried duration buckets in =MY_RXP_TASKS= for all DURs with null
+  =HANDOFF_TYPE= and in the valid-DUR table for the above-cutoff model tail.
+- Reproduced 180,803 valid above-cutoff tasks and 88,958,419 seconds
+  (24,710.67 hours). Their mean is 492.02 seconds and median 302 seconds;
+  all 180,803 task keys are distinct.
+- Broke the tail out by cohort. Cohorts 1 and 2 account for 162,489 tasks
+  and 22,480.98 hours. Saved the full distributions and read-only queries.
+- The duration measure is in-progress-to-closed dwell; the queries do not
+  establish that this entire interval was active pharmacist work.
+
+* 2026-10-14 Rename overlap groups in the DUR Sankey figures
+
+- Renamed the overlap branches to ``Possible multitasking'' and
+  ``Singletasking'' in both the count and processing-time diagrams.
+- Clarified in the appendix that possible multitasking is inferred from an
+  overlapping task for the same user, which need not be another DUR.
+- Regenerated both PNGs and rebuilt and inspected the portrait PDF; no test
+  suite was run.
+
+* 2026-10-14 Add a processing-time DUR Sankey
+
+- Added a second Mermaid Sankey using imputed processing seconds for the same
+  handoff, overlap, validity, cutoff, and =SAME_PRECEDING= partitions.
+- Summed the cached model sample by =SAME_PRECEDING=: 37,917,597 seconds for 1
+  and 51,213,074 seconds for 0. These reconcile to 89,130,671 seconds.
+- Saved the flow totals, added a transparent PNG target, and placed the
+  time-weighted figure beside the count figure in the appendix.
+- Confirmed all 11 flows reconcile, rebuilt and inspected the portrait PDF,
+  and checked the LaTeX log. No test suite was run.
+
+* 2026-10-14 Add a DUR partition Sankey diagram
+
+- Added a Mermaid Sankey that partitions 4,128,486 DURs by handoff type,
+  overlap, validity and the 156.608019-second cutoff, then divides the
+  3,433,218-task model sample by =SAME_PRECEDING=.
+- Added a Dockerized Make target and a transparent PNG, documented the
+  command, and placed the figure in the estimating-potential appendix.
+- Shortened the proportional flows and placed the figure on a portrait
+  appendix page. Rebuilt and inspected the PDF; no test suite was run.
+
+* 2026-10-14 Add a red draft notice above the report title
+
+- Added a red =DRAFT= line above the title on the first page.
+- Rebuilt the PDF and inspected page 1. No test suite was run.
+
+* 2026-10-14 Track the estimating-potential appendix in the PDF target
+
+- Added =src/latex/appendix/estimating_potential.tex= to the Makefile's
+  appendix dependencies. The existing report source already inputs it.
+- Rebuilt the PDF successfully and confirmed LaTeX read the appendix file.
+  No test suite was run.
+
+* 2026-10-14 Render the causal diagram with transparency
+
+- Added =-b transparent= to the Dockerized Mermaid CLI Make target and
+  regenerated =outputs/charts/DUR_detailed.png= as an RGBA image.
+- Rebuilt the report PDF and inspected the diagram page; the =DRAFT=
+  watermark now shows through the diagram background. No test suite was run.
+
+* 2026-10-14 Darken the report draft watermark
+
+- Changed the =DRAFT= watermark lightness from =0.94= to =0.88=.
+- Rebuilt the PDF and inspected a table page to confirm the darker
+  watermark remains behind readable text. No test suite was run.
+
+* 2026-10-14 Reconcile valid and non-intersecting DUR counts
+
+- Added the 54,138 non-intersecting DURs outside the valid table to the
+  model Markdown population table, its standalone table, and the LaTeX
+  cutoff table. Their 3,421,868 imputed seconds are the difference between
+  the existing non-intersecting and valid-DUR totals.
+- Updated the Markdown report generator so the reconciliation persists.
+  Rebuilt and visually checked the PDF; no test suite was run.
+
+* 2026-10-14 Add a draft watermark to the PDF report
+
+- Enabled a faint =DRAFT= watermark on every page through the LaTeX report
+  entry file.
+- Rebuilt the report PDF and inspected pages 1 and 2 to confirm the
+  watermark sits behind readable text and tables. No test suite was run.
+
+* 2026-10-14 Convert the valid-DUR cutoff table to LaTeX
+
+- Replaced the Markdown cutoff table in =reproducing_results.tex= with a
+  captioned LaTeX table, label, and prose reference. Clarified that the
+  excluded group is at or above the 156.608019-second cutoff.
+- Rebuilt the PDF with =make create-task-grouping-analysis=; no test suite
+  was run.
+
+* 2026-10-14 Convert the null-handoff intersection table to LaTeX
+
+- Replaced the Markdown intersection table and =xxxTODO= marker in
+  =reproducing_results.tex= with a captioned LaTeX table. Added a label and
+  referenced it from the preceding paragraph.
+- Rebuilt the PDF with =make create-task-grouping-analysis=. The label
+  resolved and the final build log reported no layout warnings. No tests
+  were run.
+
+* 2026-10-14 Recalculate intersections for null-handoff DURs
+
+- Re-ran the read-only intersection aggregate for =TASK_TYPE = 'DUR'= and
+  =HANDOFF_TYPE IS NULL=. Found 332,599 intersecting tasks totaling
+  16,046,580 imputed seconds (4,457.38 hours) and 3,668,159
+  non-intersecting tasks totaling 181,510,958 seconds (50,419.71 hours).
+  The groups reconcile to 4,000,758 null-handoff DURs and 197,557,538
+  seconds; every selected task had a sequence record.
+- Updated the =test-model-final.md= intersection table and its generator to
+  use this population. Saved the scoped query and table separately so the
+  earlier all-DUR intersection totals remain available.
+
+* 2026-10-14 Add intersecting DUR totals to the model Markdown report
+
+- Added intersecting and non-intersecting task counts and imputed processing
+  seconds/hours to the all-DUR section of =test-model-final.md=, with a link
+  to the read-only intersection query. Updated the report generator so the
+  table persists on regeneration.
+
+* 2026-10-14 Fix the reproducing-results PDF build
+
+- Reproduced the =make create-task-grouping-analysis= failure. XeLaTeX
+  reported =Missing $ inserted= at the source table name in
+  =reproducing_results.tex=.
+- Escaped the underscore before =LIFECYCLE= in the inline =\texttt{}=
+  identifier. Rebuilt the PDF successfully; the handoff-table reference
+  resolved. No test suite was run.
+
+* 2026-10-14 Convert the handoff table in reproducing results to LaTeX
+
+- Replaced the Markdown handoff-type table under the data preliminaries with
+  a captioned LaTeX table, labeled it, and referenced it from the prose.
+- Kept the existing task and duration totals; labeled the missing handoff
+  type as =NULL= to match the queried source. Reviewed the diff without
+  running tests, as requested.
+
+* 2026-10-14 Sum intersecting DUR processing time
+
+- Joined all DUR rows in =MY_RXP_TASKS= to the task-sequence table and used
+  =N_INTERSECTING_TASKS > 0=. Found 343,431 intersecting DURs totaling
+  17,333,579 imputed seconds (4,814.88 hours). The other 3,785,055 DURs
+  total 194,762,039 seconds (54,100.57 hours); no sequence records were
+  missing, and the groups reconcile to all 4,128,486 DURs.
+- Saved the read-only query in =src/sql/dur_processing_time_by_intersection.sql=
+  and the summary in =outputs/tables/dur_processing_time_by_intersection.md=.
+
+* 2026-10-14 Add DUR handoff-type distribution to the model report
+
+- Added the =MY_RXP_TASKS= DUR handoff-type counts and imputed processing
+  seconds/hours, including the null group, to the generated
+  =test-model-final= Markdown report. Updated the standalone table with hours.
+- Verified that the 4,000,758 missing handoff types are SQL nulls; there are
+  no blank handoff types among DUR tasks.
+
+* 2026-10-14 Check handoff types in MY_RXP_TASKS
+
+- Queried the read-only handoff-type distribution. Among 4,128,486 DUR
+  tasks, 127,728 have a populated =HANDOFF_TYPE=: 117,503 pharmacist,
+  6,736 technician, and 3,489 lead follow-ups. All of these have a
+  non-null =HANDOFF_REASON=; valid DUR tasks exclude them because they
+  require =HANDOFF_TYPE IS NULL=.
+- Saved the query in =src/sql/my_rxp_tasks_handoff_type.sql= and the DUR
+  summary in =outputs/tables/my_rxp_tasks_handoff_type.md=.
+
+* 2026-10-14 Sum valid DUR processing time by handoff reason
+
+- Joined =MY_RXP_VALID_DUR_TASKS= to =MY_RXP_TASKS= on user and task because
+  the valid-DUR table does not store =HANDOFF_REASON=.
+- Every valid task had a matching, unique source key and a missing handoff
+  reason. The single group contains 3,614,021 tasks and 178,089,090 imputed
+  seconds (49,469.19 hours).
+- Saved the read-only query in =src/sql/valid_dur_time_by_handoff_reason.sql=
+  and the result in
+  =outputs/tables/valid_dur_processing_time_by_handoff_reason.md=.
+
+* 2026-10-14 Put the DUR breakdown into the counterfactual table
+
+- Reordered the report and standalone comparison tables to show valid DURs
+  below the cutoff, valid DURs at or above it, their valid-DUR total, all
+  DURs below the cutoff, and the all-DUR total as the final row.
+
+* 2026-10-14 Explain the DUR population totals
+
+- Split =MY_RXP_VALID_DUR_TASKS= at the model cutoff. The 3,433,218 valid
+  tasks below it total 89,130,671 seconds; the 180,803 valid tasks at or
+  above it total 88,958,419 seconds.
+- The full-task-table below-cutoff aggregate therefore includes 472,474
+  additional DUR tasks and 15,254,283 additional seconds outside the valid
+  population. Saved the read-only breakdown query as
+  =src/sql/valid_dur_model_p95_breakdown.sql= and explained the different
+  scopes under the comparison table in the model report.
+
+* 2026-10-14 Compare DUR population totals in the counterfactual report
+
+- Queried =MY_RXP_VALID_DUR_TASKS= before the P95 filter: 3,614,021 tasks,
+  178,089,090 imputed seconds (49,469.19 hours), with process dates from
+  2026-02-01 through 2026-08-01. Saved the read-only query as
+  =src/sql/total_valid_dur_processing_time.sql=.
+- Added a three-row population table at the top of the counterfactual section
+  in =test-model-final=, comparing all DURs, all DURs below the model cutoff,
+  and all valid DURs. Saved the table in
+  =outputs/tables/test_model_final_dur_population_totals.md=.
+
+* 2026-10-14 Sum all DUR processing time below the model P95 cutoff
+
+- Applied the model's recorded approximate P95 cutoff, 156.608019 seconds,
+  to all positive imputed DUR durations in =MY_RXP_TASKS=; this cutoff was
+  estimated on the model's eligible sample, not on the full table.
+- A read-only query found 3,905,692 tasks and 104,384,954 imputed seconds
+  (28,995.82 hours), including 19,550 tasks with imputed durations.
+  Process dates span 2026-02-01 through 2026-08-04.
+- Saved the reproducible query as =src/sql/total_dur_below_model_p95.sql=.
+
+* 2026-10-14 Move the cost estimate to the end of the model report
+
+- Moved the same-preceding counterfactual to the final section of the
+  generated =test-model-final= report and stated the dollar calculation
+  explicitly from original and adjusted seconds.
+
+* 2026-10-14 Sum all DUR processing time in MY_RXP_TASKS
+
+- Queried all rows with =TASK_TYPE = 'DUR'= in
+  =EDLDB_DEV.PET_HEALTH_ANALYTICS_SANDBOX.MY_RXP_TASKS=, with no other filters.
+- Found 4,128,486 distinct DUR tasks and 212,095,618 imputed processing
+  seconds (58,915.45 hours). The raw duration sum is 212,076,068 seconds;
+  19,550 null raw durations receive one imputed second each.
+- Retained process dates range from 2026-02-01 through 2026-08-04.
+- Added the full-DUR total and scope to the generated =test-model-final=
+  report, with =src/sql/total_dur_processing_time.sql= and a command to
+  rerun the read-only aggregate. Regenerated the report from its cached
+  model data without another Snowflake extraction.
+- Added the same total and rerun command to the LaTeX model appendix.
+  Rebuilt the PDF, inspected the rendered page, and verified the build log
+  has no layout warnings for the new section.
+
+* 2026-10-14 Compute same-preceding duration counterfactual
+
+** Implementation
+
+- Added =PROCESS_START_TIME= to the cohort-only extract and refreshed its
+  cached data with 3,433,218 retained tasks.
+- Added a reusable log-duration counterfactual calculation. It preserves
+  the first retained task per user-day by process start time, breaks ties by
+  task ID, and applies the fitted =SAME_PRECEDING= duration ratio to later
+  tasks with the indicator equal to zero.
+- Added user-day, user-day/cohort, and cohort Markdown tables and a summary
+  to the =test-model-final= report. Added the first and last retained
+  process dates and priced the modeled time difference at $95 per hour.
+
+** Result and validation
+
+- The scenario adjusts 1,857,289 tasks across 20,655 user-days.
+- Original duration totals 89,130,671.0 seconds; adjusted duration totals
+  87,399,687.5 seconds, a reduction of 480.8 hours (1.94%).
+- Focused counterfactual and model tests passed. The report was regenerated
+  from the refreshed cache.
+
+* 2026-10-14 Rewrite DUR processing-time model appendix
+
+** Implementation
+
+- Replaced the prior Box-Cox MC3/cell model appendix with the
+  =test-model-final= log-duration model results.
+- Added the sample and sequence-indicator distributions, formula and term
+  definitions, numerical procedure, all 39 fixed coefficients, random-effect
+  statistics, and fit statistics including the global intercept.
+- Put the =SAME_FOLLOWING= percentage change at the start of the summary and
+  highlighted rows with significant coefficients in yellow.
+- Removed the Q--Q plots and their accompanying discussion from the appendix.
+- Added the user, parent-part-number, and date random-intercept densities
+  side by side with panel labels, a caption, and a figure reference.
+
+** Validation
+
+- Rebuilt =outputs/reports/pdf/task_grouping_analysis.pdf= with
+  =make create-task-grouping-analysis= and inspected the rendered pages.
+- The LaTeX build reported no overfull boxes; =git diff --check= passed.
+
+* 2026-10-14 Add parent part number random intercept to test-model-final
+
+- Extended the cohort-only SQL extract with =PARENT_PART_NUMBER=, refreshed it
+  from Snowflake, and fitted crossed user, date, and parent-part-number random
+  intercepts in =test-model-final=. The extract has 3,433,218 tasks and 885
+  parent part numbers; no parent part numbers are missing.
+- The REML fit converged. The parent-part-number random-intercept SD is
+  0.169522 (approximate 95% CI [0.160562, 0.178982]). =SAME_PRECEDING= is
+  -0.034871 (95% CI [-0.036552, -0.033189]), an adjusted duration ratio
+  of 0.965730. The global intercept is 3.034533 log seconds.
+- Updated the report, parent-effect data and table, Q–Q and density plots.
+  Visually checked the plots; the parent-part Q–Q plot has a few tail departures.
+  The full suite passed (141 tests), and =git diff --check= passed.
+
+* 2026-10-14 Build test-model-final with cohort-only indicators
+
+- Added =test-model-final= with the same log-duration, no-cell fixed effects,
+  and user/date random intercepts as =test-model-exp=. Its indicators use
+  =COHORT_SEQN= and =COHORT_BATCH_LEN= from the existing cohort-only cache.
+- Compared the two raw caches by =(USER_ID, TASK_ID)=: all 3,433,218 tasks
+  matched, with no duration or control mismatches. The approximate P95
+  metadata differs slightly between extracts, but no retained task differs.
+  =SAME_PRECEDING= differed on 1,430,449 tasks and =SAME_FOLLOWING= on
+  1,429,253 tasks.
+- The fit converged. =SAME_PRECEDING= was -0.037134 (95% CI [-0.038828,
+  -0.035439]) on the log scale, a duration ratio of 0.963547. The
+  =SAME_FOLLOWING= estimate was -0.003052 (95% CI [-0.004747, -0.001358]).
+  The global intercept was 2.919039 log seconds.
+- Generated separate report, data, tables, Q-Q plots, prediction plot, and
+  user/date density plots; visually inspected the date density. The full
+  suite passed (141 tests).
+
+* 2026-10-14 Plot test-model-exp random-intercept densities
+
+- Added separate Altair density plots for the 340 user and 182 date fitted
+  random intercepts, each with one equal-weight value per user or date and a
+  zero reference line. Both PNGs have transparent backgrounds and appear in
+  the =test-model-exp= report and chart index.
+- Regenerated the model and visually inspected both plots. The user density
+  has one broad peak; the date density shows a second positive peak, matching
+  the strong departure in the date Q-Q plot. The focused tests and
+  =git diff --check= passed.
+
+* 2026-10-14 Build test-model-exp with log duration
+
+- Added =test-model-exp= using the same retained cohort-and-pet extract and
+  model specification as =test-model=, with natural log duration in place of
+  the fitted Box-Cox outcome. The new Make target writes separate data,
+  tables, report, and four diagnostic charts, all ignored by Git.
+- The fit converged on 3,433,218 tasks. The =SAME_PRECEDING= coefficient was
+  -0.171335 (95% CI [-0.175693, -0.166977]) on the log scale, an adjusted
+  duration ratio of 0.842539 (15.75% lower). =SAME_FOLLOWING= was 0.000389
+  (95% CI [-0.003998, 0.004775]). The global intercept was 2.904094 log
+  seconds; user and date random-intercept SDs were 0.542884 and 0.088697.
+- The date random-intercept Q-Q plot departs strongly from normality and the
+  residual Q-Q plot curves in both tails. The report notes that its intervals
+  are model-based approximations. The full test suite passed (139 tests).
+
+* 2026-10-14 Report the test-model global intercept
+
+- Recovered the profiled global intercept as the transformed-outcome mean
+  after removing fitted fixed effects and weighted user/date random effects.
+  It is 2.553233 on the Box-Cox scale for reference categories, zero
+  indicator values, and zero random intercepts.
+- Added the estimate and interpretation to the =test-model= report,
+  regenerated the fit, and verified the calculation against row-level
+  residuals. The focused test and =git diff --check= passed.
+
+* 2026-10-14 Build test-model without fixed cells
+
+- Added an empty-cell option to the fitting core. It profiles one global
+  intercept internally and reports zero stratification cells.
+- Added =test-model= with cohort, pet type, weekday, correction, approval
+  channel, and prescription source fixed effects; user and date are random
+  intercepts. It reuses the cohort-and-pet raw extract and preserves those
+  definitions of =SAME_PRECEDING= and =SAME_FOLLOWING=.
+- The fit converged on 3,433,218 tasks, 340 users, and 182 dates.
+  =SAME_PRECEDING= was -0.136583 (95% CI [-0.140013, -0.133153]) and
+  =SAME_FOLLOWING= was 0.000090 (95% CI [-0.003362, 0.003542]) on the
+  Box-Cox scale. User and date random-intercept SDs were 0.420982 and
+  0.070698, respectively.
+- The date random-intercept Q-Q plot departs strongly from normality and the
+  residual Q-Q plot curves in both tails; the report flags the approximation.
+  Synthetic data recovered the treatment coefficient, the full suite passed
+  (137 tests), and the generated report, tables, and four diagnostics exist.
+
+* 2026-10-14 Use cohort-and-pet batches in the user-random model
+
+- The valid-DUR table exposes =COHORT_PET_SEQN= as task position within a
+  cohort-and-pet batch and =COHORT_PET_BATCH_LEN= as its length. The requested
+  =COHORT_PET_BATCH_SEQN= is an intermediate batch identifier, not a source
+  table output column. Used the within-batch position to define
+  =SAME_PRECEDING= and =SAME_FOLLOWING=.
+- Parameterized the shared SQL template's sequence and length fields while
+  retaining the cohort-only defaults for the existing fixed-user model.
+  Added a separate SQL file and raw cache for the user-random variant; its
+  Make target now supports =REDRAW=1=. The generated SQL is ignored by Git.
+- Pulled the new extract from Snowflake and refit 3,433,218 retained tasks.
+  The fit converged: =SAME_PRECEDING= -0.134601 (95% CI [-0.138032,
+  -0.131169]); =SAME_FOLLOWING= 0.002054 (95% CI [-0.001399, 0.005508]).
+  =SAME_PRECEDING= is 1 on 126,838 tasks (3.69%); 1,045 of 2,841 cells
+  (36.78%) have at least two tasks at both indicator values.
+- The full suite passed (136 tests), a focused rerun passed (6 tests), cached
+  redraw succeeded, and generated report, tables, and three diagnostics exist.
+
+* 2026-10-14 Count cells with repeated SAME_PRECEDING values
+
+- Added to the =cohort_user_date_pettype_cell_model= report the number of
+  =(COH, PETTYPE, D)= cells with at least two retained tasks for each
+  =SAME_PRECEDING= value: 1,746 of 2,841 cells (61.46%).
+- Regenerated the report from the shared cache. Both focused tests and
+  =git diff --check= passed.
+
+* 2026-10-14 Describe sequence-indicator distributions in the user-random model
+
+- Added marginal and joint =SAME_PRECEDING=/=SAME_FOLLOWING= tables to the
+  =cohort_user_date_pettype_cell_model= report, using the retained post-P95
+  sample as the denominator.
+- Added the key counts and percentages directly to the report description so
+  they are visible before the tables.
+- Regenerated the report from the shared cache. Of 3,433,218 tasks, 1,557,287
+  (45.36%) have =SAME_PRECEDING= and 1,554,376 (45.27%) have
+  =SAME_FOLLOWING=; 760,093 (22.14%) have both.
+- The focused test passed and =git diff --check= passed.
+
+* 2026-10-14 Name the user-random model cohort_user_date_pettype_cell_model
+
+- Renamed the model module, Make target, test, generated report, tables, user
+  effects data, and chart directory. Its `(COH, PETTYPE, D)` fixed cells and
+  =USER_ID= random intercept are unchanged.
+- Regenerated the report with =make create-cohort-user-date-pettype-cell-model=.
+  The fit converged with the same 3,433,218 tasks and =SAME_PRECEDING=
+  estimate of -0.029587. The focused test passed and =git diff --check= passed.
+
+* 2026-10-13 Add cohort/pet-type/date cells with a user random intercept
+
+** Implementation
+
+- Added a separate model with fixed =(COH, PETTYPE, D)= cells and a
+  =USER_ID= random intercept. The cohort/pet-type/user/date fixed-only model
+  remains available.
+- Reused its valid-DUR extract, strict global P95 filter, Box-Cox outcome,
+  sequence indicators, correction, approval-channel, and prescription-source
+  controls. Date in the cell absorbs weekday.
+- Added =create-cohort-user-date-pettype-cell-model= with a separate report,
+  fixed- and user-effect tables, user-effect data, and user/residual/prediction
+  diagnostics. The generated outputs are ignored by Git.
+
+** Validation
+
+- The target fitted 3,433,218 tasks, 2,841 cells, and 340 users from the
+  shared raw cache and converged. =SAME_PRECEDING= was -0.029587 (95% CI
+  [-0.030922, -0.028252]); =SAME_FOLLOWING= was -0.002348 (95% CI
+  [-0.003683, -0.001013]) on the Box-Cox scale. User random-intercept SD
+  was 0.420278 (95% CI [0.388573, 0.454570]).
+- Synthetic data recovered the treatment coefficient with user as the only
+  random intercept. The full test suite passed: 134 tests.
+- Inspected the generated user Q-Q plot and confirmed report, table, and
+  chart files and =git diff --check=.
+
+* 2026-10-13 Promote process date into fixed cells and remove the date random intercept
+
+** Summary
+
+Replaced the date random intercept with date-specific fixed cells in the
+cohort-by-user model.  Fixed cells are now =(COH, PETTYPE, USER_ID, D)=.
+Weekday contrasts are absorbed by the date cells and omitted. The model has no
+random effects: it is a pure fixed-effects OLS with cell intercepts.
+
+** Changes
+
+- =src/python/fit_mc3_coh_pettype_final_model.py=:
+  - Added =base_fixed_columns= parameter to =build_fixed_effect_design=.
+  - Added =_fit_fixed_only= function for cell-demeaned OLS with no random effects.
+  - Updated =_cross_products= to handle empty =random_columns= (empty Z matrices).
+  - Relaxed =fit_final_model= to accept =random_columns=()= and branch to the
+    fixed-only path; replaced the hard =random_columns= nonempty check.
+  - Widened =FinalModelResult.random_sds= type from 3-tuple to variable-length.
+- =src/python/fit_cohort_user_date_model.py=:
+  - Changed =CELL_COLUMNS= to =(coh, pettype, user_id, d)=.
+  - Set =BASE_FIXED_COLUMNS= to =TREATMENT_COLUMNS= only (no weekday).
+  - Passed =random_columns=()= to =fit_final_model=.
+  - Removed date-effect outputs, date Q-Q diagnostics, and date table.
+  - Rewrote the report formula: no =h_d=, no weekday sum, documented absorption.
+- =tests/test_fit_cohort_user_date_model.py=:
+  - Updated to test fixed-only path with zero random columns.
+  - Asserted no weekday terms, no date random intercept, and correct formula.
+
+** Validation
+
+- =make create-cohort-user-date-model REDRAW=1= succeeded from existing cache.
+- Converged: True (OLS, no optimization needed).
+- 3,433,218 tasks, 139,104 cells (COH × PETTYPE × USER_ID × D).
+- =SAME_PRECEDING= estimate: -0.029075 (95% CI [-0.030394, -0.027755]).
+- =SAME_FOLLOWING= estimate: -0.001206 (95% CI [-0.002526, 0.000114]);
+  this interval includes zero.
+- Conditional R²: 0.362, residual SD: 0.592.
+- No weekday or date random terms in fixed effects or variance components.
+- Residual Q-Q and predicted-vs-outcome charts written; obsolete generated
+  date-random-effect artifacts removed.
+- 133 tests passed; MC3 model tests unchanged.
+- =git diff --check= clean.
+
+* 2026-10-13 Add PETTYPE as a categorical fixed effect to the cohort-by-user/date model
+
+** Summary
+
+Added =PETTYPE= as a categorical fixed main effect to the cohort-by-user/date
+mixed-effects model.  The MC3/COH/PETTYPE model and its tests are unchanged.
+
+** Changes
+
+- =src/sql/cohort_user_date_model.sql.j2=: added =PETTYPE::VARCHAR= to the
+  base CTE and the final SELECT.
+- =src/python/fit_mc3_coh_pettype_final_model.py=: parameterized
+  =build_fixed_effect_design= with an optional =categorical_effects= keyword
+  argument, defaulting to the existing =(approval_channel, prescription_source)=.
+- =src/python/fit_cohort_user_date_model.py=:
+  - Defined =CATEGORICAL_EFFECTS = ("approval_channel", "prescription_source",
+    "pettype")= and passed it to =build_fixed_effect_design=.
+  - Removed =pettype= from the dummy-column list in =prepare_frame=.
+  - Updated the report formula to include a pet-type summation
+    ($\psi_t$ contrasts), reference level, and contrast-level listing.
+- =tests/test_fit_cohort_user_date_model.py=: added =pettype= to the simulated
+  frame with Dog/Cat/Bird levels and pet-type effects; asserted =PETTYPE::VARCHAR=
+  in SQL, =pettype= in design references, >=2 PETTYPE contrast labels, and
+  pet-type documentation in the report.
+
+** Validation
+
+- Fresh Snowflake extract pulled 3,433,218 tasks with =PETTYPE= from
+  =MY_RXP_VALID_DUR_TASKS=.
+- =make create-cohort-user-date-model REDRAW=1= succeeded from the refreshed cache.
+- Model converged (=True=), conditional R-squared 0.304, REML NLL 3,155,135.8.
+- 8 PETTYPE contrasts versus =Dog= reference; 7 of 8 significant at 95%.
+- All 3 diagnostic charts written (date Q-Q, residual Q-Q, predicted vs outcome).
+- 133 tests passed; both the MC3 and cohort-by-user/date suites green.
+- =git diff --check= clean.
+
+* 2026-10-13 Repair random-effects model appendix
+
+** Summary
+
+- Removed accidentally duplicated model prose and tables embedded inside an
+  unfinished variance-components longtable.
+- Kept the revised section heading and introduction, then restored the intact
+  model details and results from the last committed version.
+
+** Validation
+
+- The PDF build changed from a LaTeX LR-mode error to a successful 15-page PDF.
+- Confirmed the variance-component values and diagnostics appear in the PDF;
+  the LaTeX log has no warnings or overfull boxes.
+
+* 2026-10-13 Track reproducing results in the PDF target
+
+** Summary
+
+- Added =src/latex/appendix/reproducing_results.tex= to the Make target's
+  appendix dependencies, matching the existing input in =main.tex=.
+
+** Validation
+
+- =make create-task-grouping-analysis= rebuilt the 17-page PDF successfully.
+- The LaTeX log has no warnings or overfull boxes.
+
+* 2026-10-13 Rename LaTeX entry file to main.tex
+
+** Summary
+
+- Renamed the report entry file to =src/latex/main.tex= and updated the Make
+  target's source and intermediate PDF path. The published PDF path is unchanged.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded and produced the 17-page PDF.
+- The new LaTeX log has no warnings or overfull boxes.
+
+* 2026-10-13 Add labeled analysis repository reference
+
+** Summary
+
+- Added the analysis repository URL to the LaTeX References list with the
+  stable label =ref:analysis-repository=.
+
+** Validation
+
+- Rebuilt the PDF successfully; the LaTeX log has no warnings or overfull boxes.
+
+* 2026-10-13 Add labeled confounding reference
+
+** Summary
+
+- Added the Confounding Wikipedia page to the LaTeX References list with the
+  stable label =ref:confounding= for cross-references in the appendix.
+
+** Validation
+
+- Rebuilt the PDF successfully; the LaTeX log has no warnings or overfull boxes.
+
+* 2026-10-13 Add confidence intervals to cohort user comparison
+
+** Summary
+
+- Added 95% two-sided Student t confidence intervals for each matched-user
+  allocation-pattern mean and each paired mean difference in the appendix.
+- Retained the existing 95% one-sided upper bounds and test results.
+
+** Validation
+
+- Rebuilt the PDF and inspected both affected pages; the tables fit without
+  clipping, and the LaTeX log has no warnings or overfull boxes.
+
+* 2026-10-13 Rename statistics comparison analysis artifacts
+
+** Summary
+
+- Renamed the task-level and user-level Python modules, tests, SQL sources,
+  cached data, four Markdown reports, eight figures, and four Make targets
+  under the =stats-comparison= naming convention.
+- Updated imports, documentation, chart paths, and LaTeX figure references.
+- Preserved the existing chart content and analysis results.
+
+** Validation
+
+- All four renamed Make targets completed with =REDRAW=1=.
+- The full test suite passed (130 tests).
+- Rebuilt the PDF and inspected its four-figure grid; the LaTeX log has no
+  warnings or overfull boxes.
+
+* 2026-10-13 Regenerate transparent user-level cohort density plots
+
+** Summary
+
+- Confirmed the user-level chart generator already uses the shared transparent
+  background setting; its four PNGs were older than that styling change.
+- Added a regression assertion for transparent chart and view backgrounds.
+- Regenerated all four PNGs from cached user-level data with the one-sided
+  redraw target and refreshed the PDF that embeds them.
+
+** Validation
+
+- The focused test file passed (7 tests).
+- Checked that each PNG has an alpha channel and a fully transparent corner.
+- Inspected the rebuilt PDF's 2-by-2 grid; the beige background is gone.
+
+* 2026-10-13 Add cohort user one-sided comparison to appendix
+
+** Summary
+
+- Converted the existing user-level one-sided analysis into a separate LaTeX
+  appendix subsection with a 2-by-2 grid of the four cohort density plots.
+- Preserved the cohort summary statistics, paired-test results, methodology,
+  limitations, and SQL query in the report.
+- Added the new source file and four plot dependencies to the PDF Make target.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded and produced a 16-page PDF.
+- Inspected pages 15 and 16; figures, tables, SQL, and References fit without
+  splits or clipping. The LaTeX log has no warnings or overfull boxes.
+- =git diff --check= passed.
+
+
+* 2026-10-13 Redraw prescription-source and approval-channel figures
+
+** Summary
+
+- Updated both chart generators to use transparent backgrounds and add
+  per-category task count, median, average, and standard-deviation tables.
+- Removed task-count text from boxplot category labels and regenerated all
+  eight cohort PNGs from cached Parquet data with =REDRAW=1=.
+
+** Validation
+
+- Focused tests passed (10 tests); the full suite passed (130 tests).
+- Confirmed all eight PNGs have alpha channels.
+- Rebuilt the 14-page PDF and visually inspected pages 7 and 8; the charts
+  have white page backgrounds and their tables fit within the figure boxes.
+
+* 2026-10-13 Insert prescription-source and approval-channel charts
+
+** Summary
+
+- Replaced both remaining DUR-factors TODOs with 2-by-2 boxed grids for
+  prescription source and approval channel across Cohorts 1--4.
+- Added numbered captions, labels, in-text references, and all eight chart
+  dependencies to the PDF Make target.
+- Restored the existing model section's link to the DUR-factors subsection.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded and produced a 14-page PDF.
+- Inspected PDF pages 7 and 8; both grids and captions fit.
+- Confirmed no remaining TODOs in =dur_factors.tex=, LaTeX warnings, or
+  overfull boxes.
+
+* 2026-10-13 Insert detailed DUR causal graph
+
+** Summary
+
+- Replaced the Causal Graph TODO with the existing detailed DUR diagram.
+- Added a boxed, full-width figure with a numbered caption and in-text reference.
+- Added the PNG to the PDF Make dependencies and kept the following subsection
+  heading with its text.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded.
+- Inspected PDF pages 2 and 3; the graph and subsequent figures fit.
+- Confirmed no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add compact report title and date
+
+** Summary
+
+- Added a small navy Task Grouping Analysis title above the author byline.
+- Added the build date directly below the author and set the PDF title metadata.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded; the PDF remains 13 pages.
+- Inspected page 1 and verified title, author, date, and PDF metadata.
+- Confirmed no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Show Mehmet Yunt as report author
+
+** Summary
+
+- Added a visible author byline before the report sections.
+- Set the PDF author metadata to Mehmet Yunt.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded; the PDF remains 13 pages.
+- Inspected page 1 and confirmed the byline displays above Executive Summary.
+- Verified the PDF Author metadata and found no LaTeX warnings.
+
+* 2026-10-13 Add references at the end of the report
+
+** Summary
+
+- Added a numbered References section after the Appendix.
+- Listed the existing linked internal analysis and the JD Wright
+  conversation credited in the cohort-definitions subsection.
+- Did not add unsupported publication details.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded and produced a 13-page PDF.
+- Inspected the final page; the heading and both entries render cleanly.
+- Confirmed no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add appendix-only table of contents
+
+** Summary
+
+- Added a local contents list beneath the Appendix heading with subsection
+  and subsubsection entries and page numbers.
+- Kept the front-matter sections out of this appendix list.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded and produced a 12-page PDF.
+- Inspected the rendered first page and confirmed the appendix entries and
+  page numbers appear beneath the heading.
+- Confirmed no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add correction figures to Alterations/Corrections
+
+** Summary
+
+- Replaced both TODOs with 2-by-2 boxed grids for correction-field counts
+  and correction-field names, using the eight existing cohort charts.
+- Added numbered captions, labels, in-text references, and PDF Make
+  dependencies for each chart.
+- Used the existing =correction-field-analysis= directory for the second grid.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded with resolved references.
+- Inspected PDF pages 4 and 5; both four-chart grids and captions fit.
+- Confirmed no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add correction-field-count chart summary tables
+
+** Summary
+
+- Applied the PETTYPE-style bottom statistics table to all four
+  correction-field-count cohort charts.
+- Removed task-count annotations from plot labels and redrew the transparent
+  PNGs from cached data; updated the chart README and focused tests.
+
+** Validation
+
+- =.venv/bin/pytest tests/test_create_correction_field_analysis.py tests/test_create_ncorrection_fields_analysis.py= passed (11 tests).
+- =make create-ncorrection-fields-analysis REDRAW=1= generated all four PNGs.
+- Confirmed each PNG has an alpha channel.
+
+* 2026-10-13 Add correction-field summary tables and transparent backgrounds
+
+** Summary
+
+- Enabled the shared PETTYPE-style statistics table for each correction-field
+  cohort chart, with task count, median, average, and standard deviation.
+- Removed task-count annotations from category labels and redrew all four PNGs
+  from cached data with transparent chart and view backgrounds.
+- Updated the chart README and its focused tests.
+
+** Validation
+
+- =.venv/bin/pytest tests/test_create_correction_field_analysis.py= passed.
+- =make create-correction-field-analysis REDRAW=1= generated all four PNGs.
+- Confirmed each PNG has an alpha channel and inspected Cohort 1.
+
+* 2026-10-13 Fit cohort and part-number figures on the preceding page
+
+** Summary
+
+- Removed the page break before Cohort and Part Number.
+- Reduced its two boxed figures to half-width, equal-height panels so both
+  appear below Pharmacist Performance on page 2.
+- Kept Pet Type on the following page.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded; the PDF is nine pages.
+- Inspected page 2 and confirmed Figures 3 and 4 and their captions fit.
+- Confirmed no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add cohort and part-number figures to DUR factors
+
+** Summary
+
+- Replaced both Cohort and Part Number TODOs with the existing task-level
+  cohort and part-number-level mean duration boxplots.
+- Added numbered captions, in-text references, and both PNG dependencies to
+  the PDF Make target.
+- Kept the Pet Type heading and its chart grid together on the following page.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded with resolved references.
+- Inspected PDF pages 3 and 4; there are no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Keep PETTYPE figures with their subsection
+
+** Summary
+
+- Placed the Pet Type heading, text, and four-chart grid together on one page.
+- Made the grid non-floating so later subsection headings cannot precede it.
+- Corrected the undefined Pet Type heading command.
+
+** Validation
+
+- Rebuilt the nine-page PDF and inspected page 3.
+- Confirmed Figures 3--6 follow Pet Type and precede Alterations, with no
+  LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add PETTYPE cohort figures to DUR factors
+
+** Summary
+
+- Replaced the Pet Type TODO with a boxed 2-by-2 grid of cohort charts.
+- Added one numbered caption and label per chart, in-text references, and all
+  four PNG dependencies to the PDF Make target.
+- Preserved the surrounding DUR factors text and other appendix edits.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded.
+- Inspected the rendered grid on PDF page 3; all four captions and figures fit.
+- Confirmed the four references resolve with no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add PETTYPE chart statistics tables
+
+** Summary
+
+- Redrew the four PETTYPE boxplots with transparent backgrounds and plain
+  category labels, without the pipe/task-count annotations.
+- Added a bottom table for each chart with task count, median, average, and
+  sample standard deviation by PETTYPE and for the whole cohort.
+- Kept the shared boxplot renderer's existing behavior for other analyses.
+
+** Validation
+
+- =make create-pettype-analysis REDRAW=1= regenerated all four charts from cache.
+- Focused PETTYPE and initiation-channel tests passed; inspected a rendered
+  chart and verified the PNGs contain alpha channels.
+
+* 2026-10-13 Default new chart PNGs to transparent backgrounds
+
+** Summary
+
+- Updated the plotting preference and shared Altair background color to
+  transparent. Existing PNGs were left unchanged.
+
+** Validation
+
+- Rendered a sample chart and confirmed its PNG contains transparent pixels.
+
+* 2026-10-13 Put table captions below motivating example tables
+
+** Summary
+
+- Moved both numbered table captions below their side-by-side tables.
+- Added spacing under the shorter table so the captions align.
+- Preserved the current narrative text and table data.
+
+** Validation
+
+- Rebuilt the PDF and inspected the first page for caption placement.
+- Confirmed the table references still resolve and there are no LaTeX warnings.
+
+* 2026-10-13 Place motivating example tables side by side
+
+** Summary
+
+- Converted the two short sequence tables from =longtable= to 8 pt =tabular=
+  inside adjacent minipages.
+- Added numbered table captions, labels, and references in the narrative.
+- Kept all 25 data rows and the surrounding analysis text.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded with no LaTeX warnings.
+- Compared all 25 table rows with the committed version; values are unchanged.
+- Inspected the rendered first page for legibility and clipping.
+
+* 2026-10-13 Equalize DUR factor figure frames
+
+** Summary
+
+- Gave both side-by-side charts equal-width, equal-height boxed frames.
+- Kept each source image's aspect ratio and the existing captions and references.
+
+** Validation
+
+- Rebuilt the PDF and inspected the chart page; frames and captions align.
+- Confirmed there are no LaTeX warnings or overfull boxes.
+
+* 2026-10-13 Add captions and references to DUR factor charts
+
+** Summary
+
+- Added numbered captions and stable labels to both side-by-side charts.
+- Referenced Figures 1 and 2 from the surrounding text.
+- Loaded the reusable caption package with its minipage anchor warning disabled.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded with resolved references.
+- Inspected the rendered chart page; no clipping or LaTeX warnings remain.
+
+* 2026-10-13 Place DUR factor charts side by side
+
+** Summary
+
+- Arranged the two boxed charts in top-aligned, half-width minipages.
+- Preserved the surrounding explanatory text.
+- Corrected the second image reference to the existing all-cohorts scatter
+  chart and removed a stray character after the image command.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded.
+- Inspected the rendered chart page for alignment and clipping.
+
+* 2026-10-13 Insert requested DUR factor charts
+
+** Summary
+
+- Replaced both =xxxTODO Codex= markers in =dur_factors.tex= with boxed,
+  half-width charts.
+- Added the appendix file and both charts to the PDF target dependencies.
+- After review, corrected the second figure to the available all-cohorts
+  median scatter matrix, which addresses the cross-cohort comparison.
+
+** Validation
+
+- =make create-task-grouping-analysis= produced a nine-page portrait PDF.
+- Inspected the page with both charts and found no clipping or LaTeX warnings.
+- Confirmed edits to =dur_factors.tex= trigger a Make rebuild.
+
+* 2026-10-13 Split Appendix subsections into LaTeX inputs
+
+** Summary
+
+- Moved each of the three Appendix subsections into its own file under
+  =src/latex/appendix= and included them from the main report.
+- Added all three files as dependencies of the PDF Make target.
+- Preserved the existing LaTeX content without using Markdown generation.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded; the PDF text is unchanged
+  from the pre-split build.
+- Confirmed Make rebuilds when an Appendix input changes and inspected the
+  rendered first page.
+
+* 2026-10-13 Repair LaTeX report build
+
+** Summary
+
+- Removed an accidentally pasted block nested in row 12 of the later sequence
+  table and restored the row's original cells.
+- Restored the interrupted sentence in the Cohort 2 paragraph.
+- Preserved the other LaTeX edits; no Markdown regeneration was used.
+
+** Validation
+
+- =make create-task-grouping-analysis= succeeded and produced an eight-page
+  portrait PDF in =outputs/reports/pdf=.
+- Inspected rendered pages and confirmed the LaTeX log has no warnings or
+  overfull boxes.
+- Ran =git diff --check=.
+
+* 2026-10-13 Make LaTeX the report source of truth
+
+** Summary
+
+- Removed Markdown-to-LaTeX generation from the report Make target.
+- The PDF now depends directly on the existing LaTeX document and shared style.
+- Left the LaTeX document and Markdown file untouched.
+
+** Validation
+
+- Dry-ran =make create-task-grouping-analysis= and confirmed it invokes only
+  the LaTeX compiler and PDF copy steps when a rebuild is needed.
+- Did not rebuild the PDF or edit the LaTeX document while the user was
+  making changes to it.
+
+* 2026-10-13 Reduce bullet-list indentation
+
+** Summary
+
+- Set bulleted-list left margins to 1.5 em per level, with a 0.4 em gap
+  between bullet and text, in the reusable report style.
+
+** Validation
+
+- Rebuilt the portrait PDF and inspected top-level and nested lists.
+
+* 2026-10-13 Reduce empty space in the task grouping report
+
+** Summary
+
+- Moved constant sequence fields and timestamp suffixes into notes so the two
+  sequence tables fit upright without dropping row data.
+- Shortened repeated fixed-effect term prefixes with an explicit legend; the
+  full seven-column table now fits upright.
+- Tightened margins, lists, paragraphs, headings, and display-math gaps in the
+  reusable style. Kept 10 pt body text, 8 pt tables, left line numbers, and
+  half-width boxed figures.
+- Kept table headings with at least the first several rows using =needspace=.
+
+** Validation
+
+- Ran =make create-task-grouping-analysis=: 7 portrait pages instead of 10.
+- Compared 25 sequence rows and 27 fixed-effect rows against the committed
+  Markdown; all row values were preserved.
+- Inspected all PDF pages, confirmed no LaTeX warnings or overfull boxes, and
+  ran =git diff --check=.
+
+* 2026-10-13 Number report section headings
+
+** Summary
+
+- Enabled Pandoc's hierarchical section numbering for the report.
+- Updated the reusable style so paragraph and subparagraph headings display
+  their numbers too.
+
+** Validation
+
+- Rebuilt the PDF and inspected numbered headings on the title and appendix
+  pages.
+
+* 2026-10-13 Extract reusable LaTeX formatting
+
+** Summary
+
+- Moved the font, navy headings, margins, table size, line numbers, and framed
+  figures into =src/latex/rxp_report.sty=.
+- Kept the report-specific header as a one-line package import and the 10 pt
+  document-class option in the Make target.
+- Added the style file to the Make dependencies.
+
+** Validation
+
+- Rebuilt and inspected the portrait PDF.
+
+* 2026-10-13 Update report typography
+
+** Summary
+
+- Set the LaTeX document to 10 pt and all longtable text to 8 pt.
+- Changed the visible report title and section headings to navy blue.
+
+** Validation
+
+- Rebuilt and inspected the portrait PDF.
+
+* 2026-10-13 Align report support paths with task grouping analysis
+
+** Summary
+
+- Moved the Markdown source to =task_grouping_analysis/progress.md=.
+- Renamed the LaTeX header and Pandoc Lua filter to use the
+  =task_grouping_analysis= prefix and updated the Make dependencies.
+- Left editor autosave and lock files in the old =progress_report/= directory.
+
+** Validation
+
+- Ran =make create-task-grouping-analysis= using the renamed source files.
+- Confirmed that the 10-page portrait PDF remains current.
+
+* 2026-10-13 Rename and restyle the task grouping analysis report
+
+** Summary
+
+- Renamed the generated LaTeX source to =src/latex/task_grouping_analysis.latex=,
+  the Make target to =create-task-grouping-analysis=, and the generated PDF to
+  =outputs/reports/pdf/task_grouping_analysis.pdf=.
+- Used Carlito for report text as a close substitute for the reference PDF's
+  Calibri, which is not installed locally, and colored all section headings
+  medium gray.
+- Rendered the deepest Markdown headings as block headings so their gray style
+  and position remain consistent before tables and figures.
+- Moved the superseded generated PDF into the ignored build directory.
+
+** Validation
+
+- Ran =make create-task-grouping-analysis= successfully.
+- Confirmed that the new PDF embeds Carlito and inspected portrait text and
+  figure pages with gray headings.
+- Confirmed no LaTeX errors or overfull boxes in the final build.
+
+* 2026-10-13 Number report lines and frame figures
+
+** Summary
+
+- Added continuous line numbers in the left margin of the LaTeX report.
+- Framed all five embedded diagnostic figures and reduced each to half the
+  text width.
+
+** Validation
+
+- Ran =make create-progress-report=; the PDF has 10 portrait pages.
+- Inspected the line numbers, rotated table, and figure pages after rendering.
+- Checked the LaTeX log for errors and overfull boxes.
+
+* 2026-10-13 Set the LaTeX report to portrait
+
+** Summary
+
+- Changed the report build to portrait letter pages.
+- Rotated the two sequence tables together and the fixed-effects table while
+  leaving the remaining content upright.
+- Shortened the comparison-table headings in the PDF so the table fits on a
+  portrait page; the Markdown source remains unchanged.
+
+** Validation
+
+- Ran =make create-progress-report=; the PDF has 12 portrait pages.
+- Checked the LaTeX log for errors and overfull boxes and inspected the
+  rendered table and chart pages.
+- Ran =git diff --check=.
+
+* 2026-10-13 Convert the progress report to LaTeX
+
+** Summary
+
+- Added a Pandoc-generated LaTeX document under =src/latex/= for
+  =progress_report/progress.md=, including its equations, tables, links, and
+  diagnostic plots.
+- Added =make create-progress-report= to refresh the LaTeX source and build a
+  landscape PDF under =outputs/reports/pdf/=.
+- Kept LaTeX build files and the new generated PDF out of Git.
+
+** Validation
+
+- Ran =make create-progress-report= successfully; the PDF has 13 pages.
+- Checked the LaTeX log for errors and overfull boxes and inspected rendered
+  pages with the sequence tables, fixed-effect table, and diagnostic plots.
+- Ran =git diff --check=.
+
 * 2026-10-01 Consolidate the final mixed-effects model
 
 ** Summary
@@ -757,3 +2056,85 @@ table.
 - Visually inspected the weekday and shift charts; weekday order and all five
   cell metrics render clearly.
 - Ran =git diff --check=: passed.
+* 2026-10-13 Add cohort-by-user mixed-effects model
+
+** Implementation
+
+- Added a separate valid-DUR SQL extract using =COHORT_SEQN= and
+  =COHORT_BATCH_LEN= for preceding/following indicators. The existing
+  consecutive-task and one-hour-break rules remain in the source table.
+- Parameterized the mixed-model fitting core for fixed-cell and random-effect
+  columns. Eliminated cell means before the dense random-effect solve so the
+  1,394 cohort/user cells do not require a 1,394-square factorization.
+- Added a separate Make target, raw and transformed data caches, Markdown
+  tables and report, and date, residual, and prediction diagnostics. These
+  generated artifacts are ignored by Git. The existing MC3 SQL, report, and
+  PDF were not edited.
+
+** Validation
+
+- The full suite passed: 133 tests. The synthetic test recovered a
+  =SAME_PRECEDING= coefficient of -0.30 within 0.07, with date as the only
+  random intercept.
+- =make create-cohort-user-date-model= downloaded 3,433,218 task rows from
+  Snowflake and converged. =REDRAW=1= succeeded from its own raw cache.
+- The fitted =SAME_PRECEDING= coefficient was -0.028938 (95% CI
+  [-0.030267, -0.027609]) on the Box-Cox scale; the =SAME_FOLLOWING=
+  placebo was -0.001795 (95% CI [-0.003124, -0.000466]). Date SD was
+  0.073150 (95% CI [0.065830, 0.081283]).
+- Inspected all three PNG diagnostics and confirmed generated files and report
+  links. The date-intercept Q-Q plot deviates markedly from normality; the
+  report flags this and the residual-tail curvature as inference limitations.
+- =git diff --check= passed.
+
+** Clarification
+
+- Clarified in the generated report that the paired t-test is observational
+  too, and neither analysis identifies a causal effect. The three new tests
+  passed, and the report was regenerated with =REDRAW=1=.
+
+* 2026-10-13 Add pet type to the cohort-by-user/date model
+
+** Implementation
+
+- Added =PETTYPE= to the model-specific Snowflake extract and made it a
+  categorical fixed main effect. The `(COH, USER_ID)` cells and date-only
+  random intercept remain unchanged.
+- Parameterized the shared fixed-effect design's categorical columns; the
+  existing MC3 model retains its original defaults.
+- Added pet-type contrasts, Dog as the fitted reference, and the updated
+  formula to the cohort-by-user report.
+
+** Validation
+
+- The full test suite passed: 133 tests. After the report wording adjustment,
+  eight focused model tests passed.
+- A fresh Snowflake extraction produced 3,433,218 cached rows including
+  =PETTYPE=. The Cortex invocation stalled after downloading the cache, so
+  the fit was completed and verified locally with =REDRAW=1=.
+- The updated fit converged. =SAME_PRECEDING= was -0.028874 (95% CI
+  [-0.030201, -0.027547]) on the Box-Cox scale. The report and fixed-effect
+  table contain eight pet-type contrasts against Dog, including Cat 0.104194
+  (95% CI [0.102216, 0.106172]).
+- Confirmed the date, residual, and prediction charts and =git diff --check=.
+
+* 2026-10-13 Use cohort/pet-type/user fixed cells
+
+** Implementation
+
+- Changed the additional model's fixed cells from =(COH, USER_ID)= to
+  =(COH, PETTYPE, USER_ID)= and removed the separate pet-type main effect.
+  Date remains the only random intercept; the other controls are unchanged.
+- Updated the model formula, report labels, diagnostics README, and synthetic
+  tests. The existing MC3 model and PDF remain unchanged.
+
+** Validation
+
+- Refit with =make create-cohort-user-date-model REDRAW=1= using the cache
+  refreshed for the prior task. The 3,433,218-task model converged with
+  4,561 observed fixed cells and no standalone =PETTYPE= coefficient.
+- =SAME_PRECEDING= was -0.028742 (95% CI [-0.030068, -0.027416]) on the
+  Box-Cox scale; =SAME_FOLLOWING= was -0.001445 (95% CI
+  [-0.002771, -0.000118]).
+- All 133 tests passed. Confirmed the regenerated fixed-effect table,
+  date/residual/prediction diagnostics, and =git diff --check=.

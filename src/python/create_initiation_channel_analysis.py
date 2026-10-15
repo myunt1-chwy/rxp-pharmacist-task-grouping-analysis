@@ -113,6 +113,8 @@ def boxplot_chart(
     grouping_column: str = "initiation_channel",
     grouping_title: str = "Initiation channel",
     sort_categories_by_count: bool = False,
+    show_task_count_labels: bool = True,
+    show_statistics_table: bool = False,
 ) -> alt.Chart:
     """Create one horizontal boxplot chart for a cohort and grouping field."""
     chart_frame = normalize_frame(frame.loc[frame["coh"] == cohort])
@@ -150,11 +152,18 @@ def boxplot_chart(
                 "q3": durations.quantile(0.75),
                 "p95": durations.quantile(0.95),
                 "task_count": len(durations),
+                "average": durations.mean(),
+                "stddev": durations.std(),
             }
         )
     category_summary = pd.DataFrame(summaries)
     category_summary["category_label"] = category_summary.apply(
-        lambda row: f"{row['plot_category']} | Tasks: {row['task_count']:,}", axis=1
+        lambda row: (
+            f"{row['plot_category']} | Tasks: {row['task_count']:,}"
+            if show_task_count_labels
+            else row["plot_category"]
+        ),
+        axis=1,
     )
     median_half_width = max(
         (
@@ -206,7 +215,11 @@ def boxplot_chart(
     boxplots = (whiskers + boxes + medians).properties(
         title=alt.TitleParams(
             f"DUR duration boxplots by {grouping_title.lower()} — {cohort}",
-            subtitle=f"{len(chart_frame):,} filtered DUR tasks; boxes show IQR and whiskers show the 5th–95th percentiles",
+            subtitle=(
+                f"{len(chart_frame):,} filtered DUR tasks; "
+                if show_task_count_labels
+                else ""
+            ) + "boxes show IQR and whiskers show the 5th–95th percentiles",
             anchor="start",
         ),
         width=1200,
@@ -223,11 +236,49 @@ def boxplot_chart(
         )
         .properties(width=380, height=chart_height)
     )
-    return (
-        alt.hconcat(label_panel, boxplots)
-        .resolve_scale(y="shared")
-        .configure(background=FIGURE_BACKGROUND)
-        .configure_view(stroke=None, fill=FIGURE_BACKGROUND)
+    plot = alt.hconcat(label_panel, boxplots).resolve_scale(y="shared")
+    if show_statistics_table:
+        category_summary["task_count_label"] = category_summary["task_count"].map(
+            lambda value: f"{value:,}"
+        )
+        for value_column, label_column in (
+            ("median", "median_label"),
+            ("average", "average_label"),
+            ("stddev", "stddev_label"),
+        ):
+            category_summary[label_column] = category_summary[value_column].map(
+                lambda value: f"{value:,.1f}" if pd.notna(value) else "—"
+            )
+        table_height = max(120, len(category_order) * 30)
+        columns = []
+        for title, field, width in (
+            (grouping_title, "plot_category", 380),
+            ("Tasks", "task_count_label", 300),
+            ("Median (s)", "median_label", 300),
+            ("Average (s)", "average_label", 300),
+            ("Std. dev. (s)", "stddev_label", 300),
+        ):
+            columns.append(
+                alt.Chart(category_summary)
+                .mark_text(align="left", fontSize=18)
+                .encode(
+                    x=alt.value(4),
+                    y=alt.Y("plot_category:N", sort=category_order, axis=None),
+                    text=alt.Text(f"{field}:N"),
+                )
+                .properties(
+                    width=width,
+                    height=table_height,
+                    title=alt.TitleParams(title, anchor="start", fontSize=18),
+                )
+            )
+        plot = alt.vconcat(
+            plot,
+            alt.hconcat(*columns, spacing=0),
+            spacing=30,
+        ).resolve_scale(y="independent")
+    return plot.configure(background=FIGURE_BACKGROUND).configure_view(
+        stroke=None, fill=FIGURE_BACKGROUND
     )
 
 

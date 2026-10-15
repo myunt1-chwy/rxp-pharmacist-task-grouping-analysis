@@ -1,0 +1,27 @@
+---
+config:
+  flowchart:
+    wrappingWidth: 260
+    nodeSpacing: 30
+    rankSpacing: 35
+  themeVariables:
+    fontSize: 20px
+---
+flowchart TD
+    A["Retained model tasks"] --> B["Group by user, process date, and cohort"]
+    B --> C["Sort all tasks by process start time,<br/>then task ID"]
+
+    C --> D["First task in each group"]
+    D --> E["Keep original duration"]
+
+    C --> F["All later tasks in the group"]
+    F --> G{"SAME_PRECEDING = 0?"}
+    G -- Yes --> H["$$\\text{duration}\\times\\exp(\\beta_P)$$"]
+    G -- No --> I["Keep original duration"]
+
+    E --> J["Add original and scenario durations<br/>to user-day-cohort totals"]
+    H --> J
+    I --> J
+    J --> K["Sum by user-day, cohort, and dataset"]
+    K --> L["Hours saved =<br/>(original − scenario seconds) / 3,600"]
+    L --> M["Implied labor value = hours saved × $90"]

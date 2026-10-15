@@ -107,6 +107,8 @@ def boxplot_chart(frame: pd.DataFrame, cohort: str):
         cohort,
         grouping_column="initiation_channel",
         grouping_title="PETTYPE",
+        show_task_count_labels=False,
+        show_statistics_table=True,
     )
 
 
@@ -117,7 +119,7 @@ def write_markdown(chart_files: list[tuple[str, str]]) -> Path:
         "Valid DUR tasks are selected from `MY_RXP_VALID_DUR_TASKS` for Cohorts 1–4.",
         "Durations at or above the global approximate 95th percentile are excluded.",
         "Null or blank `PETTYPE` values are shown as `<Missing>`.",
-        "Each chart contains a horizontal boxplot for every PETTYPE plus a final `Whole cohort` reference boxplot. Labels show filtered task counts, and dark-red lines show medians.",
+        "Each transparent-background chart contains a horizontal boxplot for every PETTYPE plus a final `Whole cohort` reference boxplot. A table below gives filtered task counts, medians, averages, and standard deviations in seconds; dark-red lines show medians.",
         "Cached task-level data is stored at `outputs/data/pettype-analysis.parquet` for redraw-only runs.",
         "",
     ]

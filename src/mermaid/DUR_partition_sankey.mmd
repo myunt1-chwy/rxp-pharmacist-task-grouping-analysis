@@ -1,0 +1,31 @@
+---
+config:
+  themeVariables:
+    fontSize: 24px
+  sankey:
+    width: 1500
+    height: 600
+    showValues: false
+    linkColor: source
+    nodeAlignment: left
+    labelStyle: outlined
+    nodePadding: 24
+---
+sankey
+
+%% Task counts from the model report's handoff, intersection, and cutoff tables.
+%% The final split uses SAME_PRECEDING counts in the 3,433,218-task model sample.
+"1 All DURs (4,128,486)","2 No handoff (4,000,758)",4000758
+"1 All DURs (4,128,486)","3 Pharmacist follow-up (117,503)",117503
+"1 All DURs (4,128,486)","4 Technician follow-up (6,736)",6736
+"1 All DURs (4,128,486)","5 Lead follow-up (3,489)",3489
+
+"2 No handoff (4,000,758)","6 Possible multitasking (332,599)",332599
+"2 No handoff (4,000,758)","7 Singletasking (3,668,159)",3668159
+
+"7 Singletasking (3,668,159)","8 Other validity exclusions (54,138)",54138
+"7 Singletasking (3,668,159)","9 At or above cutoff (180,803)",180803
+"7 Singletasking (3,668,159)","10 Below cutoff (3,433,218)",3433218
+
+"10 Below cutoff (3,433,218)","11 SAME_PRECEDING = 1 (1,557,287)",1557287
+"10 Below cutoff (3,433,218)","12 SAME_PRECEDING = 0 (1,875,931)",1875931

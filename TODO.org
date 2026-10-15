@@ -800,32 +800,402 @@ ORDER BY current_task.PROCESS_START_TIME, current_task.TASK_ID;
    - [X] Add one self-contained Python model module, one SQL template, one Make target, and =REDRAW=1= support.
    - [X] Export fixed-effect confidence intervals and p-values, user/date/parent-part BLUPs, variance-component confidence intervals, random-intercept and conditional-residual Q-Q plots, a conditional predicted-versus-Box-Cox-outcome plot, Markdown tables, and a self-contained Markdown report with all model formulas.
 
-* DONE Generate a progress report in markdown
-  :PROPERTIES:
-  :REFNUM:   2.
-  :END:
-  - [X] Create a new directory called progress_report under repo main.
-  - [X] Create a markdown file called progress.md
-  - [X] Create a section with today's date
-  - [X] Create a section called Appendix
-  - [X] Under the Appendix create the following headings
-    - [X] Model Details
-    - [X] Factors Affecting Successful DURs
-  - Under the model details heading copy the content of  mc3_coh_pettype_final_model.md.  Make sure the links work in the content after we move the content
+** DONE Add a cohort-by-user fixed-cell model with a date random intercept
+   - [X] Extract valid-DUR cohort batches with preceding and following indicators and the existing P95 and control rules.
+   - [X] Parameterize the mixed-model fitting core while preserving the MC3/COH/PETTYPE model.
+   - [X] Add a separate Make target, cache, tables, report, and date/residual diagnostics.
+   - [X] Add synthetic model, SQL, and report tests; run the full test suite.
+   - [X] Run the Snowflake target and cached redraw; inspect convergence and outputs.
 
-** DONE Create a markdown for Santhosh Query Analysis
+** DONE Add pet type as a fixed effect to the cohort-by-user/date model
+   - [X] Pull =PETTYPE= in the model-specific valid-DUR extract and refresh its raw cache.
+   - [X] Add pet-type categorical contrasts without changing the MC3 model's default controls.
+   - [X] Document the pet-type reference and estimates in the model report.
+   - [X] Pass the full suite and rerun the cohort-by-user/date model from the refreshed cache.
+
+** DONE Use cohort, pet type, and user as the model's fixed cells
+   - [X] Define each fixed cell by =(COH, PETTYPE, USER_ID)=.
+   - [X] Remove the separate pet-type categorical fixed effect while retaining the other controls and date random intercept.
+   - [X] Update the report formula and synthetic-data tests.
+   - [X] Refit from the cache containing =PETTYPE=, inspect the outputs, and pass the full test suite.
+
+** DONE Promote process date into fixed cells and remove the date random intercept
+   - [X] Change fixed cells to =(COH, PETTYPE, USER_ID, D)= with no random intercept.
+   - [X] Parameterize the shared fitter to allow zero random columns while preserving existing MC3 behavior.
+   - [X] Omit weekday contrasts (absorbed by date cells) and document the absorption.
+   - [X] Remove date-effect outputs and date Q-Q plot from the new model's diagnostics and report.
+   - [X] Update synthetic tests; refit from the cache; pass the full test suite.
+
+** DONE Add a cohort/pet-type/date cell model with a user random intercept
+   - [X] Keep the existing cohort/pet-type/user/date fixed-cell model available.
+   - [X] Use =(COH, PETTYPE, D)= fixed cells and =USER_ID= as the only random intercept.
+   - [X] Reuse the same cached valid-DUR extract, controls, and Box-Cox outcome.
+   - [X] Add a separate Make target, report, tables, diagnostics, and synthetic test.
+   - [X] Fit the model, inspect outputs, and run the full test suite.
+
+** DONE Name the user-random model cohort_user_date_pettype_cell_model
+   - [X] Rename its module, Make target, test, report, tables, and chart directory.
+   - [X] Regenerate the report and verify the model results are unchanged.
+
+** DONE Describe SAME_PRECEDING and SAME_FOLLOWING distributions in the user-random model
+   - [X] Add marginal counts and percentages in the retained model sample.
+   - [X] Add the joint distribution to show indicator overlap.
+   - [X] Regenerate the report and verify the totals.
+
+** DONE Generate a progress report in markdown
    :PROPERTIES:
-   :REFNUM:   2.1.
+   :REFNUM:   2.
    :END:
-   - [X] There is a query in src/ignore/santhosh.sql.
-   - [X] The query takes the average of two populations.
-   - [X] I would like to compare the populations Same Cohort and Different Cohort. Do a hypothesis test  to determine if the population means are significantly different.
-   - [X] Create a file called santosh_analysis.md that contains
-     - [X] The analysis results. Confidence intervals and the anything else
-     - [X] The query used.
-     - [X] A graph that shows the distribution of the 2 populations.
+   - [X] Keep the report Markdown under =task_grouping_analysis/=.
+   - [X] Create a markdown file called progress.md
+   - [X] Create a section with today's date
+   - [X] Create a section called Appendix
+   - [X] Under the Appendix create the following headings
+     - [X] Model Details
+     - [X] Factors Affecting Successful DURs
+   - Under the model details heading copy the content of  mc3_coh_pettype_final_model.md.  Make sure the links work in the content after we move the content
+
+*** DONE Convert the progress report to LaTeX and add a Make target
+    - [X] Generate =src/latex/task_grouping_analysis.latex= from =task_grouping_analysis/progress.md=.
+    - [X] Add =make create-task-grouping-analysis= to build the PDF.
+    - [X] Verify the generated PDF renders its tables, equations, and plots.
+
+*** DONE Set the LaTeX report to portrait
+    - [X] Build portrait PDF pages and rotate only the wide tables.
+    - [X] Verify the regenerated report's layout and page dimensions.
+
+*** DONE Number the LaTeX report lines and frame its figures
+    - [X] Add line numbers to the left margin.
+    - [X] Box the figures and reduce them to half the text width.
+    - [X] Rebuild and inspect the portrait PDF.
+
+*** DONE Rename and restyle the task grouping analysis document
+    - [X] Name the source =task_grouping_analysis.latex= and update the Make target.
+    - [X] Use a Calibri-like font and gray section headings.
+    - [X] Rebuild and inspect the renamed PDF.
+
+*** DONE Align report support paths with task grouping analysis
+    - [X] Rename the LaTeX header and Lua filter to =task_grouping_analysis=.
+    - [X] Move the Markdown source to =task_grouping_analysis/=.
+    - [X] Update the Make target dependencies and rebuild the PDF.
+
+*** DONE Update report typography
+    - [X] Use 10 pt as the document's default font size.
+    - [X] Set table text to 8 pt.
+    - [X] Color the report title and section headings navy blue.
+    - [X] Rebuild and inspect the PDF.
+
+*** DONE Extract reusable LaTeX formatting
+    - [X] Move report styling into =src/latex/rxp_report.sty=.
+    - [X] Load the style from the report header and track it as a Make dependency.
+    - [X] Rebuild and inspect the PDF.
+
+*** DONE Number report section headings
+    - [X] Enable hierarchical section numbering in the Pandoc build.
+    - [X] Show numbers on the deeper block-style headings.
+    - [X] Rebuild and inspect the PDF.
+
+*** DONE Reduce empty space in the task grouping report
+    - [X] Reformat repeated fields in the two sequence tables and fixed-effects table without dropping values.
+    - [X] Tighten reusable margins and vertical spacing while keeping 10 pt body, 8 pt tables, and half-width figures.
+    - [X] Keep table headings with their tables and rebuild the portrait PDF.
+    - [X] Verify all table rows and inspect the seven-page result.
+
+*** DONE Reduce bullet-list indentation
+    - [X] Reduce indentation for nested and top-level bulleted lists in the reusable style.
+    - [X] Rebuild and inspect the report PDF.
+
+*** DONE Make LaTeX the report source of truth
+    - [X] Remove Markdown-to-LaTeX generation from =create-task-grouping-analysis=.
+    - [X] Keep the PDF target dependent on the handwritten LaTeX and shared style.
+    - [X] Verify the target without rewriting the LaTeX document.
+
+*** DONE Split Appendix subsections into separate LaTeX files
+    - [X] Move each Appendix subsection into a dedicated input file.
+    - [X] Make the PDF target depend on the input files.
+    - [X] Rebuild and verify that report text is unchanged.
+
+*** DONE Insert charts requested in DUR factors appendix
+    - [X] Replace both =xxxTODO Codex= image markers with the requested charts.
+    - [X] Use the all-cohorts median scatter chart for the second figure.
+    - [X] Add the appendix file and both images to the PDF target dependencies.
+    - [X] Rebuild and inspect the chart page.
+
+*** DONE Place DUR factor charts side by side
+    - [X] Align both boxed charts in half-width columns.
+    - [X] Fix the second image reference and rebuild the PDF.
+    - [X] Inspect the rendered chart page.
+
+*** DONE Add captions and references to DUR factor charts
+    - [X] Give each chart a numbered caption and label.
+    - [X] Reference each chart from the surrounding text.
+    - [X] Rebuild and inspect the PDF with resolved references.
+
+*** DONE Make DUR factor figure frames the same size
+    - [X] Use equal-width, equal-height frames without distorting the images.
+    - [X] Rebuild and inspect the rendered figures and captions.
+
+*** DONE Place motivating example tables side by side
+    - [X] Put both sequence tables in adjacent minipages at 8 pt.
+    - [X] Add numbered captions and in-text references.
+    - [X] Verify all 25 rows and inspect the rebuilt PDF.
+
+*** DONE Put motivating example table captions below tables
+    - [X] Move both captions under their tables and align them.
+    - [X] Rebuild and inspect the PDF with resolved references.
+
+*** DONE Make future chart PNG backgrounds transparent
+    - [X] Update the chart-export preference and shared Altair background.
+    - [X] Verify a newly rendered PNG has transparent pixels.
+
+*** DONE Add PETTYPE chart statistics tables
+    - [X] Remove category pipe/task-count annotations.
+    - [X] Add counts, medians, averages, and standard deviations below each chart.
+    - [X] Redraw transparent PNGs from cached data and inspect the result.
+
+*** DONE Add correction-field chart statistics tables
+    - [X] Remove category task-count annotations and add the four summary columns.
+    - [X] Redraw all four cohort PNGs with transparent backgrounds.
+    - [X] Run focused tests and inspect the output.
+
+*** DONE Add correction-field-count chart statistics tables
+    - [X] Remove category task-count annotations and add the four summary columns.
+    - [X] Redraw all four cohort PNGs with transparent backgrounds.
+    - [X] Run focused tests and verify the exported PNGs.
+
+*** DONE Insert correction charts in Alterations/Corrections
+    - [X] Add 2-by-2 grids for correction-field counts and names.
+    - [X] Add captions, labels, references, and PDF chart dependencies.
+    - [X] Rebuild and inspect both figure pages.
+
+*** DONE Add appendix-only table of contents
+    - [X] List appendix subsections and nested headings beneath Appendix.
+    - [X] Rebuild and inspect the PDF with resolved page numbers.
+
+*** DONE Add references at the end of the report
+    - [X] List the identifiable sources already credited in the report.
+    - [X] Rebuild and inspect the final PDF page.
+
+*** DONE Show Mehmet Yunt as report author
+    - [X] Add a visible byline and PDF author metadata.
+    - [X] Rebuild and inspect the first page.
+
+*** DONE Add compact report title and date
+    - [X] Show Task Grouping Analysis above the author.
+    - [X] Show the build date below the author and set PDF title metadata.
+    - [X] Rebuild and inspect the first page.
+
+*** DONE Insert detailed DUR causal graph
+    - [X] Replace the Causal Graph TODO with the existing diagram.
+    - [X] Add a caption, label, reference, and PDF chart dependency.
+    - [X] Rebuild and inspect the affected pages.
+
+*** DONE Insert prescription-source and approval-channel charts
+    - [X] Replace both remaining DUR-factors TODOs with cohort chart grids.
+    - [X] Add captions, labels, references, and PDF chart dependencies.
+    - [X] Rebuild and inspect the figure pages with resolved references.
+
+*** DONE Add cohort user one-sided comparison to appendix
+    - [X] Convert the statistical narrative and tables to a separate LaTeX file.
+    - [X] Include four cohort density plots in a 2-by-2 grid and reproduce the SQL.
+    - [X] Add PDF build dependencies and inspect the rendered pages.
+
+*** DONE Add confidence intervals to cohort user estimates
+    - [X] Calculate 95% two-sided intervals from the matched-user data.
+    - [X] Add intervals to the LaTeX summary and paired-comparison tables.
+    - [X] Rebuild the PDF and inspect the affected pages.
+
+*** DONE Add a labeled confounding reference
+    - [X] Add the Confounding page to the LaTeX References list.
+    - [X] Give it a stable label for cross-references.
+
+*** DONE Add a labeled analysis repository reference
+    - [X] Add the GitHub repository URL to the LaTeX References list.
+    - [X] Give it a stable label for cross-references.
+
+*** DONE Rename LaTeX entry file to main.tex
+    - [X] Rename the entry file without changing its contents.
+    - [X] Update the PDF Make target and rebuild the report.
+
+*** DONE Track reproducing results in the PDF target
+    - [X] Add the existing appendix input to the Make dependencies.
+    - [X] Verify the report target still builds.
+
+*** DONE Repair random-effects model appendix
+    - [X] Remove duplicated content inside the unfinished longtable.
+    - [X] Preserve the new introduction and restore the model details.
+    - [X] Rebuild the PDF and verify the results and diagnostics appear.
+
+*** DONE Rewrite DUR processing-time model appendix from test-model-final
+    - [X] Describe the sample, cohort-only sequence indicators, and their distributions.
+    - [X] Add the model formula, term definitions, numerical procedure, and fitted statistics.
+    - [X] Highlight significant fixed coefficients and rebuild the PDF.
+    - [X] Show labeled user, parent-part-number, and date intercept densities.
+
+*** DONE Compute same-preceding counterfactual from test-model-final
+    - [X] Retain process start time in the cohort-only model extract.
+    - [X] Keep the first retained task of each user-day unchanged.
+    - [X] Aggregate observed and adjusted durations by user-day, cohort, and overall.
+    - [X] Add the calculation to the model report and reusable model code.
+    - [X] Report retained process dates and implied labor value at $95 per hour.
+
+*** DONE Document the full DUR workload in test-model-final
+    - [X] Add the all-DUR count and imputed processing-time total to the report.
+    - [X] Provide the read-only SQL and rerun command.
+    - [X] Add the same result to the LaTeX appendix and check the PDF.
+
+*** DONE Move the cost estimate to the end of the model report
+    - [X] Place the counterfactual and cost calculation after the model results.
+
+*** DONE Sum all DUR durations below the model P95 cutoff
+    - [X] Query all positive imputed DUR durations below 156.608019 seconds.
+    - [X] Save the reproducible read-only SQL and record the result.
+
+*** DONE Compare DUR populations at the start of the counterfactual section
+    - [X] Aggregate the pre-P95 valid-DUR table.
+    - [X] Add all-DUR, below-cutoff, and valid-DUR counts and processing totals.
+    - [X] Save the comparison table under outputs/tables.
+
+*** DONE Explain the difference between valid-DUR and full-table cutoff totals
+    - [X] Split valid DUR tasks and durations at the model cutoff.
+    - [X] Clarify the different populations beneath the report table.
+
+*** DONE End the DUR breakdown table with all DUR tasks
+    - [X] Put the valid-DUR cutoff breakdown into the table.
+    - [X] Retain the full-table below-cutoff comparison and end with all DURs.
+
+*** DONE Aggregate valid DUR processing time by handoff reason
+    - [X] Join handoff reason from the source task table.
+    - [X] Save the grouped result and verify the join grain.
+
+*** DONE Check handoff-type coverage in MY_RXP_TASKS
+    - [X] Query populated handoff types and counts by task type.
+    - [X] Save the DUR breakdown and explain the valid-DUR exclusion.
+
+*** DONE Add the DUR handoff-type distribution to the model report
+    - [X] Include null handoff types, task counts, seconds, and hours.
+    - [X] Regenerate the Markdown report from the model code.
+
+*** DONE Sum intersecting DUR processing time
+    - [X] Identify DURs with a positive intersecting-task count.
+    - [X] Reconcile the count and duration totals to all DURs.
+    - [X] Save the read-only query and Markdown summary table.
+
+*** DONE Convert the reproducing-results handoff table to LaTeX
+    - [X] Replace the Markdown table with a captioned LaTeX table.
+    - [X] Add a label and prose reference without running tests.
+
+*** DONE Fix the reproducing-results PDF build
+    - [X] Reproduce the LaTeX error from the report target.
+    - [X] Escape the source table name and rebuild the PDF.
+
+*** DONE Record intersecting DUR totals in the model Markdown report
+    - [X] Add the intersection counts and durations to the all-DUR section.
+    - [X] Preserve the table in the report generator and link its query.
+
+*** DONE Recalculate intersections for null-handoff DURs
+    - [X] Filter to DUR tasks with NULL handoff type.
+    - [X] Reconcile intersection groups to the null-handoff total.
+    - [X] Update the model report and save the scoped query and table.
+
+*** DONE Convert the null-handoff intersection table to LaTeX
+    - [X] Replace the reproducing-results TODO with a captioned table.
+    - [X] Add a label and prose reference.
+
+*** DONE Convert the valid-DUR cutoff table to LaTeX
+    - [X] Replace the Markdown table with a captioned LaTeX table.
+    - [X] Add a label and prose reference, then rebuild the PDF.
+
+*** DONE Add a faint DRAFT watermark to the PDF report
+    - [X] Enable the watermark in the LaTeX report entry file.
+    - [X] Rebuild and inspect the PDF.
+
+*** DONE Darken the DRAFT watermark slightly
+    - [X] Adjust its lightness and rebuild the PDF.
+    - [X] Inspect a rendered table page for readability.
+
+*** DONE Reconcile valid DURs with non-intersecting DURs in the reports
+    - [X] Add the 54,138 excluded DURs and their imputed processing time.
+    - [X] Update both report tables and the Markdown generator.
+    - [X] Rebuild and inspect the PDF.
+
+*** DONE Rename statistics comparison analysis artifacts
+    - [X] Rename task-level and user-level modules, reports, caches, figures, and SQL files.
+    - [X] Update Make targets, imports, documentation, tests, and LaTeX references.
+    - [X] Run all renamed targets, the test suite, and the PDF build.
+
+*** DONE Regenerate transparent user-level cohort density plots
+    - [X] Verify the chart generator's transparent background configuration.
+    - [X] Add a regression test and regenerate all four cohort PNGs from cached data.
+    - [X] Rebuild the PDF and inspect the 2-by-2 plot grid.
+
+*** DONE Redraw prescription-source and approval-channel figures with summary tables
+    - [X] Add task count, median, average, and standard deviation beneath each chart.
+    - [X] Regenerate all eight PNGs with transparent backgrounds using the redraw targets.
+    - [X] Test the chart specifications and inspect the rebuilt PDF pages.
+
+*** DONE Insert PETTYPE cohort charts in DUR factors appendix
+    - [X] Replace the Pet Type TODO with a boxed 2-by-2 chart grid.
+    - [X] Add captions, labels, and references for all four cohorts.
+    - [X] Rebuild and inspect the PDF page.
+
+*** DONE Keep PETTYPE figures inside Pet Type subsection
+    - [X] Prevent the four-chart grid from floating past later headings.
+    - [X] Keep the heading and grid together and inspect the PDF page.
+
+*** DONE Insert cohort and part-number figures in DUR factors appendix
+    - [X] Replace both Cohort and Part Number TODOs with the available charts.
+    - [X] Add captions, labels, references, and PDF target dependencies.
+    - [X] Rebuild and inspect the PDF without separating the Pet Type grid.
+
+*** DONE Fit cohort and part-number figures on the preceding PDF page
+    - [X] Reduce and align the two figures below Pharmacist Performance.
+    - [X] Rebuild and inspect page 2 with both captions and references.
+
+*** DONE Repair LaTeX report build
+    - [X] Remove the accidental pasted block inside the sequence table.
+    - [X] Restore the interrupted Cohort 2 sentence.
+    - [X] Build and inspect the portrait PDF without regenerating LaTeX from Markdown.
+
+*** DONE Create a markdown for Task-Level Statistics Comparison
+    :PROPERTIES:
+    :REFNUM:   2.1.
+    :END:
+    - [X] There is a query in src/ignore/stats_comparison.sql.
+    - [X] The query takes the average of two populations.
+    - [X] I would like to compare the populations Same Cohort and Different Cohort. Do a hypothesis test  to determine if the population means are significantly different.
+    - [X] Create a file called stats_comparison.md that contains
+      - [X] The analysis results. Confidence intervals and the anything else
+      - [X] The query used.
+      - [X] A graph that shows the distribution of the 2 populations.
 
 
+
+
+ * TODO Build the model with the following
+   - same_preceding = cohort_pet_seqn/cohort_pet_batch_len
+   - same_following = cohort_pet_seqn/cohort_pet_batch_len
+   - cells: user, date, cohort, pet
+   - fixed effects: approval channel and prescription source and has_correction
+   - name of the model cohort-pet-user-date
+   - random effects:parent part number
+ * TODO  Build the model with the following
+    - same_preceding = cohort_seqn/cohort_batch_len
+    - same_following = cohort_seqn/cohort_batch_len
+    - cells: user, date, cohort
+    - fixed effects: approval channel and prescription source and has_correction
+    - name of the model cohort-user-date
+    - random effects:parent part number
+
+
+
+** TODO Generate the entitlement document
+   * TODO Create the latex file
+   * TODO Create sankey mermaid png diagram that shows the  breakdown of tasks
+
+
+
+   * TODO Describe the methodology used computing the potential
 
 * Scrap
   :PROPERTIES:
